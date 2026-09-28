@@ -1,0 +1,121 @@
+import { Business } from '@/types/business';
+
+export const mockNexoBusiness: Business = {
+  id: 'biz-nexo-001',
+  slug: 'nexosoluciones',
+  name: 'Nexo Soluciones',
+  isVerified: true,
+  category: 'Soluciones Tecnológicas & Consultoría B2B',
+  bio: 'Impulsamos el crecimiento de empresas mediante infraestructura en la nube, digitalización de procesos y hardware NFC para networking corporativo.',
+  bannerUrl: '/images/nexo-banner.jpg',
+  logoUrl: '/images/nexo-logo.jpg',
+  themeColor: '#0284c7', // Cyan / Sky blue
+  phone: '+52 55 8421 9000',
+  whatsapp: '+525584219000',
+  email: 'contacto@nexosoluciones.mx',
+  address: 'Av. Paseo de la Reforma 222, Piso 18, Juárez, Cuauhtémoc, CDMX',
+  googleMapsUrl: 'https://maps.google.com/?q=Paseo+de+la+Reforma+222+CDMX',
+  catalogUrl: 'https://nexosoluciones.mx/catalogo-corporativo-2026.pdf',
+  catalogTitle: 'Catálogo de Servicios 2026',
+  websiteUrl: 'https://nexosoluciones.mx',
+  cards: [
+    {
+      id: 'card-01',
+      cardCode: 'NX-8821',
+      businessId: 'biz-nexo-001',
+      status: 'ACTIVE',
+      totalTaps: 342,
+      lastTapAt: '2026-09-28T14:20:00Z',
+      createdAt: '2026-01-15T09:00:00Z',
+    },
+    {
+      id: 'card-02',
+      cardCode: 'NX-9940',
+      businessId: 'biz-nexo-001',
+      status: 'ACTIVE',
+      totalTaps: 128,
+      lastTapAt: '2026-09-28T11:05:00Z',
+      createdAt: '2026-02-10T12:00:00Z',
+    },
+  ],
+  links: [
+    {
+      id: 'link-wa',
+      businessId: 'biz-nexo-001',
+      type: 'whatsapp',
+      title: 'WhatsApp',
+      subtitle: 'Chatea con nosotros en tiempo real',
+      url: 'https://wa.me/525584219000?text=Hola%20Nexo%20Soluciones,%20me%20gustar%C3%ADa%20solicitar%20informaci%C3%B3n.',
+      iconName: 'whatsapp',
+      order: 1,
+      isActive: true,
+      highlighted: true,
+    },
+    {
+      id: 'link-call',
+      businessId: 'biz-nexo-001',
+      type: 'phone',
+      title: 'Llamar ahora',
+      subtitle: '+52 55 8421 9000',
+      url: 'tel:+525584219000',
+      iconName: 'phone',
+      order: 2,
+      isActive: true,
+    },
+    {
+      id: 'link-ig',
+      businessId: 'biz-nexo-001',
+      type: 'instagram',
+      title: 'Síguenos en Instagram',
+      subtitle: '@nexosoluciones.mx',
+      url: 'https://instagram.com/nexosoluciones',
+      iconName: 'instagram',
+      order: 3,
+      isActive: true,
+    },
+    {
+      id: 'link-fb',
+      businessId: 'biz-nexo-001',
+      type: 'facebook',
+      title: 'Visítanos en Facebook',
+      subtitle: '/nexosolucionesoficial',
+      url: 'https://facebook.com/nexosoluciones',
+      iconName: 'facebook',
+      order: 4,
+      isActive: true,
+    },
+    {
+      id: 'link-li',
+      businessId: 'biz-nexo-001',
+      type: 'linkedin',
+      title: 'Conéctate en LinkedIn',
+      subtitle: 'Nexo Soluciones Corporativas',
+      url: 'https://linkedin.com/company/nexo-soluciones',
+      iconName: 'linkedin',
+      order: 5,
+      isActive: true,
+    },
+    {
+      id: 'link-web',
+      businessId: 'biz-nexo-001',
+      type: 'website',
+      title: 'Conoce nuestro sitio web',
+      subtitle: 'nexosoluciones.mx',
+      url: 'https://nexosoluciones.mx',
+      iconName: 'globe',
+      order: 6,
+      isActive: true,
+    },
+  ],
+};
+
+// Map of businesses by slug for mock backend
+export const mockBusinessesDatabase: Record<string, Business> = {
+  nexosoluciones: mockNexoBusiness,
+};
+
+// NFC card router lookup database
+export const mockCardsDatabase: Record<string, string> = {
+  'NX-8821': 'nexosoluciones',
+  'NX-9940': 'nexosoluciones',
+};

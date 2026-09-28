@@ -1,0 +1,629 @@
+'use client';
+
+import React, { useState } from 'react';
+import {
+  Business,
+  BusinessLink,
+  LinkType,
+  NfcCard,
+} from '@/types/business';
+import {
+  Building2,
+  Share2,
+  Palette,
+  CreditCard,
+  Plus,
+  Trash2,
+  ArrowUp,
+  ArrowDown,
+  Eye,
+  EyeOff,
+  CheckCircle2,
+  Sparkles,
+  Smartphone,
+  ExternalLink,
+} from 'lucide-react';
+
+interface ProfileEditorProps {
+  business: Business;
+  onChange: (updated: Business) => void;
+}
+
+export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
+  const [activeTab, setActiveTab] = useState<'info' | 'links' | 'design' | 'cards'>('info');
+  const [newCardCode, setNewCardCode] = useState('');
+
+  // Handle generic property updates
+  const updateField = <K extends keyof Business>(key: K, value: Business[K]) => {
+    onChange({
+      ...business,
+      [key]: value,
+    });
+  };
+
+  // Toggle link active status
+  const toggleLinkActive = (id: string) => {
+    const updatedLinks = business.links.map((link) =>
+      link.id === id ? { ...link, isActive: !link.isActive } : link
+    );
+    updateField('links', updatedLinks);
+  };
+
+  // Move link up or down in order
+  const moveLink = (index: number, direction: 'up' | 'down') => {
+    const newLinks = [...business.links];
+    const targetIndex = direction === 'up' ? index - 1 : index + 1;
+    if (targetIndex < 0 || targetIndex >= newLinks.length) return;
+
+    const temp = newLinks[index];
+    newLinks[index] = newLinks[targetIndex];
+    newLinks[targetIndex] = temp;
+
+    // Reassign order
+    const ordered = newLinks.map((link, idx) => ({ ...link, order: idx + 1 }));
+    updateField('links', ordered);
+  };
+
+  // Update specific link field
+  const updateLink = (id: string, updates: Partial<BusinessLink>) => {
+    const updatedLinks = business.links.map((link) =>
+      link.id === id ? { ...link, ...updates } : link
+    );
+    updateField('links', updatedLinks);
+  };
+
+  // Delete a link
+  const deleteLink = (id: string) => {
+    const filtered = business.links.filter((l) => l.id !== id);
+    updateField('links', filtered);
+  };
+
+  // Add a new link with template defaults
+  const addLink = (type: LinkType) => {
+    const id = 'link-' + Math.random().toString(36).substring(2, 7);
+    let title = 'Nuevo Enlace';
+    let subtitle = 'Descripción breve';
+    let url = 'https://';
+    let iconName = 'globe';
+
+    if (type === 'whatsapp') {
+      title = 'WhatsApp';
+      subtitle = 'Chatea con nosotros';
+      url = 'https://wa.me/5215500000000';
+      iconName = 'whatsapp';
+    } else if (type === 'phone') {
+      title = 'Llamar ahora';
+      subtitle = '+52 55 0000 0000';
+      url = 'tel:+525500000000';
+      iconName = 'phone';
+    } else if (type === 'instagram') {
+      title = 'Síguenos en Instagram';
+      subtitle = '@tunegocio';
+      url = 'https://instagram.com/tunegocio';
+      iconName = 'instagram';
+    } else if (type === 'facebook') {
+      title = 'Visítanos en Facebook';
+      subtitle = '/tunegocio';
+      url = 'https://facebook.com/tunegocio';
+      iconName = 'facebook';
+    } else if (type === 'linkedin') {
+      title = 'Conéctate en LinkedIn';
+      subtitle = 'Empresa en LinkedIn';
+      url = 'https://linkedin.com/company/tunegocio';
+      iconName = 'linkedin';
+    } else if (type === 'catalog') {
+      title = 'Ver Catálogo / Menú';
+      subtitle = 'Descarga nuestro brochure en PDF';
+      url = 'https://ejemplo.com/catalogo.pdf';
+      iconName = 'catalog';
+    }
+
+    const newLink: BusinessLink = {
+      id,
+      businessId: business.id,
+      type,
+      title,
+      subtitle,
+      url,
+      iconName,
+      order: business.links.length + 1,
+      isActive: true,
+    };
+
+    updateField('links', [...business.links, newLink]);
+  };
+
+  // Add NFC Card to business
+  const handleAddCard = () => {
+    if (!newCardCode.trim()) return;
+    const cleanCode = newCardCode.trim().toUpperCase();
+    const existing = business.cards || [];
+    if (existing.some((c) => c.cardCode === cleanCode)) {
+      alert('Esta tarjeta ya está vinculada a tu perfil');
+      return;
+    }
+
+    const newCard: NfcCard = {
+      id: 'card-' + Date.now(),
+      cardCode: cleanCode,
+      businessId: business.id,
+      status: 'ACTIVE',
+      totalTaps: 0,
+      createdAt: new Date().toISOString(),
+    };
+
+    updateField('cards', [...existing, newCard]);
+    setNewCardCode('');
+  };
+
+  // Toggle card active/pause
+  const toggleCardStatus = (cardId: string) => {
+    const updated = (business.cards || []).map((c) =>
+      c.id === cardId
+        ? { ...c, status: (c.status === 'ACTIVE' ? 'PAUSED' : 'ACTIVE') as NfcCard['status'] }
+        : c
+    );
+    updateField('cards', updated);
+  };
+
+  return (
+    <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm p-6">
+      {/* Editor Tabs Navigation */}
+      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-4 mb-6 overflow-x-auto no-scrollbar">
+        <button
+          onClick={() => setActiveTab('info')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'info'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          }`}
+        >
+          <Building2 className="w-4 h-4" />
+          <span>Información</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('links')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'links'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          }`}
+        >
+          <Share2 className="w-4 h-4" />
+          <span>Enlaces ({business.links.length})</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('design')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'design'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          }`}
+        >
+          <Palette className="w-4 h-4" />
+          <span>Multimedia & Tema</span>
+        </button>
+
+        <button
+          onClick={() => setActiveTab('cards')}
+          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+            activeTab === 'cards'
+              ? 'bg-blue-600 text-white shadow-sm'
+              : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
+          }`}
+        >
+          <CreditCard className="w-4 h-4" />
+          <span>Chips NFC ({business.cards?.length || 0})</span>
+        </button>
+      </div>
+
+      {/* TAB 1: Business Information */}
+      {activeTab === 'info' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+              Nombre Comercial
+            </label>
+            <input
+              type="text"
+              value={business.name}
+              onChange={(e) => updateField('name', e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Ej. Nexo Soluciones"
+            />
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+                Slug Público (URL)
+              </label>
+              <div className="flex items-center rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/50 px-3">
+                <span className="text-xs text-slate-400">tapcard.link/</span>
+                <input
+                  type="text"
+                  value={business.slug}
+                  onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                  className="w-full py-2.5 bg-transparent text-sm focus:outline-none font-medium text-slate-800 dark:text-zinc-200"
+                />
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+                Giro Comercial / Subtítulo
+              </label>
+              <input
+                type="text"
+                value={business.category || ''}
+                onChange={(e) => updateField('category', e.target.value)}
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                placeholder="Ej. Consultoría Tecnológica & B2B"
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+              Biografía / Propuesta de Valor
+            </label>
+            <textarea
+              rows={3}
+              value={business.bio || ''}
+              onChange={(e) => updateField('bio', e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              placeholder="Escribe un párrafo conciso sobre tu negocio..."
+            />
+          </div>
+
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60">
+            <div className="flex items-center gap-2">
+              <CheckCircle2 className="w-5 h-5 text-blue-600" />
+              <div>
+                <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                  Insignia Oficial de Verificación
+                </span>
+                <p className="text-[11px] text-slate-500">
+                  Muestra el distintivo azul de negocio autenticado en tu perfil
+                </p>
+              </div>
+            </div>
+            <input
+              type="checkbox"
+              checked={business.isVerified}
+              onChange={(e) => updateField('isVerified', e.target.checked)}
+              className="w-5 h-5 accent-blue-600 cursor-pointer rounded"
+            />
+          </div>
+
+          {/* Quick contact info */}
+          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
+            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
+              Datos para vCard y Accesos Rápidos
+            </h4>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
+                  Teléfono
+                </label>
+                <input
+                  type="text"
+                  value={business.phone || ''}
+                  onChange={(e) => updateField('phone', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
+                  Correo Electrónico
+                </label>
+                <input
+                  type="email"
+                  value={business.email || ''}
+                  onChange={(e) => updateField('email', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
+                  Dirección Física
+                </label>
+                <input
+                  type="text"
+                  value={business.address || ''}
+                  onChange={(e) => updateField('address', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
+                  URL Google Maps
+                </label>
+                <input
+                  type="text"
+                  value={business.googleMapsUrl || ''}
+                  onChange={(e) => updateField('googleMapsUrl', e.target.value)}
+                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 2: Links Manager */}
+      {activeTab === 'links' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400">
+              Agregar botón rápido:
+            </span>
+            <div className="flex flex-wrap gap-1.5">
+              <button
+                onClick={() => addLink('whatsapp')}
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
+              >
+                + WhatsApp
+              </button>
+              <button
+                onClick={() => addLink('phone')}
+                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-semibold transition-colors"
+              >
+                + Teléfono
+              </button>
+              <button
+                onClick={() => addLink('instagram')}
+                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 hover:bg-pink-500/20 text-xs font-semibold transition-colors"
+              >
+                + Instagram
+              </button>
+              <button
+                onClick={() => addLink('website')}
+                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 text-xs font-semibold transition-colors"
+              >
+                + Sitio Web
+              </button>
+            </div>
+          </div>
+
+          {/* Links list */}
+          <div className="space-y-3">
+            {business.links.map((link, idx) => (
+              <div
+                key={link.id}
+                className="p-3.5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 space-y-2.5 transition-all"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2 flex-1">
+                    <button
+                      onClick={() => toggleLinkActive(link.id)}
+                      title={link.isActive ? 'Desactivar botón' : 'Activar botón'}
+                      className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                        link.isActive
+                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                          : 'bg-slate-200 dark:bg-zinc-700 text-slate-500'
+                      }`}
+                    >
+                      {link.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                    </button>
+                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
+                      #{idx + 1} {link.type}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => moveLink(idx, 'up')}
+                      disabled={idx === 0}
+                      className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                    >
+                      <ArrowUp className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => moveLink(idx, 'down')}
+                      disabled={idx === business.links.length - 1}
+                      className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
+                    >
+                      <ArrowDown className="w-3.5 h-3.5" />
+                    </button>
+                    <button
+                      onClick={() => deleteLink(link.id)}
+                      className="p-1 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <div>
+                    <input
+                      type="text"
+                      value={link.title}
+                      onChange={(e) => updateLink(link.id, { title: e.target.value })}
+                      placeholder="Título del botón"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-semibold"
+                    />
+                  </div>
+                  <div>
+                    <input
+                      type="text"
+                      value={link.subtitle || ''}
+                      onChange={(e) => updateLink(link.id, { subtitle: e.target.value })}
+                      placeholder="Subtítulo descriptivo"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <input
+                    type="text"
+                    value={link.url}
+                    onChange={(e) => updateLink(link.id, { url: e.target.value })}
+                    placeholder="URL de destino"
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono"
+                  />
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* TAB 3: Design & Media */}
+      {activeTab === 'design' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+              Banner de Portada (URL)
+            </label>
+            <input
+              type="text"
+              value={business.bannerUrl}
+              onChange={(e) => updateField('bannerUrl', e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono"
+            />
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => updateField('bannerUrl', '/images/nexo-banner.jpg')}
+                className="text-[11px] px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium"
+              >
+                Usar Banner High-Tech Nexo
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+              Avatar / Logo Circular (URL)
+            </label>
+            <input
+              type="text"
+              value={business.logoUrl}
+              onChange={(e) => updateField('logoUrl', e.target.value)}
+              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono"
+            />
+            <div className="mt-2 flex gap-2">
+              <button
+                type="button"
+                onClick={() => updateField('logoUrl', '/images/nexo-logo.jpg')}
+                className="text-[11px] px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium"
+              >
+                Usar Logo Hexagonal Nexo
+              </button>
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+              Color de Acento Primario
+            </label>
+            <div className="flex items-center gap-3">
+              <input
+                type="color"
+                value={business.themeColor}
+                onChange={(e) => updateField('themeColor', e.target.value)}
+                className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200"
+              />
+              <span className="text-xs font-mono text-slate-600 dark:text-zinc-400">
+                {business.themeColor}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* TAB 4: Physical NFC Cards */}
+      {activeTab === 'cards' && (
+        <div className="space-y-4 animate-in fade-in duration-150">
+          <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60">
+            <h4 className="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5 mb-1">
+              <Smartphone className="w-4 h-4 text-blue-600" />
+              Vincular Nuevo Chip NFC Físico
+            </h4>
+            <p className="text-[11px] text-blue-700 dark:text-blue-400 mb-3">
+              Ingresa el código alfanumérico impreso o grabado en tu tarjeta física NFC para activarla de inmediato.
+            </p>
+
+            <div className="flex gap-2">
+              <input
+                type="text"
+                value={newCardCode}
+                onChange={(e) => setNewCardCode(e.target.value)}
+                placeholder="Ej. NX-7732"
+                className="px-3 py-2 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-mono uppercase bg-white dark:bg-zinc-800 flex-1"
+              />
+              <button
+                onClick={handleAddCard}
+                className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
+              >
+                Vincular Tarjeta
+              </button>
+            </div>
+          </div>
+
+          {/* Cards List */}
+          <div className="space-y-2.5">
+            {(business.cards || []).map((card) => (
+              <div
+                key={card.id}
+                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-xs">
+                    NFC
+                  </div>
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+                        {card.cardCode}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                          card.status === 'ACTIVE'
+                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                            : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                        }`}
+                      >
+                        {card.status}
+                      </span>
+                    </div>
+                    <div className="text-[11px] text-slate-500 mt-0.5">
+                      {card.totalTaps} lecturas registradas
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <a
+                    href={`/t/${card.cardCode}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    title="Probar redirección de chip"
+                    className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
+                  <button
+                    onClick={() => toggleCardStatus(card.id)}
+                    className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                  >
+                    {card.status === 'ACTIVE' ? 'Pausar' : 'Reactivar'}
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
