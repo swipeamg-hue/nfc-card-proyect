@@ -1,6 +1,14 @@
 import { mockBusinessesDatabase } from '@/lib/mock-data';
 import { generateVCardString } from '@/lib/vcard';
 
+export const dynamic = 'force-static';
+
+export async function generateStaticParams() {
+  return Object.keys(mockBusinessesDatabase).map((slug) => ({
+    slug,
+  }));
+}
+
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ slug: string }> }

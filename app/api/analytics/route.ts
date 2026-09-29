@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server';
 
+export const dynamic = 'force-static';
+
 // In-memory analytics store for mock/demo purposes
 export const analyticsStore: Array<{
   id: string;
