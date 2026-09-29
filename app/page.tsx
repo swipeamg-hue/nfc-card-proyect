@@ -74,9 +74,6 @@ export default function HomePage() {
             <a href="#como-funciona" className="hover:text-white transition-colors">
               Cómo Funciona
             </a>
-            <a href="#beneficios" className="hover:text-white transition-colors">
-              Beneficios
-            </a>
             <a href="#planes" className="hover:text-white transition-colors">
               Planes
             </a>
@@ -462,137 +459,230 @@ export default function HomePage() {
         {/* SECTION: PLANES Y PRECIOS */}
         <section id="planes" className="py-16 sm:py-24 border-t border-slate-800/80 bg-slate-900/20">
           <div className="max-w-7xl mx-auto px-4 sm:px-6">
-            <div className="text-center max-w-3xl mx-auto mb-14">
+            <div className="text-center max-w-3xl mx-auto mb-12">
               <span className="text-xs font-bold uppercase tracking-wider text-emerald-400 bg-emerald-950/80 px-3 py-1 rounded-full border border-emerald-800/50">
-                Planes Transparentes
+                Planes & Equipamiento Físico
               </span>
               <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight mt-3">
-                Comienza Gratis y Escala a tu Ritmo
+                Tarjetas NFC, Displays Acrílicos y Plataforma Digital
               </h2>
               <p className="text-sm text-slate-400 mt-2">
-                Sin contratos forzosos. Prueba gratis todas las funciones de la plataforma.
+                Equipa a tu negocio con tarjetas inteligentes y acrílicos para tu mostrador o caja. Todos los planes incluyen 14 días de prueba gratis sin tarjeta.
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto">
-              {/* Plan 1: Prueba Gratis */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
+            {/* Free Trial Banner Notice */}
+            <div className="mb-10 p-4 rounded-2xl bg-gradient-to-r from-blue-950/70 via-slate-900 to-indigo-950/70 border border-blue-800/60 max-w-3xl mx-auto flex items-center justify-between gap-4 text-left">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
+                  <Sparkles className="w-5 h-5 text-amber-300" />
+                </div>
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-800/50">
-                    Prueba
+                  <span className="block text-xs font-bold text-white">
+                    ¡Todos los planes incluyen 14 Días de Prueba Gratuita!
                   </span>
-                  <h3 className="text-xl font-bold text-white mt-3">Prueba Gratuita</h3>
-                  <div className="mt-2 mb-4">
-                    <span className="text-3xl font-black text-white">$0</span>
-                    <span className="text-xs text-slate-400"> / 14 días</span>
+                  <span className="text-[11px] text-slate-400">
+                    Comienza hoy sin ingresar tarjeta de crédito. Explora tu panel y micro-landing inmediatamente.
+                  </span>
+                </div>
+              </div>
+              <Link
+                href="/login?tab=register"
+                className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md whitespace-nowrap active:scale-95 transition-all"
+              >
+                Probar Gratis
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
+              {/* Plan 1: Starter */}
+              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 px-2.5 py-0.5 rounded-full border border-blue-800/50">
+                      Starter
+                    </span>
+                    <span className="text-[11px] text-slate-400 font-medium">1 a 3 Tarjetas</span>
                   </div>
-                  <ul className="space-y-2 text-xs text-slate-300">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Micro-landing personalizada en vivo</span>
+
+                  <h3 className="text-xl font-bold text-white mt-3">Plan Starter</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Para profesionistas independientes, doctores, consultores y emprendedores.
+                  </p>
+
+                  <div className="mt-4 mb-5 p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-white">$49</span>
+                      <span className="text-xs font-bold text-slate-400">MXN / mes</span>
+                    </div>
+                    <span className="text-[10px] text-emerald-400 font-semibold block mt-0.5">
+                      Incluye de 1 a 3 tarjetas físicas NFC
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2.5 text-xs text-slate-300">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span><strong>De 1 a 3 Tarjetas Inteligentes NFC</strong> con microchip NTAG</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Panel con simulador móvil en tiempo real</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Micro-landing móvil personalizada 24/7</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Descarga vCard 3.0 para contactos</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Descarga directa vCard 3.0 en agenda de clientes</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Código QR para compartir digitalmente</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Botón directo de WhatsApp con mensaje automático</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Panel autoadministrable con simulador en tiempo real</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Código QR dinámico para compartir digitalmente</span>
                     </li>
                   </ul>
                 </div>
+
                 <Link
                   href="/login?tab=register"
-                  className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block"
+                  className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block shadow-sm"
                 >
-                  Probar Gratis Ahora
+                  Comenzar Prueba Gratis (Starter)
                 </Link>
               </div>
 
-              {/* Plan 2: PyME Pro (Destacado) */}
-              <div className="p-6 rounded-3xl bg-gradient-to-b from-blue-950/60 to-slate-900 border-2 border-blue-500 shadow-xl shadow-blue-500/10 flex flex-col justify-between relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-blue-600 text-white text-[10px] font-black uppercase tracking-wider shadow">
-                  Más Popular
+              {/* Plan 2: PRO (Destacado) */}
+              <div className="p-6 rounded-3xl bg-gradient-to-b from-blue-950/70 via-slate-900 to-slate-900 border-2 border-blue-500 shadow-2xl shadow-blue-500/15 flex flex-col justify-between relative">
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[10px] font-black uppercase tracking-wider shadow">
+                  ⭐ Más Popular • Recomendado
                 </div>
+
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 bg-cyan-950/80 px-2.5 py-0.5 rounded-full border border-cyan-800/50">
-                    PyME Pro
-                  </span>
-                  <h3 className="text-xl font-bold text-white mt-3">Negocio & Profesional</h3>
-                  <div className="mt-2 mb-4">
-                    <span className="text-3xl font-black text-white">$499</span>
-                    <span className="text-xs text-slate-400"> / año</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-cyan-300 bg-cyan-950/80 px-2.5 py-0.5 rounded-full border border-cyan-800/50">
+                      PRO
+                    </span>
+                    <span className="text-[11px] text-cyan-400 font-bold">4 a 8 Tarjetas + 1 Acrílico</span>
                   </div>
-                  <ul className="space-y-2 text-xs text-slate-300">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>1 Tarjeta física NFC con chip NTAG grabado</span>
+
+                  <h3 className="text-xl font-bold text-white mt-3">Plan PRO</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Ideal para restaurantes, consultorios, tiendas y despachos que reciben clientes.
+                  </p>
+
+                  <div className="mt-4 mb-5 p-3 rounded-2xl bg-blue-950/50 border border-blue-800/80">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-white">$69</span>
+                      <span className="text-xs font-bold text-slate-400">MXN / mes</span>
+                    </div>
+                    <span className="text-[10px] text-cyan-300 font-semibold block mt-0.5">
+                      4 a 8 tarjetas NFC + 1 Acrílico para Mostrador
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2.5 text-xs text-slate-200">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span><strong>De 4 a 8 Tarjetas Inteligentes NFC</strong> para tu equipo</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Impresión premium con tu logotipo y QR</span>
+                    <li className="flex items-start gap-2 p-2 rounded-xl bg-blue-600/15 border border-blue-500/30">
+                      <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0 mt-0.5" />
+                      <span className="text-white font-semibold">
+                        <strong>1 Display Acrílico Inteligente NFC</strong> para mostrador, caja o recepción
+                      </span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Micro-landing y panel ilimitado 24/7</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Micro-landing corporativa sin límite de visitas</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Analíticas de toques NFC y clics</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Botón de Catálogo de productos / menú PDF y Google Maps</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Catálogo PDF y botones ilimitados</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Métricas en vivo: Toques NFC vs escaneos QR</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Soporte técnico preferencial</span>
                     </li>
                   </ul>
                 </div>
+
                 <Link
                   href="/login?tab=register"
-                  className="mt-6 w-full py-3 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs text-center shadow-lg shadow-blue-600/30 transition-all active:scale-95 block"
+                  className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs text-center shadow-lg shadow-blue-600/30 transition-all active:scale-95 block"
                 >
-                  Comenzar con Prueba Gratis
+                  Comenzar Prueba Gratis (PRO)
                 </Link>
               </div>
 
-              {/* Plan 3: Corporativo / Flotillas */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between">
+              {/* Plan 3: Enterprise */}
+              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all">
                 <div>
-                  <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-800/50">
-                    Empresas
-                  </span>
-                  <h3 className="text-xl font-bold text-white mt-3">Flotillas & Equipos</h3>
-                  <div className="mt-2 mb-4">
-                    <span className="text-3xl font-black text-white">A Medida</span>
-                    <span className="text-xs text-slate-400"> / según volumen</span>
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 px-2.5 py-0.5 rounded-full border border-purple-800/50">
+                      Enterprise
+                    </span>
+                    <span className="text-[11px] text-purple-300 font-bold">8 a 12 Tarjetas + 1 Acrílico</span>
                   </div>
-                  <ul className="space-y-2 text-xs text-slate-300">
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Tarjetas NFC para todo tu equipo de ventas</span>
+
+                  <h3 className="text-xl font-bold text-white mt-3">Plan Enterprise</h3>
+                  <p className="text-xs text-slate-400 mt-1">
+                    Para flotillas comerciales, agencias, inmobiliarias y empresas consolidadas.
+                  </p>
+
+                  <div className="mt-4 mb-5 p-3 rounded-2xl bg-slate-950/80 border border-slate-800">
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-3xl font-black text-white">$99</span>
+                      <span className="text-xs font-bold text-slate-400">MXN / mes</span>
+                    </div>
+                    <span className="text-[10px] text-purple-300 font-semibold block mt-0.5">
+                      8 a 12 tarjetas NFC + 1 Acrílico para Mostrador
+                    </span>
+                  </div>
+
+                  <ul className="space-y-2.5 text-xs text-slate-300">
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span><strong>De 8 a 12 Tarjetas Inteligentes NFC</strong> para tu flotilla</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Directorio central y control de perfiles</span>
+                    <li className="flex items-start gap-2 p-2 rounded-xl bg-purple-950/40 border border-purple-800/40">
+                      <Sparkles className="w-4 h-4 text-amber-300 flex-shrink-0 mt-0.5" />
+                      <span className="text-white font-semibold">
+                        <strong>1 Display Acrílico Inteligente NFC</strong> para showroom o recepción
+                      </span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Tarjetas en metal o acabado mate exclusivo</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Directorio corporativo y control de usuarios</span>
                     </li>
-                    <li className="flex items-center gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0" />
-                      <span>Soporte prioritario y capacitación</span>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Personalización completa de manual de marca y colores</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Métricas de rendimiento por cada miembro del equipo</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Soporte VIP prioritario 24/7 y asesoría de onboarding</span>
                     </li>
                   </ul>
                 </div>
+
                 <Link
                   href="/login?tab=register"
-                  className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block"
+                  className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block shadow-sm"
                 >
-                  Solicitar Cotización Gratis
+                  Comenzar Prueba Gratis (Enterprise)
                 </Link>
               </div>
             </div>
