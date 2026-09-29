@@ -49,6 +49,14 @@ export interface TapMetric {
   createdAt: string;
 }
 
+export interface QuickAccessConfig {
+  enabled: boolean;
+  showPhone?: boolean;
+  showEmail?: boolean;
+  showMaps?: boolean;
+  showCatalog?: boolean;
+}
+
 export interface Business {
   id: string;
   slug: string;
@@ -67,6 +75,7 @@ export interface Business {
   catalogUrl?: string;
   catalogTitle?: string;
   websiteUrl: string;
+  quickAccess?: QuickAccessConfig;
   cards?: NfcCard[];
   links: BusinessLink[];
   createdAt?: string;

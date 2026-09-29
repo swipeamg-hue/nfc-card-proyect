@@ -6,6 +6,7 @@ import {
   BusinessLink,
   LinkType,
   NfcCard,
+  QuickAccessConfig,
 } from '@/types/business';
 import {
   Building2,
@@ -49,6 +50,7 @@ import {
   GlobeSvg,
   PhoneSvg,
   MapPinSvg,
+  MailSvg,
 } from '@/components/ui/svg-icons';
 
 const OFFICIAL_SOCIAL_ICONS = [
@@ -131,6 +133,21 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       }
     };
     reader.readAsDataURL(file);
+  };
+
+  // Update quick access settings
+  const updateQuickAccess = (key: keyof QuickAccessConfig, value: boolean) => {
+    const current = business.quickAccess || {
+      enabled: true,
+      showPhone: false,
+      showEmail: true,
+      showMaps: true,
+      showCatalog: true,
+    };
+    updateField('quickAccess', {
+      ...current,
+      [key]: value,
+    });
   };
 
   // Toggle link active status
@@ -431,60 +448,157 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
             />
           </div>
 
-          {/* Quick contact info */}
-          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800">
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider mb-3">
-              Datos para vCard y Accesos Rápidos
-            </h4>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          {/* Quick contact info & Accesos Rapidos */}
+          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800 space-y-3">
+            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800">
               <div>
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
-                  Teléfono
-                </label>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
+                  Accesos Rápidos Directos (Botonera Inferior)
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Activa o desactiva qué botones de contacto directo y catálogo ve tu cliente
+                </p>
+              </div>
+
+              {/* Master toggle */}
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400">
+                  {business.quickAccess?.enabled !== false ? 'Activado' : 'Oculto'}
+                </span>
+                <input
+                  type="checkbox"
+                  checked={business.quickAccess?.enabled !== false}
+                  onChange={(e) => updateQuickAccess('enabled', e.target.checked)}
+                  className="w-4 h-4 accent-blue-600 cursor-pointer rounded"
+                />
+              </div>
+            </div>
+
+            {/* Individual access option cards with toggle and field */}
+            <div className={`space-y-2.5 transition-opacity ${business.quickAccess?.enabled !== false ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
+              
+              {/* 1. Teléfono */}
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <PhoneSvg className="w-3.5 h-3.5 text-blue-500" />
+                    Botón de Llamar Directo
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={business.quickAccess?.showPhone ?? false}
+                      onChange={(e) => updateQuickAccess('showPhone', e.target.checked)}
+                      className="w-3.5 h-3.5 accent-blue-600 rounded"
+                    />
+                    <span>Mostrar botón</span>
+                  </label>
+                </div>
                 <input
                   type="text"
                   value={business.phone || ''}
                   onChange={(e) => updateField('phone', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                  placeholder="Ej: +52 55 1234 5678"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
-                  Correo Electrónico
-                </label>
+              {/* 2. Correo Electrónico */}
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <MailSvg className="w-3.5 h-3.5 text-indigo-500" />
+                    Botón de Correo Electrónico
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={business.quickAccess?.showEmail ?? true}
+                      onChange={(e) => updateQuickAccess('showEmail', e.target.checked)}
+                      className="w-3.5 h-3.5 accent-blue-600 rounded"
+                    />
+                    <span>Mostrar botón</span>
+                  </label>
+                </div>
                 <input
                   type="email"
                   value={business.email || ''}
                   onChange={(e) => updateField('email', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
+                  placeholder="contacto@tunegocio.com"
+                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
                 />
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
-                  Dirección Física
-                </label>
-                <input
-                  type="text"
-                  value={business.address || ''}
-                  onChange={(e) => updateField('address', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
-                />
+              {/* 3. Ubicación y Maps */}
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <MapPinSvg className="w-3.5 h-3.5 text-rose-500" />
+                    Botón de Ubicación / Google Maps
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={business.quickAccess?.showMaps ?? true}
+                      onChange={(e) => updateQuickAccess('showMaps', e.target.checked)}
+                      className="w-3.5 h-3.5 accent-blue-600 rounded"
+                    />
+                    <span>Mostrar botón</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={business.address || ''}
+                    onChange={(e) => updateField('address', e.target.value)}
+                    placeholder="Dirección física (calle, ciudad)"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
+                  />
+                  <input
+                    type="text"
+                    value={business.googleMapsUrl || ''}
+                    onChange={(e) => updateField('googleMapsUrl', e.target.value)}
+                    placeholder="URL Google Maps (https://maps.app.goo.gl/...)"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
+                  />
+                </div>
               </div>
 
-              <div>
-                <label className="block text-[11px] font-semibold text-slate-600 dark:text-zinc-400 mb-1">
-                  URL Google Maps
-                </label>
-                <input
-                  type="text"
-                  value={business.googleMapsUrl || ''}
-                  onChange={(e) => updateField('googleMapsUrl', e.target.value)}
-                  className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs"
-                />
+              {/* 4. Catálogo / Menú / PDF */}
+              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
+                    <FileTextSvg className="w-3.5 h-3.5 text-amber-500" />
+                    Botón de Catálogo / Menú / PDF
+                  </label>
+                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={business.quickAccess?.showCatalog ?? true}
+                      onChange={(e) => updateQuickAccess('showCatalog', e.target.checked)}
+                      className="w-3.5 h-3.5 accent-blue-600 rounded"
+                    />
+                    <span>Mostrar botón</span>
+                  </label>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                  <input
+                    type="text"
+                    value={business.catalogTitle || ''}
+                    onChange={(e) => updateField('catalogTitle', e.target.value)}
+                    placeholder="Texto del botón (ej. Catálogo PDF, Menú)"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
+                  />
+                  <input
+                    type="text"
+                    value={business.catalogUrl || ''}
+                    onChange={(e) => updateField('catalogUrl', e.target.value)}
+                    placeholder="URL del PDF o Catálogo (https://...)"
+                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
+                  />
+                </div>
               </div>
+
             </div>
           </div>
         </div>
