@@ -104,6 +104,8 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
   const logoFileRef = useRef<HTMLInputElement>(null);
   const [showBannerUrlInput, setShowBannerUrlInput] = useState(false);
   const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
+  // Intelligent background sync: automatically set cover background when profile photo is uploaded
+  const [autoSyncCover, setAutoSyncCover] = useState(true);
 
   // Handle generic property updates
   const updateField = <K extends keyof Business>(key: K, value: Business[K]) => {
@@ -129,7 +131,17 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;
       if (dataUrl) {
-        updateField(field, dataUrl);
+        if (field === 'logoUrl') {
+          // Intelligent behavior: when uploading profile picture, also set as background banner
+          const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
+          onChange({
+            ...business,
+            logoUrl: dataUrl,
+            bannerUrl: shouldSyncBanner ? dataUrl : business.bannerUrl,
+          });
+        } else {
+          updateField(field, dataUrl);
+        }
       }
     };
     reader.readAsDataURL(file);
@@ -986,6 +998,17 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 Subir foto desde mi computadora
               </button>
 
+              {business.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => updateField('bannerUrl', business.logoUrl!)}
+                  className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/80 text-purple-700 dark:text-purple-300 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-purple-200 dark:border-purple-800"
+                >
+                  <span>🪄</span>
+                  <span>Usar foto de perfil como fondo</span>
+                </button>
+              )}
+
               <button
                 type="button"
                 onClick={() => updateField('bannerUrl', '/images/nexo-banner.jpg')}
@@ -1002,6 +1025,14 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 {showBannerUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
               </button>
             </div>
+
+            {/* Smart Banner Active Indicator */}
+            {business.bannerUrl && business.logoUrl && business.bannerUrl === business.logoUrl && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200/80 dark:border-blue-800/80 text-[11px] text-blue-700 dark:text-blue-300 font-medium">
+                <span>✨</span>
+                <span>Fondo Inteligente: Tu foto de perfil está adaptada automáticamente como portada panorámica.</span>
+              </div>
+            )}
 
             {/* Optional URL input toggle */}
             {showBannerUrlInput && (
@@ -1107,6 +1138,26 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                   >
                     {showLogoUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
                   </button>
+                </div>
+
+                {/* Smart Background Sync Toggle */}
+                <div className="pt-1">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none p-2 rounded-xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40">
+                    <input
+                      type="checkbox"
+                      checked={autoSyncCover}
+                      onChange={(e) => setAutoSyncCover(e.target.checked)}
+                      className="rounded border-slate-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
+                    />
+                    <div className="flex-1 text-[11px]">
+                      <span className="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1">
+                        <span>🪄</span> Fondo Inteligente Automático
+                      </span>
+                      <span className="text-slate-500 dark:text-zinc-400 block text-[10px]">
+                        Al subir tu foto de perfil, se adaptará y colocará automáticamente como fondo de portada panorámico.
+                      </span>
+                    </div>
+                  </label>
                 </div>
 
                 {showLogoUrlInput && (

@@ -10,25 +10,52 @@ interface HeroBannerProps {
 }
 
 export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps) {
+  // Smart background: if bannerUrl is provided use it; otherwise fallback to logoUrl
+  const effectiveBanner = bannerUrl || logoUrl;
+  const isSmartFromLogo = !bannerUrl && !!logoUrl;
+  const isSameAsLogo = effectiveBanner === logoUrl;
+
   return (
     <div className="relative w-full">
       {/* Banner Cover */}
       <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
-        {bannerUrl ? (
-          <Image
-            src={bannerUrl}
-            alt={`${businessName} Portada`}
-            fill
-            priority
-            unoptimized
-            sizes="(max-width: 768px) 100vw, 450px"
-            className="object-cover object-center"
-          />
+        {effectiveBanner ? (
+          <>
+            {/* If banner is derived from avatar or square photo, apply ambient backdrop blur */}
+            {isSameAsLogo ? (
+              <div className="absolute inset-0 overflow-hidden">
+                <Image
+                  src={effectiveBanner}
+                  alt=""
+                  fill
+                  priority
+                  unoptimized
+                  sizes="(max-width: 768px) 100vw, 450px"
+                  className="object-cover object-center scale-125 filter blur-md brightness-[0.70] contrast-125"
+                />
+              </div>
+            ) : null}
+
+            <Image
+              src={effectiveBanner}
+              alt={`${businessName} Portada`}
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 450px"
+              className={`object-cover object-center ${
+                isSameAsLogo ? 'opacity-90 mix-blend-overlay scale-105' : 'opacity-100'
+              }`}
+            />
+
+            {/* Smart cinematic vignette overlay for contrast and sleek finish */}
+            <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-black/30 to-black/20 pointer-events-none" />
+          </>
         ) : (
           <div className="absolute inset-0 bg-gradient-to-r from-blue-700 via-indigo-800 to-sky-700 opacity-90" />
         )}
         {/* Subtle dark gradient overlay on bottom of banner */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Overlapping Avatar Logo */}
