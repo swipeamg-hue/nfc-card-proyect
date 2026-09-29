@@ -775,10 +775,10 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                             type="button"
                             onClick={() => document.getElementById(`link-img-${link.id}`)?.click()}
                             title="Subir foto o imagen para este botón"
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-[10px] font-semibold transition-all border border-purple-200/60 dark:border-purple-800/60"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-[10px] font-semibold transition-all border border-purple-200/60 dark:border-purple-800/60 whitespace-nowrap"
                           >
                             <ImageIcon className="w-3 h-3 text-purple-500" />
-                            <span>Subir Imagen</span>
+                            <span>IMG</span>
                           </button>
 
                           {/* 3. Subir Documento button */}
@@ -786,10 +786,10 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                             type="button"
                             onClick={() => document.getElementById(`link-doc-${link.id}`)?.click()}
                             title="Subir archivo PDF, catálogo o menú"
-                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold transition-all border border-amber-200/60 dark:border-amber-800/60"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold transition-all border border-amber-200/60 dark:border-amber-800/60 whitespace-nowrap"
                           >
                             <FileText className="w-3 h-3 text-amber-500" />
-                            <span>Subir Documento</span>
+                            <span>DOC</span>
                           </button>
                         </div>
                       )}
