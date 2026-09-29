@@ -5,7 +5,6 @@ import { Business } from '@/types/business';
 import { HeroBanner } from './hero-banner';
 import { ProfileHeader } from './profile-header';
 import { ActionCard } from './action-card';
-import { QuickActionsBar } from './quick-actions-bar';
 import { FloatingVCardButton } from './floating-vcard-button';
 import { QrModal } from './qr-modal';
 import { Smartphone, Zap, Sparkles } from 'lucide-react';
@@ -170,14 +169,6 @@ export function PublicProfile({
                 onTrackClick={handleTrackClick}
               />
             ))}
-          </div>
-
-          {/* Quick Actions Grid (Email, Maps, Catalog) */}
-          <div className="px-4">
-            <QuickActionsBar
-              business={business}
-              onTrackAction={(act) => handleTrackClick(act, act)}
-            />
           </div>
         </div>
 

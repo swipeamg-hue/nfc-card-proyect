@@ -30,6 +30,10 @@ import {
   Check,
   Download,
   QrCode,
+  FileText,
+  Image as ImageIcon,
+  Link as LinkIcon,
+  Upload,
 } from 'lucide-react';
 import { uploadBusinessAsset, getAppBaseUrl } from '@/lib/supabase';
 import {
@@ -225,6 +229,33 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
     setTimeout(() => {
       setSavedLinkId(null);
     }, 2000);
+  };
+
+  // Upload asset for custom link (image or document)
+  const handleLinkAssetUpload = async (linkId: string, type: 'image' | 'doc', file?: File | null) => {
+    if (!file) return;
+    try {
+      const uploadRes = await uploadBusinessAsset(
+        file,
+        `${business.slug}-${linkId}`,
+        type === 'image' ? 'logo' : 'banner'
+      );
+      if (uploadRes.url) {
+        updateLink(linkId, { url: uploadRes.url });
+        return;
+      }
+    } catch (err) {
+      console.warn('Fallback link asset to Data URL:', err);
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        updateLink(linkId, { url: dataUrl });
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Add a new link with template defaults
@@ -692,17 +723,93 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                     </div>
                   </div>
 
-                  <div>
-                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
-                      Enlace de destino (URL):
-                    </label>
+                  {/* Link destination */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between">
+                      <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400">
+                        Destino del botón:
+                      </label>
+
+                      {isCustom && (
+                        <div className="flex items-center gap-1.5">
+                          {/* Hidden file inputs for image and doc upload */}
+                          <input
+                            id={`link-img-${link.id}`}
+                            type="file"
+                            accept="image/*"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleLinkAssetUpload(link.id, 'image', e.target.files[0]);
+                              }
+                            }}
+                          />
+                          <input
+                            id={`link-doc-${link.id}`}
+                            type="file"
+                            accept=".pdf,.doc,.docx,application/pdf"
+                            className="hidden"
+                            onChange={(e) => {
+                              if (e.target.files?.[0]) {
+                                handleLinkAssetUpload(link.id, 'doc', e.target.files[0]);
+                              }
+                            }}
+                          />
+
+                          {/* 1. URL button */}
+                          <button
+                            type="button"
+                            onClick={() => {
+                              const input = document.getElementById(`url-input-${link.id}`);
+                              input?.focus();
+                            }}
+                            title="Ingresar dirección web"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-slate-100 hover:bg-slate-200 dark:bg-zinc-800 dark:hover:bg-zinc-700 text-slate-700 dark:text-zinc-300 text-[10px] font-semibold transition-all border border-slate-200 dark:border-zinc-700"
+                          >
+                            <LinkIcon className="w-3 h-3 text-blue-500" />
+                            <span>URL</span>
+                          </button>
+
+                          {/* 2. Subir Imagen button */}
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`link-img-${link.id}`)?.click()}
+                            title="Subir foto o imagen para este botón"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/40 dark:hover:bg-purple-900/50 text-purple-700 dark:text-purple-300 text-[10px] font-semibold transition-all border border-purple-200/60 dark:border-purple-800/60"
+                          >
+                            <ImageIcon className="w-3 h-3 text-purple-500" />
+                            <span>Subir Imagen</span>
+                          </button>
+
+                          {/* 3. Subir Documento button */}
+                          <button
+                            type="button"
+                            onClick={() => document.getElementById(`link-doc-${link.id}`)?.click()}
+                            title="Subir archivo PDF, catálogo o menú"
+                            className="flex items-center gap-1 px-2 py-0.5 rounded-lg bg-amber-50 hover:bg-amber-100 dark:bg-amber-950/40 dark:hover:bg-amber-900/50 text-amber-700 dark:text-amber-300 text-[10px] font-semibold transition-all border border-amber-200/60 dark:border-amber-800/60"
+                          >
+                            <FileText className="w-3 h-3 text-amber-500" />
+                            <span>Subir Documento</span>
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     <input
+                      id={`url-input-${link.id}`}
                       type="text"
                       value={link.url}
                       onChange={(e) => updateLink(link.id, { url: e.target.value })}
-                      placeholder="https://..."
+                      placeholder={isCustom ? 'https://... o haz clic en Subir Imagen / Documento arriba' : 'https://...'}
                       className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
                     />
+
+                    {link.url && (link.url.startsWith('data:image') || link.url.includes('storage') || link.url.endsWith('.pdf')) && (
+                      <div className="flex items-center gap-1.5 text-[10px] text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 px-2 py-1 rounded-md border border-emerald-200/80 dark:border-emerald-900/60">
+                        <Check className="w-3 h-3 flex-shrink-0" />
+                        <span className="truncate">Archivo adjunto listo y vinculado al botón</span>
+                      </div>
+                    )}
                   </div>
 
                   {/* ONLY FOR CUSTOM BUTTONS: Choose SVG icon via modal library & custom colors */}
@@ -1143,7 +1250,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                     className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow transition-all active:scale-95"
                   >
                     <Download className="w-3.5 h-3.5" />
-                    <span>Descargar QR (Alta Resolución PNG)</span>
+                    <span>Descargar QR</span>
                   </button>
 
                   <button
@@ -1152,7 +1259,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                     className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-xs font-semibold transition-all active:scale-95"
                   >
                     {copiedQr ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                    <span>{copiedQr ? 'Enlace Copiado' : 'Copiar Enlace'}</span>
+                    <span>{copiedQr ? 'Copiado' : 'Copiar'}</span>
                   </button>
                 </div>
               </div>

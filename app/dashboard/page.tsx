@@ -29,7 +29,7 @@ import {
   Crown,
 } from 'lucide-react';
 
-import { saveBusinessToSupabase, getAllBusinesses, getBusinessBySlug } from '@/lib/supabase';
+import { saveBusinessToSupabase, getAllBusinesses, getBusinessBySlug, getAppBaseUrl } from '@/lib/supabase';
 
 const STORAGE_KEY = 'tapcard_business_data_nexo';
 const STORAGE_BUSINESSES_LIST_KEY = 'tapcard_saas_all_businesses';
@@ -327,15 +327,16 @@ export default function DashboardPage() {
 
 
 
-            <Link
-              href={`/${business.slug}`}
+            <a
+              href={`${getAppBaseUrl()}/${business.slug}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl border border-slate-300 dark:border-zinc-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all text-slate-700 dark:text-zinc-300"
             >
               <span className="hidden sm:inline">Ver Perfil Público</span>
               <span className="sm:hidden">Ver Perfil</span>
               <ExternalLink className="w-3.5 h-3.5" />
-            </Link>
+            </a>
 
             <button
               onClick={handleLogout}

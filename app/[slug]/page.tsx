@@ -1,7 +1,6 @@
-import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import { mockBusinessesDatabase } from '@/lib/mock-data';
-import { PublicProfile } from '@/components/nfc/public-profile';
+import { ProfileViewer } from '@/components/nfc/profile-viewer';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -21,7 +20,7 @@ export async function generateMetadata({
 
   if (!business) {
     return {
-      title: 'Perfil no encontrado | TapCard NFC',
+      title: 'Perfil Digital NFC | TapCard',
     };
   }
 
@@ -40,16 +39,12 @@ export default async function BusinessProfilePage({
   params,
 }: PageProps) {
   const { slug } = await params;
-
-  const business = mockBusinessesDatabase[slug.toLowerCase()];
-
-  if (!business) {
-    notFound();
-  }
+  const initialBusiness = mockBusinessesDatabase[slug.toLowerCase()] || null;
 
   return (
-    <PublicProfile
-      business={business}
+    <ProfileViewer
+      slug={slug}
+      initialBusiness={initialBusiness}
     />
   );
 }

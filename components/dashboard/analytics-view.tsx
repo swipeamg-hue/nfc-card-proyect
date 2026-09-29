@@ -1,50 +1,20 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
-import QRCode from 'qrcode';
+import React from 'react';
 import {
   Smartphone,
-  QrCode,
-  Download,
   TrendingUp,
   MousePointerClick,
   CheckCircle2,
-  ExternalLink,
-  Printer,
-  Copy,
-  Check,
+  QrCode,
 } from 'lucide-react';
 import { Business } from '@/types/business';
-import { getAppBaseUrl } from '@/lib/supabase';
 
 interface AnalyticsViewProps {
   business: Business;
 }
 
 export function AnalyticsView({ business }: AnalyticsViewProps) {
-  const [qrPng, setQrPng] = useState<string>('');
-  const [copied, setCopied] = useState<boolean>(false);
-
-  const profileUrl = typeof window !== 'undefined'
-    ? `${getAppBaseUrl()}/${business.slug}`
-    : `https://tapcard.mx/${business.slug}`;
-
-  useEffect(() => {
-    QRCode.toDataURL(
-      profileUrl,
-      {
-        width: 600,
-        margin: 2,
-        color: {
-          dark: '#0f172a',
-          light: '#ffffff',
-        },
-      },
-      (err, url) => {
-        if (!err && url) setQrPng(url);
-      }
-    );
-  }, [profileUrl]);
 
   const totalNfcTaps = (business.cards || []).reduce((acc, c) => acc + (c.totalTaps || 0), 0);
   const totalQrScans = 0;
@@ -70,20 +40,6 @@ export function AnalyticsView({ business }: AnalyticsViewProps) {
       share: 0,
     };
   });
-
-  const handleCopyLink = () => {
-    navigator.clipboard.writeText(profileUrl);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-  };
-
-  const handleDownloadQr = () => {
-    if (!qrPng) return;
-    const link = document.createElement('a');
-    link.href = qrPng;
-    link.download = `QR-AltaResolucion-${business.slug}.png`;
-    link.click();
-  };
 
   return (
     <div className="space-y-6">
@@ -180,54 +136,6 @@ export function AnalyticsView({ business }: AnalyticsViewProps) {
         </p>
       </div>
 
-      {/* QR Code Ready for Printing */}
-      <div className="bg-white dark:bg-zinc-900 p-5 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm">
-        <div className="flex flex-col sm:flex-row items-center gap-6">
-          <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm flex-shrink-0">
-            {qrPng ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={qrPng}
-                alt="QR Print Ready"
-                className="w-36 h-36 object-contain"
-              />
-            ) : (
-              <div className="w-36 h-36 flex items-center justify-center text-xs text-slate-400">
-                Generando QR...
-              </div>
-            )}
-          </div>
-
-          <div className="flex-1 space-y-3 text-center sm:text-left">
-            <div>
-              <h4 className="text-sm font-bold text-slate-900 dark:text-white">
-                Código QR para Impresión Física
-              </h4>
-              <p className="text-xs text-slate-500 mt-1">
-                Imprime este código en vinil, tarjetas de presentación, stands o exhibidores de mostrador.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleDownloadQr}
-                className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow transition-all active:scale-95"
-              >
-                <Download className="w-3.5 h-3.5" />
-                Descargar PNG (Alta Resolución)
-              </button>
-
-              <button
-                onClick={handleCopyLink}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 dark:border-zinc-700 text-slate-700 dark:text-zinc-200 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all active:scale-95"
-              >
-                {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-                {copied ? 'Copiado' : 'Copiar URL'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
