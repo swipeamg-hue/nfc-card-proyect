@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Zap,
 } from 'lucide-react';
-import { login, registerClient, getActiveSession, SUPER_ADMIN_ACCOUNT } from '@/lib/auth';
+import { login, registerClient, getActiveSession } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,7 +35,7 @@ export default function LoginPage() {
   const [regBusinessName, setRegBusinessName] = useState('');
   const [regCategory, setRegCategory] = useState('');
 
-  // If already logged in, redirect
+  // Check session and URL query parameter on mount
   useEffect(() => {
     const session = getActiveSession();
     if (session) {
@@ -44,7 +44,16 @@ export default function LoginPage() {
       } else {
         router.push('/dashboard');
       }
+      return;
     }
+
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const tabParam = params.get('tab');
+      if (tabParam === 'register' || tabParam === 'trial') {
+        setActiveTab('register');
+      }
+    } catch {}
   }, [router]);
 
   const handleLoginSubmit = (e: React.FormEvent) => {
@@ -87,20 +96,6 @@ export default function LoginPage() {
         setErrorMsg(res.error || 'Error al crear la cuenta');
       }
     }, 400);
-  };
-
-  // Quick 1-click login for demo / testing
-  const handleQuickLogin = (email: string, pass: string) => {
-    setLoginEmail(email);
-    setLoginPassword(pass);
-    const res = login(email, pass);
-    if (res.success && res.user) {
-      if (res.user.role === 'SUPER_ADMIN') {
-        router.push('/admin');
-      } else {
-        router.push('/dashboard');
-      }
-    }
   };
 
   return (
@@ -176,7 +171,7 @@ export default function LoginPage() {
                   : 'text-slate-400 hover:text-white'
               }`}
             >
-              Crear Cuenta (PyME)
+              Prueba Gratis (Registro)
             </button>
           </div>
 
@@ -202,7 +197,7 @@ export default function LoginPage() {
                     required
                     value={loginEmail}
                     onChange={(e) => setLoginEmail(e.target.value)}
-                    placeholder="tu@negocio.com o admin@tapcard.com"
+                    placeholder="tu@negocio.com"
                     className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -325,55 +320,44 @@ export default function LoginPage() {
                 disabled={isLoading}
                 className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
               >
-                <span>{isLoading ? 'Creando tu cuenta y tienda...' : 'Crear Cuenta y Comenzar'}</span>
+                <span>{isLoading ? 'Creando tu cuenta y tienda...' : 'Comenzar Mi Prueba Gratis'}</span>
                 <Sparkles className="w-4 h-4" />
               </button>
+
+              <div className="pt-2 text-center">
+                <span className="text-[11px] text-slate-500 flex items-center justify-center gap-1">
+                  <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>Sin tarjeta de crédito requerida • Acceso inmediato</span>
+                </span>
+              </div>
             </form>
           )}
 
-          {/* Quick Demo Access Buttons */}
-          <div className="mt-6 pt-5 border-t border-slate-800/80 space-y-2">
-            <span className="block text-[11px] font-bold text-slate-500 uppercase tracking-wider text-center">
-              Acceso Rápido para Pruebas (1 Clic)
-            </span>
-
-            <div className="grid grid-cols-1 gap-1.5">
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('admin@tapcard.com', 'admin123')}
-                className="w-full p-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 text-xs font-semibold transition-colors flex items-center justify-between"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span>👑</span>
-                  <span>Super Admin (Control Total)</span>
-                </span>
-                <span className="text-[10px] text-amber-400 font-mono">admin@tapcard.com</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('nexo@empresa.com', 'nexo123')}
-                className="w-full p-2 rounded-xl bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 text-xs font-semibold transition-colors flex items-center justify-between"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span>🏢</span>
-                  <span>Cliente: Nexo Soluciones</span>
-                </span>
-                <span className="text-[10px] text-blue-400 font-mono">nexo@empresa.com</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => handleQuickLogin('fuego@grill.com', 'fuego123')}
-                className="w-full p-2 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 text-xs font-semibold transition-colors flex items-center justify-between"
-              >
-                <span className="flex items-center gap-1.5">
-                  <span>🥩</span>
-                  <span>Cliente: Fuego & Leña Grill</span>
-                </span>
-                <span className="text-[10px] text-emerald-400 font-mono">fuego@grill.com</span>
-              </button>
-            </div>
+          {/* Footer note inside card */}
+          <div className="mt-6 pt-4 border-t border-slate-800 text-center">
+            {activeTab === 'login' ? (
+              <p className="text-xs text-slate-400">
+                ¿Aún no tienes cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('register')}
+                  className="font-bold text-blue-400 hover:text-blue-300 hover:underline"
+                >
+                  Regístrate e inicia tu prueba gratis
+                </button>
+              </p>
+            ) : (
+              <p className="text-xs text-slate-400">
+                ¿Ya tienes una cuenta registrada?{' '}
+                <button
+                  type="button"
+                  onClick={() => setActiveTab('login')}
+                  className="font-bold text-blue-400 hover:text-blue-300 hover:underline"
+                >
+                  Inicia sesión aquí
+                </button>
+              </p>
+            )}
           </div>
         </div>
       </main>

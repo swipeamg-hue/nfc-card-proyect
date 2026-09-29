@@ -20,7 +20,6 @@ import {
   BarChart3,
   SlidersHorizontal,
   Check,
-  RotateCcw,
   Sparkles,
   Layers,
   Building2,
@@ -172,18 +171,6 @@ export default function DashboardPage() {
     }
   };
 
-  const handleReset = () => {
-    if (confirm('¿Deseas restaurar la información predeterminada y borrar los cambios guardados?')) {
-      try {
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem(STORAGE_KEY);
-        }
-      } catch {}
-      setBusiness(mockNexoBusiness);
-      setLastSavedTime('Restaurado a demo inicial');
-    }
-  };
-
   if (isAuthChecking) {
     return (
       <div className="min-h-screen bg-slate-950 flex items-center justify-center">
@@ -293,14 +280,6 @@ export default function DashboardPage() {
                 <span>Métricas & QR</span>
               </button>
             </div>
-
-            <button
-              onClick={handleReset}
-              title="Restaurar valores de demo"
-              className="p-2 rounded-xl text-slate-500 hover:text-slate-800 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-zinc-800 transition-colors"
-            >
-              <RotateCcw className="w-4 h-4" />
-            </button>
 
             {lastSavedTime && (
               <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80">
