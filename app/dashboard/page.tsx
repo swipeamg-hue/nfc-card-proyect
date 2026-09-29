@@ -314,7 +314,7 @@ export default function DashboardPage() {
                 }`}
               >
                 <BarChart3 className="w-3.5 h-3.5" />
-                <span>Métricas & QR</span>
+                <span>Métricas</span>
               </button>
             </div>
 
@@ -370,7 +370,7 @@ export default function DashboardPage() {
               }`}
             >
               <BarChart3 className="w-3.5 h-3.5" />
-              <span>Métricas & QR</span>
+              <span>Métricas</span>
             </button>
           </div>
         </div>

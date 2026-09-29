@@ -397,7 +397,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
           }`}
         >
           <Palette className="w-4 h-4" />
-          <span>Multimedia & Tema</span>
+          <span>Multimedia</span>
         </button>
 
         <button
@@ -409,7 +409,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
           }`}
         >
           <CreditCard className="w-4 h-4" />
-          <span>Chips NFC ({business.cards?.length || 0})</span>
+          <span>NFC</span>
         </button>
       </div>
 
@@ -902,10 +902,10 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                 <button
                   type="button"
                   onClick={() => updateField('bannerUrl', '')}
-                  className="text-[11px] text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1"
+                  title="Eliminar foto de portada"
+                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  Quitar foto
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </div>
@@ -996,10 +996,10 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
                 <button
                   type="button"
                   onClick={() => updateField('logoUrl', '')}
-                  className="text-[11px] text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1"
+                  title="Eliminar foto de perfil"
+                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                 >
-                  <Trash2 className="w-3 h-3" />
-                  Quitar foto
+                  <Trash2 className="w-4 h-4" />
                 </button>
               )}
             </div>
