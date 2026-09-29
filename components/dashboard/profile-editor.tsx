@@ -22,30 +22,57 @@ import {
   Sparkles,
   Smartphone,
   ExternalLink,
-  Utensils,
-  Calendar,
-  Coffee,
-  Scissors,
-  ShoppingBag,
-  FileText,
   Star,
-  Clock,
-  Globe,
-  Tag,
 } from 'lucide-react';
+import {
+  WhatsAppOfficialIcon,
+  InstagramOfficialIcon,
+  FacebookOfficialIcon,
+  LinkedinOfficialIcon,
+  TikTokOfficialIcon,
+  XOfficialIcon,
+  YouTubeOfficialIcon,
+  TelegramOfficialIcon,
+  UtensilsSvg,
+  CalendarSvg,
+  SparklesBeautySvg,
+  ScissorsSvg,
+  CoffeeSvg,
+  ShoppingBagSvg,
+  FileTextSvg,
+  ClockSvg,
+  CreditCardSvg,
+  StarSvg,
+  GlobeSvg,
+  PhoneSvg,
+  MapPinSvg,
+} from '@/components/ui/svg-icons';
 
-const AVAILABLE_ICONS = [
-  { id: 'utensils', label: 'Menú / Restaurante', icon: Utensils },
-  { id: 'calendar', label: 'Reservar Cita', icon: Calendar },
-  { id: 'sparkles', label: 'Uñas / Belleza', icon: Sparkles },
-  { id: 'scissors', label: 'Peluquería / Barba', icon: Scissors },
-  { id: 'coffee', label: 'Café / Bebidas', icon: Coffee },
-  { id: 'shopping-bag', label: 'Catálogo / Tienda', icon: ShoppingBag },
-  { id: 'file-text', label: 'Menú PDF', icon: FileText },
-  { id: 'clock', label: 'Horarios', icon: Clock },
-  { id: 'credit-card', label: 'Pagos', icon: CreditCard },
-  { id: 'star', label: 'Destacado / Reseña', icon: Star },
-  { id: 'globe', label: 'Sitio Web', icon: Globe },
+const OFFICIAL_SOCIAL_ICONS = [
+  { id: 'whatsapp', label: 'WhatsApp', icon: WhatsAppOfficialIcon, defaultColor: 'bg-[#25D366]' },
+  { id: 'instagram', label: 'Instagram', icon: InstagramOfficialIcon, defaultColor: 'bg-pink-600' },
+  { id: 'facebook', label: 'Facebook', icon: FacebookOfficialIcon, defaultColor: 'bg-[#1877F2]' },
+  { id: 'tiktok', label: 'TikTok', icon: TikTokOfficialIcon, defaultColor: 'bg-black' },
+  { id: 'linkedin', label: 'LinkedIn', icon: LinkedinOfficialIcon, defaultColor: 'bg-[#0A66C2]' },
+  { id: 'youtube', label: 'YouTube', icon: YouTubeOfficialIcon, defaultColor: 'bg-[#FF0000]' },
+  { id: 'x', label: 'X (Twitter)', icon: XOfficialIcon, defaultColor: 'bg-black' },
+  { id: 'telegram', label: 'Telegram', icon: TelegramOfficialIcon, defaultColor: 'bg-[#229ED9]' },
+];
+
+const SERVICE_SVG_ICONS = [
+  { id: 'utensils', label: 'Menú / Restaurante', icon: UtensilsSvg },
+  { id: 'calendar', label: 'Reservar Cita', icon: CalendarSvg },
+  { id: 'sparkles', label: 'Uñas / Belleza', icon: SparklesBeautySvg },
+  { id: 'scissors', label: 'Peluquería / Barba', icon: ScissorsSvg },
+  { id: 'coffee', label: 'Café / Bebidas', icon: CoffeeSvg },
+  { id: 'shopping-bag', label: 'Catálogo / Tienda', icon: ShoppingBagSvg },
+  { id: 'file-text', label: 'Menú PDF', icon: FileTextSvg },
+  { id: 'clock', label: 'Horarios', icon: ClockSvg },
+  { id: 'credit-card', label: 'Pagos', icon: CreditCardSvg },
+  { id: 'star', label: 'Destacado / Reseña', icon: StarSvg },
+  { id: 'phone', label: 'Llamar / Teléfono', icon: PhoneSvg },
+  { id: 'globe', label: 'Sitio Web', icon: GlobeSvg },
+  { id: 'map-pin', label: 'Ubicación / Maps', icon: MapPinSvg },
 ];
 
 const COLOR_OPTIONS = [
@@ -146,11 +173,31 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       subtitle = 'Empresa en LinkedIn';
       url = 'https://linkedin.com/company/tunegocio';
       iconName = 'linkedin';
+    } else if (type === 'tiktok') {
+      title = 'TikTok Oficial';
+      subtitle = 'Mira nuestros videos y novedades';
+      url = 'https://tiktok.com/@tunegocio';
+      iconName = 'tiktok';
+    } else if (type === 'youtube') {
+      title = 'Canal de YouTube';
+      subtitle = 'Suscríbete a nuestro canal';
+      url = 'https://youtube.com/@tunegocio';
+      iconName = 'youtube';
+    } else if (type === 'x') {
+      title = 'Síguenos en X';
+      subtitle = '@tunegocio';
+      url = 'https://x.com/tunegocio';
+      iconName = 'x';
+    } else if (type === 'telegram') {
+      title = 'Canal de Telegram';
+      subtitle = 'Únete a nuestra comunidad';
+      url = 'https://t.me/tunegocio';
+      iconName = 'telegram';
     } else if (type === 'catalog') {
       title = 'Ver Catálogo / Menú';
       subtitle = 'Descarga nuestro brochure en PDF';
       url = 'https://ejemplo.com/catalogo.pdf';
-      iconName = 'catalog';
+      iconName = 'file-text';
     } else if (type === 'menu') {
       title = 'Menú del Restaurante';
       subtitle = 'Consulta nuestros platillos y bebidas';
@@ -428,30 +475,42 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
               <button
                 type="button"
                 onClick={() => addLink('whatsapp')}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                + WhatsApp
+                <WhatsAppOfficialIcon className="w-3.5 h-3.5" />
+                <span>+ WhatsApp</span>
               </button>
               <button
                 type="button"
                 onClick={() => addLink('phone')}
-                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                + Teléfono
+                <PhoneSvg className="w-3.5 h-3.5" />
+                <span>+ Teléfono</span>
               </button>
               <button
                 type="button"
                 onClick={() => addLink('instagram')}
-                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                + Instagram
+                <InstagramOfficialIcon className="w-3.5 h-3.5" />
+                <span>+ Instagram</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => addLink('tiktok')}
+                className="px-2.5 py-1 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1"
+              >
+                <TikTokOfficialIcon className="w-3.5 h-3.5 text-white" />
+                <span>+ TikTok</span>
               </button>
               <button
                 type="button"
                 onClick={() => addLink('website')}
-                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                + Sitio Web
+                <GlobeSvg className="w-3.5 h-3.5" />
+                <span>+ Sitio Web</span>
               </button>
               <button
                 type="button"
@@ -459,7 +518,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 title="Ideal para restaurantes, cafeterías o bares"
                 className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                <Utensils className="w-3.5 h-3.5" />
+                <UtensilsSvg className="w-3.5 h-3.5" />
                 <span>+ Menú / Carta</span>
               </button>
               <button
@@ -468,7 +527,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 title="Ideal para salones de uñas, estética o consultorios"
                 className="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-700 dark:text-purple-400 hover:bg-purple-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
               >
-                <Calendar className="w-3.5 h-3.5" />
+                <CalendarSvg className="w-3.5 h-3.5" />
                 <span>+ Reservar Cita</span>
               </button>
               <button
@@ -476,7 +535,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 onClick={() => addLink('custom')}
                 className="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
               >
-                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <SparklesBeautySvg className="w-3.5 h-3.5 text-amber-300" />
                 <span>+ Personalizado</span>
               </button>
             </div>
@@ -595,41 +654,76 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 </div>
 
                 {/* Visual Icon & Color Customization */}
-                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-700/80 space-y-2">
+                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-700/80 space-y-2.5">
                   <div className="flex items-center justify-between">
                     <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
                       Ícono del botón:
                     </span>
                     <span className="text-[10px] text-slate-400 font-mono">
-                      Seleccionado: {link.iconName || 'predeterminado'}
+                      Seleccionado: <strong className="text-blue-500">{link.iconName || 'predeterminado'}</strong>
                     </span>
                   </div>
 
-                  {/* Icon chips */}
-                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto no-scrollbar py-0.5">
-                    {AVAILABLE_ICONS.map((item) => {
-                      const IconComp = item.icon;
-                      const isSelected = link.iconName === item.id;
-                      return (
-                        <button
-                          key={item.id}
-                          type="button"
-                          onClick={() => updateLink(link.id, { iconName: item.id })}
-                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                            isSelected
-                              ? 'bg-blue-600 text-white shadow-xs font-semibold'
-                              : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
-                          }`}
-                        >
-                          <IconComp className="w-3.5 h-3.5" />
-                          <span>{item.label}</span>
-                        </button>
-                      );
-                    })}
+                  {/* 1. Redes Sociales Oficiales */}
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">
+                      Redes Sociales Oficiales:
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {OFFICIAL_SOCIAL_ICONS.map((item) => {
+                        const IconComp = item.icon;
+                        const isSelected = link.iconName === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => updateLink(link.id, { iconName: item.id })}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                              isSelected
+                                ? 'bg-blue-600 text-white shadow-xs font-semibold ring-1 ring-blue-400'
+                                : 'bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                            }`}
+                          >
+                            <span className={`w-4 h-4 rounded-md flex items-center justify-center ${item.defaultColor} p-0.5`}>
+                              <IconComp className="w-3 h-3 text-white" />
+                            </span>
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+
+                  {/* 2. Servicios & Negocios (SVGs) */}
+                  <div>
+                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">
+                      Servicios & Negocios (SVG):
+                    </span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {SERVICE_SVG_ICONS.map((item) => {
+                        const IconComp = item.icon;
+                        const isSelected = link.iconName === item.id;
+                        return (
+                          <button
+                            key={item.id}
+                            type="button"
+                            onClick={() => updateLink(link.id, { iconName: item.id })}
+                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                              isSelected
+                                ? 'bg-blue-600 text-white shadow-xs font-semibold ring-1 ring-blue-400'
+                                : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                            }`}
+                          >
+                            <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-600 dark:text-zinc-300'}`} />
+                            <span>{item.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
                   </div>
 
                   {/* Color Swatches */}
-                  <div className="flex items-center gap-2 pt-1.5">
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800">
                     <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
                       Color / Estilo:
                     </span>

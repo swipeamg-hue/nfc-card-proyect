@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Mail, MapPin, FileText } from 'lucide-react';
+import { MailSvg, MapPinSvg, FileTextSvg } from '@/components/ui/svg-icons';
 import { Business } from '@/types/business';
 
 interface QuickActionsBarProps {
@@ -14,21 +14,21 @@ export function QuickActionsBar({ business, onTrackAction }: QuickActionsBarProp
     {
       id: 'email',
       label: 'Correo',
-      icon: <Mail className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />,
+      icon: <MailSvg className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />,
       url: `mailto:${business.email}`,
       available: !!business.email,
     },
     {
       id: 'maps',
       label: 'Ubicación',
-      icon: <MapPin className="w-5 h-5 text-rose-600 dark:text-rose-400" />,
+      icon: <MapPinSvg className="w-5 h-5 text-rose-600 dark:text-rose-400" />,
       url: business.googleMapsUrl || `https://maps.google.com/?q=${encodeURIComponent(business.address || '')}`,
       available: !!(business.googleMapsUrl || business.address),
     },
     {
       id: 'catalog',
       label: 'Catálogo / PDF',
-      icon: <FileText className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
+      icon: <FileTextSvg className="w-5 h-5 text-amber-600 dark:text-amber-400" />,
       url: business.catalogUrl || '#',
       available: !!business.catalogUrl,
     },
