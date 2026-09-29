@@ -12,9 +12,9 @@ const REGISTERED_USERS_KEY = 'tapcard_saas_registered_users';
 const BUSINESSES_KEY = 'tapcard_saas_all_businesses';
 
 export const SUPER_ADMIN_ACCOUNT: AuthUser = {
-  id: 'usr-admin-001',
-  email: 'admin@tapcard.com',
-  name: 'Super Administrador (Tú)',
+  id: 'usr-admin-swipeamg',
+  email: 'swipeamg@gmail.com',
+  name: 'Super Administrador (SwipeAMG)',
   role: 'SUPER_ADMIN',
   createdAt: '2026-01-01T00:00:00Z',
 };

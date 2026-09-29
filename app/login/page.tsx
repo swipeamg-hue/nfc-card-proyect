@@ -108,6 +108,20 @@ export default function LoginPage() {
 
           if (!email) return;
 
+          // EXCLUSIVE SUPER ADMIN CHECK
+          if (email === 'swipeamg@gmail.com') {
+            const superAdminUser: AuthUser = {
+              id: 'usr-admin-swipeamg',
+              email: 'swipeamg@gmail.com',
+              name: fullName || 'Super Administrador (SwipeAMG)',
+              role: 'SUPER_ADMIN',
+              createdAt: new Date().toISOString(),
+            };
+            setActiveSession(superAdminUser);
+            router.push('/admin');
+            return;
+          }
+
           // Check if this user is already registered with a business in app_users
           const { data: dbUser } = await supabase
             .from('app_users')
@@ -115,7 +129,7 @@ export default function LoginPage() {
             .eq('email', email)
             .maybeSingle();
 
-          if (dbUser && dbUser.business_id) {
+          if (dbUser && (dbUser.business_id || dbUser.role === 'SUPER_ADMIN')) {
             // Existing user: Log them directly into their business dashboard
             const safeUser: AuthUser = {
               id: dbUser.id,
