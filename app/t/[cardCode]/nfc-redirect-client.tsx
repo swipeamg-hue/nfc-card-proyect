@@ -5,6 +5,8 @@ import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { Smartphone, AlertCircle, ArrowLeft, Loader2 } from 'lucide-react';
 
+import { getBusinessByCardCode } from '@/lib/supabase';
+
 interface NfcRedirectClientProps {
   cardCode: string;
   targetSlug: string | null;
@@ -13,38 +15,60 @@ interface NfcRedirectClientProps {
 export function NfcRedirectClient({ cardCode, targetSlug }: NfcRedirectClientProps) {
   const router = useRouter();
   const [resolvedSlug, setResolvedSlug] = React.useState<string | null>(targetSlug);
-  const [isChecking, setIsChecking] = React.useState<boolean>(!targetSlug);
+  const [isChecking, setIsChecking] = React.useState<boolean>(true);
 
   useEffect(() => {
-    let slug = targetSlug;
+    let isMounted = true;
 
-    // If card was not in static mock data, check user's saved cards in localStorage
-    if (!slug && typeof window !== 'undefined') {
-      try {
-        const saved = localStorage.getItem('tapcard_business_data_nexo');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          const userCards = parsed.cards || [];
-          const found = userCards.find((c: { cardCode: string; status: string }) => 
-            c.cardCode.toUpperCase() === cardCode.toUpperCase() && c.status === 'ACTIVE'
-          );
-          if (found) {
-            slug = parsed.slug;
+    async function resolveCard() {
+      let slug = targetSlug;
+
+      // 1. If not found in static params, query Supabase cloud database
+      if (!slug) {
+        try {
+          const res = await getBusinessByCardCode(cardCode);
+          if (res && res.business && res.business.slug) {
+            slug = res.business.slug;
           }
+        } catch (e) {
+          console.warn('Supabase card resolution error:', e);
         }
-      } catch {
-        // Ignore
+      }
+
+      // 2. Check local fallback
+      if (!slug && typeof window !== 'undefined') {
+        try {
+          const saved = localStorage.getItem('tapcard_business_data_nexo');
+          if (saved) {
+            const parsed = JSON.parse(saved);
+            const userCards = parsed.cards || [];
+            const found = userCards.find((c: { cardCode: string; status: string }) => 
+              c.cardCode.toUpperCase() === cardCode.toUpperCase() && c.status === 'ACTIVE'
+            );
+            if (found) {
+              slug = parsed.slug;
+            }
+          }
+        } catch {}
+      }
+
+      if (!isMounted) return;
+
+      setResolvedSlug(slug);
+      setIsChecking(false);
+
+      if (slug && typeof window !== 'undefined') {
+        const search = new URLSearchParams(window.location.search);
+        const sourceParam = search.get('type') === 'qr' ? 'qr' : 'nfc';
+        router.replace(`/${slug}?src=${sourceParam}&code=${encodeURIComponent(cardCode)}`);
       }
     }
 
-    setResolvedSlug(slug);
-    setIsChecking(false);
+    resolveCard();
 
-    if (slug && typeof window !== 'undefined') {
-      const search = new URLSearchParams(window.location.search);
-      const sourceParam = search.get('type') === 'qr' ? 'qr' : 'nfc';
-      router.replace(`/${slug}?src=${sourceParam}&code=${encodeURIComponent(cardCode)}`);
-    }
+    return () => {
+      isMounted = false;
+    };
   }, [targetSlug, cardCode, router]);
 
   if (resolvedSlug || isChecking) {

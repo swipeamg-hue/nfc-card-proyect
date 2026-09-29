@@ -28,6 +28,7 @@ import {
   Image as ImageIcon,
   Camera,
 } from 'lucide-react';
+import { uploadBusinessAsset } from '@/lib/supabase';
 import {
   WhatsAppOfficialIcon,
   InstagramOfficialIcon,
@@ -115,8 +116,8 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     });
   };
 
-  // Handle local desktop file upload as Data URL
-  const handleFileUpload = (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
+  // Handle desktop file upload (Supabase Storage with Data URL fallback)
+  const handleFileUpload = async (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Por favor selecciona una imagen válida (JPG, PNG, WEBP, etc.)');
@@ -127,6 +128,26 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       return;
     }
 
+    try {
+      const uploadRes = await uploadBusinessAsset(file, business.slug, field === 'logoUrl' ? 'logo' : 'banner');
+      if (uploadRes.url) {
+        if (field === 'logoUrl') {
+          const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
+          onChange({
+            ...business,
+            logoUrl: uploadRes.url,
+            bannerUrl: shouldSyncBanner ? uploadRes.url : business.bannerUrl,
+          });
+        } else {
+          updateField(field, uploadRes.url);
+        }
+        return;
+      }
+    } catch (err) {
+      console.warn('Storage upload fallback to dataURL:', err);
+    }
+
+    // Fallback to local Data URL
     const reader = new FileReader();
     reader.onload = (e) => {
       const dataUrl = e.target?.result as string;

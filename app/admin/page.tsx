@@ -38,6 +38,8 @@ import {
   mockSalonBusiness,
 } from '@/lib/mock-data';
 
+import { getAllBusinesses, saveBusinessToSupabase, supabase } from '@/lib/supabase';
+
 const STORAGE_BUSINESSES_LIST_KEY = 'tapcard_saas_all_businesses';
 const STORAGE_CURRENT_ACTIVE_ID = 'tapcard_active_business_id';
 
@@ -65,29 +67,44 @@ export default function SuperAdminPage() {
   const [newCardCode, setNewCardCode] = useState('');
   const [newPlan, setNewPlan] = useState<'STARTER' | 'PRO' | 'ENTERPRISE'>('PRO');
 
-  // Load businesses & session from localStorage on mount
+  // Load businesses & session on mount (Local first + Supabase Live Cloud Sync)
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
+    let isMounted = true;
+
+    async function loadAdminData() {
+      try {
+        if (typeof window === 'undefined') return;
+
         const curSession = getActiveSession();
         setSession(curSession);
         setIsAuthChecking(false);
 
+        // 1. Try local storage cache for immediate display
         const saved = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
           if (Array.isArray(parsed) && parsed.length > 0) {
             setBusinesses(parsed);
           }
-        } else {
-          // Initialize storage with default mock list
-          localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(INITIAL_BUSINESSES));
         }
+
+        // 2. Fetch live data from Supabase
+        const cloudBusinesses = await getAllBusinesses();
+        if (cloudBusinesses && cloudBusinesses.length > 0 && isMounted) {
+          setBusinesses(cloudBusinesses);
+          localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(cloudBusinesses));
+        }
+      } catch (e) {
+        console.error('Error loading businesses list:', e);
+        if (isMounted) setIsAuthChecking(false);
       }
-    } catch (e) {
-      console.error('Error loading businesses list', e);
-      setIsAuthChecking(false);
     }
+
+    loadAdminData();
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   const handleLogout = () => {
@@ -95,7 +112,7 @@ export default function SuperAdminPage() {
     router.replace('/login');
   };
 
-  // Save changes to localStorage
+  // Save changes to localStorage and Supabase
   const saveBusinesses = (updated: Business[]) => {
     setBusinesses(updated);
     try {
@@ -103,7 +120,7 @@ export default function SuperAdminPage() {
         localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(updated));
       }
     } catch (e) {
-      console.error('Error saving businesses', e);
+      console.error('Error saving businesses locally', e);
     }
   };
 
@@ -119,11 +136,20 @@ export default function SuperAdminPage() {
   };
 
   // Assign a new NFC card to a specific business
-  const handleAddCardToBusiness = (businessId: string) => {
+  const handleAddCardToBusiness = async (businessId: string) => {
     const code = prompt('Ingresa el código alfanumérico del nuevo chip NFC físico (ej. VIP-8890):');
     if (!code || !code.trim()) return;
 
     const cleanCode = code.trim().toUpperCase();
+
+    const newCard: NfcCard = {
+      id: 'card-' + Date.now(),
+      cardCode: cleanCode,
+      businessId: businessId,
+      status: 'ACTIVE',
+      totalTaps: 0,
+      createdAt: new Date().toISOString(),
+    };
 
     const updated = businesses.map((b) => {
       if (b.id === businessId) {
@@ -132,14 +158,6 @@ export default function SuperAdminPage() {
           alert('Este código ya está vinculado a este negocio.');
           return b;
         }
-        const newCard: NfcCard = {
-          id: 'card-' + Date.now(),
-          cardCode: cleanCode,
-          businessId: b.id,
-          status: 'ACTIVE',
-          totalTaps: 0,
-          createdAt: new Date().toISOString(),
-        };
         return {
           ...b,
           cards: [...existingCards, newCard],
@@ -149,10 +167,39 @@ export default function SuperAdminPage() {
     });
 
     saveBusinesses(updated);
+
+    // Persist card to Supabase
+    try {
+      await supabase.from('nfc_cards').insert({
+        id: newCard.id,
+        card_code: newCard.cardCode,
+        business_id: businessId,
+        status: 'ACTIVE',
+        total_taps: 0,
+      });
+    } catch (e) {
+      console.warn('Could not save card to Supabase:', e);
+    }
+  };
+
+  // Delete business permanently
+  const handleDeleteBusiness = async (businessId: string, businessName: string) => {
+    if (!confirm(`¿Estás seguro de que deseas eliminar permanentemente a "${businessName}"? Esta acción borrará sus enlaces y tarjetas asociadas de Supabase.`)) {
+      return;
+    }
+
+    const updated = businesses.filter((b) => b.id !== businessId);
+    saveBusinesses(updated);
+
+    try {
+      await supabase.from('businesses').delete().eq('id', businessId);
+    } catch (e) {
+      console.error('Error deleting business from Supabase:', e);
+    }
   };
 
   // Create new tenant business
-  const handleCreateBusiness = (e: React.FormEvent) => {
+  const handleCreateBusiness = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newName.trim() || !newSlug.trim()) {
       alert('Por favor completa al menos el nombre y el enlace (slug).');
@@ -166,12 +213,14 @@ export default function SuperAdminPage() {
       return;
     }
 
+    const bizId = 'biz-' + Date.now();
+
     const initialCards: NfcCard[] = newCardCode.trim()
       ? [
           {
             id: 'card-' + Date.now(),
             cardCode: newCardCode.trim().toUpperCase(),
-            businessId: 'biz-' + Date.now(),
+            businessId: bizId,
             status: 'ACTIVE',
             totalTaps: 0,
             createdAt: new Date().toISOString(),
@@ -225,6 +274,24 @@ export default function SuperAdminPage() {
     const updated = [newBiz, ...businesses];
     saveBusinesses(updated);
     setIsNewModalOpen(false);
+
+    // Persist new business & cards to Supabase
+    try {
+      await saveBusinessToSupabase(newBiz);
+      if (initialCards.length > 0) {
+        await supabase.from('nfc_cards').insert(
+          initialCards.map((c) => ({
+            id: c.id,
+            card_code: c.cardCode,
+            business_id: bizId,
+            status: 'ACTIVE',
+            total_taps: 0,
+          }))
+        );
+      }
+    } catch (e) {
+      console.warn('Could not save new business to Supabase:', e);
+    }
 
     // Reset inputs
     setNewName('');
@@ -669,6 +736,15 @@ export default function SuperAdminPage() {
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Link>
+
+                      <button
+                        type="button"
+                        onClick={() => handleDeleteBusiness(biz.id, biz.name)}
+                        className="p-2.5 rounded-xl bg-rose-950/40 hover:bg-rose-900/60 text-rose-400 border border-rose-900/60 transition-colors active:scale-95"
+                        title="Eliminar empresa de Supabase"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
                     </div>
                   </div>
                 );

@@ -10,6 +10,8 @@ import { FloatingVCardButton } from './floating-vcard-button';
 import { QrModal } from './qr-modal';
 import { Smartphone, Zap, Sparkles } from 'lucide-react';
 
+import { supabase, getBusinessBySlug, trackTapEvent } from '@/lib/supabase';
+
 interface PublicProfileProps {
   business: Business;
   source?: 'NFC' | 'QR' | 'DIRECT';
@@ -27,38 +29,84 @@ export function PublicProfile({
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Sync with saved dashboard data from localStorage if available
+  // 1. Fetch live data from Supabase and subscribe to real-time changes
+  useEffect(() => {
+    let isMounted = true;
+
+    async function loadFreshBusiness() {
+      try {
+        const fresh = await getBusinessBySlug(initialBusiness.slug);
+        if (fresh && isMounted) {
+          setBusiness(fresh);
+        }
+      } catch (e) {
+        console.warn('Could not fetch latest Supabase profile:', e);
+      }
+    }
+
+    loadFreshBusiness();
+
+    // Setup Supabase Realtime channel
+    const channel = supabase
+      .channel(`realtime-biz-${initialBusiness.slug}`)
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'businesses',
+          filter: `id=eq.${initialBusiness.id}`,
+        },
+        () => {
+          loadFreshBusiness();
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'business_links',
+          filter: `business_id=eq.${initialBusiness.id}`,
+        },
+        () => {
+          loadFreshBusiness();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      isMounted = false;
+      supabase.removeChannel(channel);
+    };
+  }, [initialBusiness.slug, initialBusiness.id]);
+
+  // 2. Track page tap/view in Supabase & check URL params
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem('tapcard_business_data_nexo');
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.slug === initialBusiness.slug) {
-            if (!parsed.bannerUrl || parsed.bannerUrl.startsWith('/images/')) {
-              parsed.bannerUrl = initialBusiness.bannerUrl;
-            }
-            if (!parsed.logoUrl || parsed.logoUrl.startsWith('/images/')) {
-              parsed.logoUrl = initialBusiness.logoUrl;
-            }
-            setBusiness(parsed);
-          }
-        }
-
-        // Also check URL parameters dynamically on client mount
         const search = new URLSearchParams(window.location.search);
-        const srcParam = search.get('src') || source;
+        const srcParam = (search.get('src') || source).toUpperCase() as 'NFC' | 'QR' | 'DIRECT';
         const codeParam = search.get('code') || cardCode;
-        if (srcParam === 'nfc' || srcParam === 'NFC') {
+
+        if (srcParam === 'NFC') {
           showToast(`¡Leído vía Chip NFC${codeParam ? ` (${codeParam})` : ''}!`);
-        } else if (srcParam === 'qr' || srcParam === 'QR') {
+        } else if (srcParam === 'QR') {
           showToast('¡Escaneado vía Código QR!');
         }
+
+        // Record tap in Supabase analytics
+        if (!isMockup) {
+          trackTapEvent({
+            businessId: business.id,
+            cardCode: codeParam,
+            source: srcParam === 'NFC' || srcParam === 'QR' ? srcParam : 'DIRECT',
+            clickedItem: 'page_view',
+          });
+        }
       }
-    } catch {
-      // Ignore
-    }
-  }, [initialBusiness.slug, source, cardCode]);
+    } catch {}
+  }, [source, cardCode, isMockup, business.id]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);
@@ -68,23 +116,13 @@ export function PublicProfile({
   };
 
   const handleTrackClick = (linkId: string, linkType: string) => {
-    // Record async analytics event without blocking UI
-    try {
-      fetch('/api/analytics', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          businessId: business.id,
-          source,
-          clickedItem: linkType,
-          deviceType: 'MOBILE',
-        }),
-      }).catch(() => {
-        // Silent failure for analytics
-      });
-    } catch {
-      // Ignore
-    }
+    if (isMockup) return;
+    trackTapEvent({
+      businessId: business.id,
+      cardCode,
+      source: (source || 'DIRECT').toUpperCase() as any,
+      clickedItem: linkType,
+    });
   };
 
   // Sort active links by order

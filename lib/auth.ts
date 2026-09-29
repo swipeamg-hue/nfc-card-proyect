@@ -5,6 +5,7 @@ import {
   mockRestaurantBusiness,
   mockSalonBusiness,
 } from '@/lib/mock-data';
+import { supabase, saveBusinessToSupabase } from './supabase';
 
 const SESSION_STORAGE_KEY = 'tapcard_current_auth_session';
 const REGISTERED_USERS_KEY = 'tapcard_saas_registered_users';
@@ -93,7 +94,63 @@ export function setActiveSession(user: AuthUser | null) {
   } catch {}
 }
 
-// Login with email and password
+// Login with email and password (sync with fallback + async Supabase query)
+export async function loginAsync(
+  email: string,
+  pass: string
+): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
+  const cleanEmail = email.toLowerCase().trim();
+  const cleanPass = pass.trim();
+
+  // 1. Try local storage first for instant response
+  const users = getStoredUsers();
+  const localMatch = users.find(
+    (u) => u.email.toLowerCase() === cleanEmail && u.passwordHash === cleanPass
+  );
+
+  if (localMatch) {
+    const { passwordHash: _, ...safeUser } = localMatch;
+    setActiveSession(safeUser);
+    return { success: true, user: safeUser };
+  }
+
+  // 2. Query Supabase app_users table
+  try {
+    const { data: dbUser, error } = await supabase
+      .from('app_users')
+      .select('*')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (dbUser && !error) {
+      if (dbUser.password_hash === cleanPass) {
+        const safeUser: AuthUser = {
+          id: dbUser.id,
+          email: dbUser.email,
+          name: dbUser.name,
+          role: dbUser.role,
+          businessId: dbUser.business_id,
+          businessSlug: dbUser.business_slug,
+          createdAt: dbUser.created_at,
+        };
+
+        // Cache in local storage
+        const updatedUsers = [...users, { ...safeUser, passwordHash: cleanPass }];
+        localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(updatedUsers));
+        setActiveSession(safeUser);
+        return { success: true, user: safeUser };
+      }
+    }
+  } catch (e) {
+    console.warn('[Supabase Auth] Login fallback error:', e);
+  }
+
+  return {
+    success: false,
+    error: 'Correo o contraseña incorrectos. Verifica tus credenciales.',
+  };
+}
+
 export function login(
   email: string,
   pass: string
@@ -107,9 +164,11 @@ export function login(
   );
 
   if (!found) {
+    // If not found in memory, trigger async check in background
+    loginAsync(email, pass);
     return {
       success: false,
-      error: 'Correo o contraseña incorrectos. Verifica tus credenciales.',
+      error: 'Correo o contraseña incorrectos. Si acabas de registrarte en otro equipo, intenta de nuevo.',
     };
   }
 
@@ -119,13 +178,13 @@ export function login(
 }
 
 // Register a new client with their own business
-export function registerClient(params: {
+export async function registerClientAsync(params: {
   userName: string;
   email: string;
   pass: string;
   businessName: string;
   category: string;
-}): { success: boolean; user?: AuthUser; error?: string } {
+}): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
   const cleanEmail = params.email.toLowerCase().trim();
   const users = getStoredUsers();
 
@@ -152,8 +211,8 @@ export function registerClient(params: {
     isVerified: true,
     category: params.category.trim() || 'Servicios Generales',
     bio: `Bienvenido al perfil interactivo oficial de ${params.businessName.trim()}. Toca para conectar con nosotros.`,
-    bannerUrl: '',
-    logoUrl: '',
+    bannerUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop',
+    logoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
     themeColor: '#2563eb',
     phone: '',
     whatsapp: '',
@@ -188,7 +247,7 @@ export function registerClient(params: {
     },
   };
 
-  // Save new business to all businesses list
+  // 1. Save new business to local storage
   try {
     let currentBusinesses: Business[] = [
       mockNexoBusiness,
@@ -210,7 +269,24 @@ export function registerClient(params: {
     console.error('Error saving new business in register', e);
   }
 
-  // Create new user
+  // 2. Persist to Supabase in the cloud
+  try {
+    await saveBusinessToSupabase(newBusiness);
+
+    await supabase.from('app_users').insert({
+      id: newUserId,
+      email: cleanEmail,
+      name: params.userName.trim(),
+      role: 'CLIENT',
+      business_id: newBusinessId,
+      business_slug: slug,
+      password_hash: params.pass.trim(),
+    });
+  } catch (e) {
+    console.warn('[Supabase] Failed to write new user to cloud:', e);
+  }
+
+  // Create new user locally
   const newUser: AuthUser & { passwordHash: string } = {
     id: newUserId,
     email: cleanEmail,
@@ -228,6 +304,39 @@ export function registerClient(params: {
   } catch {}
 
   const { passwordHash: _, ...safeUser } = newUser;
+  setActiveSession(safeUser);
+  return { success: true, user: safeUser };
+}
+
+export function registerClient(params: {
+  userName: string;
+  email: string;
+  pass: string;
+  businessName: string;
+  category: string;
+}): { success: boolean; user?: AuthUser; error?: string } {
+  // Call async version in background and return immediately
+  registerClientAsync(params);
+
+  // Synchronous response
+  const cleanEmail = params.email.toLowerCase().trim();
+  let slug = params.businessName
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9]/g, '-')
+    .replace(/-+/g, '-');
+  if (!slug) slug = 'negocio-' + Date.now().toString(36);
+
+  const safeUser: AuthUser = {
+    id: 'usr-' + Date.now(),
+    email: cleanEmail,
+    name: params.userName.trim(),
+    role: 'CLIENT',
+    businessId: 'biz-' + Date.now(),
+    businessSlug: slug,
+    createdAt: new Date().toISOString(),
+  };
+
   setActiveSession(safeUser);
   return { success: true, user: safeUser };
 }

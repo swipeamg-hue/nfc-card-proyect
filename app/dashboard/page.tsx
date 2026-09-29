@@ -28,6 +28,8 @@ import {
   ShieldAlert,
 } from 'lucide-react';
 
+import { saveBusinessToSupabase, getAllBusinesses, getBusinessBySlug } from '@/lib/supabase';
+
 const STORAGE_KEY = 'tapcard_business_data_nexo';
 const STORAGE_BUSINESSES_LIST_KEY = 'tapcard_saas_all_businesses';
 const STORAGE_CURRENT_ACTIVE_ID = 'tapcard_active_business_id';
@@ -48,11 +50,16 @@ export default function DashboardPage() {
   const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState<'editor' | 'preview'>('editor');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
   // Authenticate user & load businesses list on client mount
   useEffect(() => {
-    try {
-      if (typeof window !== 'undefined') {
+    let isMounted = true;
+
+    async function initializeDashboard() {
+      try {
+        if (typeof window === 'undefined') return;
+
         const currentSession = getActiveSession();
         if (!currentSession) {
           router.replace('/login');
@@ -62,34 +69,39 @@ export default function DashboardPage() {
         setSession(currentSession);
         setIsAuthChecking(false);
 
+        // 1. Try to load fresh list of businesses from Supabase
         let loadedBusinesses = DEFAULT_BUSINESSES;
-        const savedList = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
-        if (savedList) {
-          const parsed = JSON.parse(savedList);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            const healed = parsed.map((b) => {
-              if (b.slug === 'nexosoluciones') {
-                return {
-                  ...b,
-                  bannerUrl: b.bannerUrl?.startsWith('/images/') ? mockNexoBusiness.bannerUrl : (b.bannerUrl || mockNexoBusiness.bannerUrl),
-                  logoUrl: b.logoUrl?.startsWith('/images/') ? mockNexoBusiness.logoUrl : (b.logoUrl || mockNexoBusiness.logoUrl),
-                };
-              }
-              return b;
-            });
-            loadedBusinesses = healed;
-            setAllBusinesses(healed);
+        try {
+          const cloudBusinesses = await getAllBusinesses();
+          if (cloudBusinesses && cloudBusinesses.length > 0) {
+            loadedBusinesses = cloudBusinesses;
           }
-        } else {
-          localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(DEFAULT_BUSINESSES));
+        } catch (e) {
+          console.warn('[Dashboard] Fallback to local storage list:', e);
+          const savedList = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
+          if (savedList) {
+            const parsed = JSON.parse(savedList);
+            if (Array.isArray(parsed) && parsed.length > 0) loadedBusinesses = parsed;
+          }
         }
 
-        // ROLE ISOLATION: If CLIENT, restrict strictly to user's assigned business
+        if (!isMounted) return;
+        setAllBusinesses(loadedBusinesses);
+        localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(loadedBusinesses));
+
+        // 2. Select the business according to role
         if (currentSession.role === 'CLIENT') {
-          const clientBiz = loadedBusinesses.find((b) => b.id === currentSession.businessId);
-          if (clientBiz) {
+          let clientBiz: Business | null | undefined = loadedBusinesses.find(
+            (b) => b.id === currentSession.businessId || b.slug === currentSession.businessSlug
+          );
+
+          if (!clientBiz && currentSession.businessSlug) {
+            clientBiz = await getBusinessBySlug(currentSession.businessSlug);
+          }
+
+          if (clientBiz && isMounted) {
             setBusiness(clientBiz);
-            setLastSavedTime('Panel de tu tienda cargado');
+            setLastSavedTime('Sincronizado con Supabase');
             return;
           }
         }
@@ -98,35 +110,28 @@ export default function DashboardPage() {
         const activeId = localStorage.getItem(STORAGE_CURRENT_ACTIVE_ID);
         if (activeId) {
           const match = loadedBusinesses.find((b) => b.id === activeId);
-          if (match) {
+          if (match && isMounted) {
             setBusiness(match);
-            setLastSavedTime('Empresa cargada');
+            setLastSavedTime('Sincronizado con Supabase');
             return;
           }
         }
 
-        // Fallback to active business data
-        const savedActive = localStorage.getItem(STORAGE_KEY);
-        if (savedActive) {
-          const parsedActive = JSON.parse(savedActive);
-          if (parsedActive && parsedActive.id) {
-            if (parsedActive.slug === 'nexosoluciones') {
-              if (!parsedActive.bannerUrl || parsedActive.bannerUrl.startsWith('/images/')) {
-                parsedActive.bannerUrl = mockNexoBusiness.bannerUrl;
-              }
-              if (!parsedActive.logoUrl || parsedActive.logoUrl.startsWith('/images/')) {
-                parsedActive.logoUrl = mockNexoBusiness.logoUrl;
-              }
-            }
-            setBusiness(parsedActive);
-            setLastSavedTime('Sesión restaurada');
-          }
+        if (loadedBusinesses.length > 0 && isMounted) {
+          setBusiness(loadedBusinesses[0]);
+          setLastSavedTime('Sincronizado con Supabase');
         }
+      } catch (e) {
+        console.error('Error loading dashboard:', e);
+        if (isMounted) setIsAuthChecking(false);
       }
-    } catch (e) {
-      console.error('Error loading saved business', e);
-      setIsAuthChecking(false);
     }
+
+    initializeDashboard();
+
+    return () => {
+      isMounted = false;
+    };
   }, [router]);
 
   const handleLogout = () => {
@@ -150,7 +155,7 @@ export default function DashboardPage() {
     } catch {}
   };
 
-  // Automatic instantaneous save on any change
+  // Automatic instantaneous save on any change (Local + Supabase Cloud)
   const handleBusinessChange = (updated: Business) => {
     setBusiness(updated);
     try {
@@ -167,11 +172,17 @@ export default function DashboardPage() {
         setLastSavedTime(`Autoguardado a las ${timeStr}`);
       }
     } catch (e) {
-      console.error('Error auto-saving business', e);
+      console.error('Error auto-saving business locally', e);
     }
+
+    // Background push to Supabase
+    saveBusinessToSupabase(updated).catch((err) => {
+      console.warn('[Dashboard] Supabase background sync notice:', err);
+    });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
+    setIsCloudSyncing(true);
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(business));
@@ -179,13 +190,20 @@ export default function DashboardPage() {
         setAllBusinesses(updatedList);
         localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(updatedList));
       }
+
+      // Persist to Supabase
+      await saveBusinessToSupabase(business);
+
       setSavedSuccess(true);
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setLastSavedTime(`Guardado a las ${timeStr}`);
+      setLastSavedTime(`Guardado en Supabase a las ${timeStr}`);
       setTimeout(() => setSavedSuccess(false), 2000);
     } catch (e) {
-      alert('Error al guardar datos');
+      console.error('Error al guardar en Supabase:', e);
+      setLastSavedTime('Guardado localmente (sin conexión a Supabase)');
+    } finally {
+      setIsCloudSyncing(false);
     }
   };
 

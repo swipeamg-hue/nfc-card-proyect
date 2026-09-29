@@ -16,7 +16,7 @@ import {
   AlertCircle,
   Zap,
 } from 'lucide-react';
-import { login, registerClient, getActiveSession } from '@/lib/auth';
+import { login, loginAsync, registerClient, registerClientAsync, getActiveSession } from '@/lib/auth';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -56,13 +56,13 @@ export default function LoginPage() {
     } catch {}
   }, [router]);
 
-  const handleLoginSubmit = (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setIsLoading(true);
 
-    setTimeout(() => {
-      const res = login(loginEmail, loginPassword);
+    try {
+      const res = await loginAsync(loginEmail, loginPassword);
       setIsLoading(false);
       if (res.success && res.user) {
         if (res.user.role === 'SUPER_ADMIN') {
@@ -73,16 +73,19 @@ export default function LoginPage() {
       } else {
         setErrorMsg(res.error || 'Credenciales inválidas');
       }
-    }, 300);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err.message || 'Error al iniciar sesión');
+    }
   };
 
-  const handleRegisterSubmit = (e: React.FormEvent) => {
+  const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
     setIsLoading(true);
 
-    setTimeout(() => {
-      const res = registerClient({
+    try {
+      const res = await registerClientAsync({
         userName: regName,
         email: regEmail,
         pass: regPassword,
@@ -95,7 +98,10 @@ export default function LoginPage() {
       } else {
         setErrorMsg(res.error || 'Error al crear la cuenta');
       }
-    }, 400);
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err.message || 'Error al crear la cuenta');
+    }
   };
 
   return (
