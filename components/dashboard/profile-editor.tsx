@@ -329,12 +329,12 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
   };
 
   return (
-    <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm p-6">
+    <div className="bg-white dark:bg-zinc-900 rounded-3xl border border-slate-200 dark:border-zinc-800 shadow-sm p-4 sm:p-6">
       {/* Editor Tabs Navigation */}
-      <div className="flex items-center gap-2 border-b border-slate-200 dark:border-zinc-800 pb-4 mb-6 overflow-x-auto no-scrollbar">
+      <div className="flex items-center gap-1.5 sm:gap-2 border-b border-slate-200 dark:border-zinc-800 pb-3 sm:pb-4 mb-5 sm:mb-6 overflow-x-auto no-scrollbar scroll-smooth">
         <button
           onClick={() => setActiveTab('info')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
             activeTab === 'info'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
@@ -346,7 +346,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
         <button
           onClick={() => setActiveTab('links')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
             activeTab === 'links'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
@@ -358,7 +358,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
         <button
           onClick={() => setActiveTab('design')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
             activeTab === 'design'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'
@@ -370,7 +370,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
         <button
           onClick={() => setActiveTab('cards')}
-          className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-semibold transition-all ${
+          className={`flex items-center gap-1.5 sm:gap-2 px-3 sm:px-4 py-2 rounded-xl text-xs font-semibold whitespace-nowrap flex-shrink-0 transition-all ${
             activeTab === 'cards'
               ? 'bg-blue-600 text-white shadow-sm'
               : 'text-slate-600 dark:text-zinc-400 hover:bg-slate-100 dark:hover:bg-zinc-800'

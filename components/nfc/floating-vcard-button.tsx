@@ -9,12 +9,14 @@ interface FloatingVCardButtonProps {
   business: Business;
   onOpenQrModal?: () => void;
   onTrackAction?: (actionName: string) => void;
+  contained?: boolean;
 }
 
 export function FloatingVCardButton({
   business,
   onOpenQrModal,
   onTrackAction,
+  contained = false,
 }: FloatingVCardButtonProps) {
   const [downloaded, setDownloaded] = useState<boolean>(false);
 
@@ -43,7 +45,11 @@ export function FloatingVCardButton({
   };
 
   return (
-    <div className="fixed bottom-4 left-0 right-0 z-40 max-w-md mx-auto px-4 pointer-events-none">
+    <div
+      className={`${
+        contained ? 'absolute bottom-3' : 'fixed bottom-4 sm:bottom-6'
+      } left-0 right-0 z-40 max-w-md mx-auto px-4 pointer-events-none`}
+    >
       <div className="flex items-center gap-2 pointer-events-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-2xl">
         {/* Primary Action: Guardar Contacto */}
         <button

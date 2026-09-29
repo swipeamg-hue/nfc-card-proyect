@@ -23,6 +23,7 @@ const STORAGE_KEY = 'tapcard_business_data_nexo';
 export default function DashboardPage() {
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
+  const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState<'editor' | 'preview'>('editor');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
 
@@ -89,29 +90,30 @@ export default function DashboardPage() {
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100">
       {/* Top Navbar */}
-      <header className="sticky top-0 z-40 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20">
-              <Smartphone className="w-5 h-5" />
+      <header className="sticky top-0 z-40 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md border-b border-slate-200 dark:border-zinc-800">
+        <div className="max-w-7xl mx-auto px-3 sm:px-6 py-2.5 sm:py-0 sm:h-16 flex flex-wrap items-center justify-between gap-2">
+          {/* Logo & Brand */}
+          <div className="flex items-center gap-2.5">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-br from-blue-600 to-cyan-500 flex items-center justify-center text-white font-bold shadow-md shadow-blue-500/20 flex-shrink-0">
+              <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-2">
-                <span className="font-bold text-base tracking-tight">TapCard</span>
-                <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
+              <div className="flex items-center gap-1.5">
+                <span className="font-bold text-sm sm:text-base tracking-tight">TapCard</span>
+                <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
                   PyME SaaS
                 </span>
               </div>
-              <p className="text-xs text-slate-500 dark:text-zinc-400">
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate max-w-[130px] sm:max-w-none">
                 Panel de {business.name}
               </p>
             </div>
           </div>
 
           {/* Top Actions */}
-          <div className="flex items-center gap-3">
-            {/* View Switcher */}
-            <div className="flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
+          <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
+            {/* View Switcher (Desktop) */}
+            <div className="hidden md:flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
               <button
                 onClick={() => setActiveMainTab('editor')}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
@@ -145,7 +147,7 @@ export default function DashboardPage() {
             </button>
 
             {lastSavedTime && (
-              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80">
+              <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                 <span>{lastSavedTime}</span>
               </div>
@@ -153,17 +155,18 @@ export default function DashboardPage() {
 
             <button
               onClick={handleSave}
-              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
+              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
             >
               {savedSuccess ? (
                 <>
                   <Check className="w-4 h-4 stroke-[3]" />
-                  <span>¡Cambios Guardados!</span>
+                  <span>¡Guardado!</span>
                 </>
               ) : (
                 <>
                   <Sparkles className="w-4 h-4" />
-                  <span>Guardar Cambios</span>
+                  <span className="hidden xs:inline">Guardar Cambios</span>
+                  <span className="xs:hidden">Guardar</span>
                 </>
               )}
             </button>
@@ -171,46 +174,111 @@ export default function DashboardPage() {
             <Link
               href={`/${business.slug}`}
               target="_blank"
-              className="hidden sm:flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-300 dark:border-zinc-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all"
+              className="flex items-center gap-1 sm:gap-1.5 px-2.5 sm:px-3 py-2 rounded-xl border border-slate-300 dark:border-zinc-700 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-zinc-800 transition-all text-slate-700 dark:text-zinc-300"
             >
-              <span>Ver Perfil Público</span>
+              <span className="hidden sm:inline">Ver Perfil Público</span>
+              <span className="sm:hidden">Ver Perfil</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
+          </div>
+
+          {/* View Switcher (Mobile Row) */}
+          <div className="flex md:hidden w-full bg-slate-100 dark:bg-zinc-800/80 p-1 rounded-xl mt-1">
+            <button
+              onClick={() => setActiveMainTab('editor')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMainTab === 'editor'
+                  ? 'bg-white dark:bg-zinc-900 text-blue-600 shadow-sm'
+                  : 'text-slate-600 dark:text-zinc-400'
+              }`}
+            >
+              <SlidersHorizontal className="w-3.5 h-3.5" />
+              <span>Editor & Vista</span>
+            </button>
+            <button
+              onClick={() => setActiveMainTab('analytics')}
+              className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                activeMainTab === 'analytics'
+                  ? 'bg-white dark:bg-zinc-900 text-blue-600 shadow-sm'
+                  : 'text-slate-600 dark:text-zinc-400'
+              }`}
+            >
+              <BarChart3 className="w-3.5 h-3.5" />
+              <span>Métricas & QR</span>
+            </button>
           </div>
         </div>
       </header>
 
       {/* Main Content Area */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 py-8">
+      <main className="max-w-7xl mx-auto px-3 sm:px-6 py-6 sm:py-8">
         {activeMainTab === 'editor' ? (
-          /* Split Screen: Editor on Left, Live Phone Mockup on Right */
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-            {/* Left Column: Management Form & Tabs */}
-            <div className="lg:col-span-7 space-y-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Personalización en Tiempo Real
-                  </h2>
-                  <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    Modifica los datos, enlaces o diseño. Cada cambio se guarda automáticamente y se refleja instantáneamente en el simulador móvil.
-                  </p>
-                </div>
-              </div>
-
-              <ProfileEditor business={business} onChange={handleBusinessChange} />
+          <div>
+            {/* Mobile/Tablet Segmented Toggle: Editor vs Simulador */}
+            <div className="flex lg:hidden bg-slate-200/90 dark:bg-zinc-800 p-1 rounded-2xl mb-6 max-w-sm mx-auto shadow-xs">
+              <button
+                type="button"
+                onClick={() => setMobileWorkspaceTab('editor')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                  mobileWorkspaceTab === 'editor'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900'
+                }`}
+              >
+                <SlidersHorizontal className="w-3.5 h-3.5" />
+                <span>Editor de Datos</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setMobileWorkspaceTab('preview')}
+                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-xl text-xs font-bold transition-all ${
+                  mobileWorkspaceTab === 'preview'
+                    ? 'bg-blue-600 text-white shadow-md'
+                    : 'text-slate-600 dark:text-zinc-400 hover:text-slate-900'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Simulador Móvil</span>
+              </button>
             </div>
 
-            {/* Right Column: Live Phone Simulator */}
-            <div className="lg:col-span-5 flex justify-center">
-              <PhoneMockup business={business} />
+            {/* Split Screen on Desktop (lg), Tabbed on Mobile/Tablet */}
+            <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              {/* Left Column: Management Form & Tabs */}
+              <div
+                className={`lg:col-span-7 space-y-4 ${
+                  mobileWorkspaceTab === 'editor' ? 'block' : 'hidden lg:block'
+                }`}
+              >
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+                      Personalización en Tiempo Real
+                    </h2>
+                    <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
+                      Modifica los datos, enlaces o diseño. Cada cambio se guarda automáticamente y se refleja instantáneamente en el simulador móvil.
+                    </p>
+                  </div>
+                </div>
+
+                <ProfileEditor business={business} onChange={handleBusinessChange} />
+              </div>
+
+              {/* Right Column: Live Phone Simulator */}
+              <div
+                className={`lg:col-span-5 flex justify-center ${
+                  mobileWorkspaceTab === 'preview' ? 'block' : 'hidden lg:flex'
+                }`}
+              >
+                <PhoneMockup business={business} />
+              </div>
             </div>
           </div>
         ) : (
           /* Analytics & QR Code Generator View */
           <div className="space-y-6">
             <div>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+              <h2 className="text-lg sm:text-xl font-bold tracking-tight text-slate-900 dark:text-white">
                 Analíticas de Rendimiento & Códigos Físicos
               </h2>
               <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">

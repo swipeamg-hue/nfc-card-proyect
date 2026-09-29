@@ -14,12 +14,14 @@ interface PublicProfileProps {
   business: Business;
   source?: 'NFC' | 'QR' | 'DIRECT';
   cardCode?: string;
+  isMockup?: boolean;
 }
 
 export function PublicProfile({
   business: initialBusiness,
   source = 'DIRECT',
   cardCode,
+  isMockup = false,
 }: PublicProfileProps) {
   const [business, setBusiness] = useState<Business>(initialBusiness);
   const [isQrOpen, setIsQrOpen] = useState(false);
@@ -136,7 +138,7 @@ export function PublicProfile({
         </div>
 
         {/* Footer & NFC Branding */}
-        <div className="px-4 pt-6 pb-24 text-center">
+        <div className="px-4 pt-6 pb-32 text-center">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400 dark:text-zinc-500">
             <Smartphone className="w-3.5 h-3.5" />
             <span>Perfil interactivo compatible con NFC & QR</span>
@@ -149,6 +151,7 @@ export function PublicProfile({
         {/* Floating VCard & Share Bar */}
         <FloatingVCardButton
           business={business}
+          contained={isMockup}
           onOpenQrModal={() => setIsQrOpen(true)}
           onTrackAction={(act) => handleTrackClick(act, act)}
         />

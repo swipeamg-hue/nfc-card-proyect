@@ -20,60 +20,60 @@ export default function HomePage() {
 
       {/* Navigation */}
       <header className="relative z-10 border-b border-slate-800/80 backdrop-blur-md">
-        <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20">
-              <Smartphone className="w-5 h-5" />
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3">
+            <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr from-blue-600 to-cyan-500 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-500/20 flex-shrink-0">
+              <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <span className="font-bold text-lg tracking-tight">TapCard</span>
-              <span className="text-xs text-blue-400 font-semibold block -mt-1">
+              <span className="font-bold text-base sm:text-lg tracking-tight">TapCard</span>
+              <span className="text-[10px] sm:text-xs text-blue-400 font-semibold block -mt-1">
                 SaaS NFC & QR Corporativo
               </span>
             </div>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
             <Link
               href="/dashboard"
-              className="text-xs font-semibold px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
+              className="text-xs font-semibold px-3 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
             >
               Panel PyME
             </Link>
             <Link
               href="/nexosoluciones"
-              className="text-xs font-semibold px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95"
+              className="text-xs font-semibold px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95"
             >
-              Demo Móvil Nexo
+              Demo Móvil
             </Link>
           </div>
         </div>
       </header>
 
       {/* Hero Section */}
-      <main className="relative z-10 max-w-5xl mx-auto px-6 py-16 sm:py-24 text-center">
-        <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/80 border border-blue-800/60 text-xs font-semibold text-blue-300 mb-6">
-          <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400" />
-          <span>Micro-Landing Móvil Optimizada para Carga en &lt;400ms</span>
+      <main className="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 py-12 sm:py-20 text-center">
+        <div className="inline-flex items-center gap-2 px-3 py-1 sm:px-3.5 sm:py-1.5 rounded-full bg-blue-950/80 border border-blue-800/60 text-[11px] sm:text-xs font-semibold text-blue-300 mb-6 max-w-full truncate">
+          <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 flex-shrink-0" />
+          <span className="truncate">Micro-Landing Móvil Optimizada para Carga en &lt;400ms</span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
+        <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
           Tarjetas y Perfiles Digitales{' '}
           <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">
             NFC para Negocios
           </span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
+        <p className="mt-4 sm:mt-6 text-sm sm:text-lg text-slate-400 max-w-2xl mx-auto leading-relaxed">
           Convierte cada toque de tarjeta física o escaneo QR en clientes potenciales.
           Panel de administración en tiempo real con simulador móvil e integración instantánea con vCard.
         </p>
 
         {/* CTA Buttons */}
-        <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
           <Link
             href="/nexosoluciones"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 group"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 group text-center"
           >
             <span>Ver Micro-Landing (Nexo Soluciones)</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -81,7 +81,7 @@ export default function HomePage() {
 
           <Link
             href="/t/NX-8821"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95 text-center"
           >
             <Smartphone className="w-4 h-4 text-emerald-400" />
             <span>Simular Toque NFC (NX-8821)</span>
@@ -89,10 +89,10 @@ export default function HomePage() {
 
           <Link
             href="/dashboard"
-            className="flex items-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95 text-center"
           >
             <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
-            <span>Abrir Dashboard Split-Screen</span>
+            <span>Abrir Dashboard PyME</span>
           </Link>
         </div>
 
