@@ -8,6 +8,8 @@ export type LinkType =
   | 'catalog'
   | 'email'
   | 'maps'
+  | 'menu'
+  | 'booking'
   | 'custom';
 
 export interface BusinessLink {
@@ -21,6 +23,7 @@ export interface BusinessLink {
   order: number;
   isActive: boolean;
   highlighted?: boolean;
+  customColor?: string;
 }
 
 export interface NfcCard {

@@ -22,7 +22,41 @@ import {
   Sparkles,
   Smartphone,
   ExternalLink,
+  Utensils,
+  Calendar,
+  Coffee,
+  Scissors,
+  ShoppingBag,
+  FileText,
+  Star,
+  Clock,
+  Globe,
+  Tag,
 } from 'lucide-react';
+
+const AVAILABLE_ICONS = [
+  { id: 'utensils', label: 'Menú / Restaurante', icon: Utensils },
+  { id: 'calendar', label: 'Reservar Cita', icon: Calendar },
+  { id: 'sparkles', label: 'Uñas / Belleza', icon: Sparkles },
+  { id: 'scissors', label: 'Peluquería / Barba', icon: Scissors },
+  { id: 'coffee', label: 'Café / Bebidas', icon: Coffee },
+  { id: 'shopping-bag', label: 'Catálogo / Tienda', icon: ShoppingBag },
+  { id: 'file-text', label: 'Menú PDF', icon: FileText },
+  { id: 'clock', label: 'Horarios', icon: Clock },
+  { id: 'credit-card', label: 'Pagos', icon: CreditCard },
+  { id: 'star', label: 'Destacado / Reseña', icon: Star },
+  { id: 'globe', label: 'Sitio Web', icon: Globe },
+];
+
+const COLOR_OPTIONS = [
+  { id: 'amber', label: 'Naranja / Ámbar (Menú)', bg: 'bg-amber-500' },
+  { id: 'purple', label: 'Púrpura (Citas)', bg: 'bg-purple-600' },
+  { id: 'pink', label: 'Rosa (Uñas / Belleza)', bg: 'bg-pink-500' },
+  { id: 'emerald', label: 'Verde Esmeralda', bg: 'bg-emerald-500' },
+  { id: 'blue', label: 'Azul', bg: 'bg-blue-600' },
+  { id: 'rose', label: 'Rojo / Rose', bg: 'bg-rose-500' },
+  { id: 'dark', label: 'Grafito', bg: 'bg-zinc-800' },
+];
 
 interface ProfileEditorProps {
   business: Business;
@@ -85,6 +119,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     let subtitle = 'Descripción breve';
     let url = 'https://';
     let iconName = 'globe';
+    let customColor: string | undefined = undefined;
 
     if (type === 'whatsapp') {
       title = 'WhatsApp';
@@ -116,6 +151,24 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       subtitle = 'Descarga nuestro brochure en PDF';
       url = 'https://ejemplo.com/catalogo.pdf';
       iconName = 'catalog';
+    } else if (type === 'menu') {
+      title = 'Menú del Restaurante';
+      subtitle = 'Consulta nuestros platillos y bebidas';
+      url = 'https://ejemplo.com/menu-digital';
+      iconName = 'utensils';
+      customColor = 'amber';
+    } else if (type === 'booking') {
+      title = 'Reservar Cita';
+      subtitle = 'Agenda tu horario o servicio en línea';
+      url = 'https://citas.com/reservar';
+      iconName = 'calendar';
+      customColor = 'purple';
+    } else if (type === 'custom') {
+      title = 'Botón Personalizado';
+      subtitle = 'Escribe un subtítulo o llamado a la acción';
+      url = 'https://';
+      iconName = 'sparkles';
+      customColor = 'pink';
     }
 
     const newLink: BusinessLink = {
@@ -126,8 +179,10 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       subtitle,
       url,
       iconName,
+      customColor,
       order: business.links.length + 1,
       isActive: true,
+      highlighted: false,
     };
 
     updateField('links', [...business.links, newLink]);
@@ -359,35 +414,70 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
       {/* TAB 2: Links Manager */}
       {activeTab === 'links' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-600 dark:text-zinc-400">
-              Agregar botón rápido:
-            </span>
-            <div className="flex flex-wrap gap-1.5">
+        <div className="space-y-5 animate-in fade-in duration-150">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800 space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
+                Agregar botón rápido:
+              </span>
+              <span className="text-[11px] text-slate-500">
+                Elige un acceso directo o crea uno a tu medida
+              </span>
+            </div>
+            <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <button
+                type="button"
                 onClick={() => addLink('whatsapp')}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors"
               >
                 + WhatsApp
               </button>
               <button
+                type="button"
                 onClick={() => addLink('phone')}
-                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 hover:bg-blue-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors"
               >
                 + Teléfono
               </button>
               <button
+                type="button"
                 onClick={() => addLink('instagram')}
-                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 hover:bg-pink-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors"
               >
                 + Instagram
               </button>
               <button
+                type="button"
                 onClick={() => addLink('website')}
-                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 hover:bg-sky-500/20 text-xs font-semibold transition-colors"
+                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors"
               >
                 + Sitio Web
+              </button>
+              <button
+                type="button"
+                onClick={() => addLink('menu')}
+                title="Ideal para restaurantes, cafeterías o bares"
+                className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
+              >
+                <Utensils className="w-3.5 h-3.5" />
+                <span>+ Menú / Carta</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => addLink('booking')}
+                title="Ideal para salones de uñas, estética o consultorios"
+                className="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-700 dark:text-purple-400 hover:bg-purple-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
+              >
+                <Calendar className="w-3.5 h-3.5" />
+                <span>+ Reservar Cita</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => addLink('custom')}
+                className="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>+ Personalizado</span>
               </button>
             </div>
           </div>
@@ -397,11 +487,16 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
             {business.links.map((link, idx) => (
               <div
                 key={link.id}
-                className="p-3.5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50 space-y-2.5 transition-all"
+                className={`p-4 rounded-2xl border transition-all space-y-3 ${
+                  link.highlighted
+                    ? 'border-amber-400/70 dark:border-amber-500/50 bg-amber-500/5 dark:bg-amber-950/15 shadow-sm'
+                    : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50'
+                }`}
               >
                 <div className="flex items-center justify-between gap-2">
                   <div className="flex items-center gap-2 flex-1">
                     <button
+                      type="button"
                       onClick={() => toggleLinkActive(link.id)}
                       title={link.isActive ? 'Desactivar botón' : 'Activar botón'}
                       className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
@@ -415,10 +510,26 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
                       #{idx + 1} {link.type}
                     </span>
+
+                    {/* Star highlight badge toggle */}
+                    <button
+                      type="button"
+                      onClick={() => updateLink(link.id, { highlighted: !link.highlighted })}
+                      title={link.highlighted ? 'Quitar destacado' : 'Destacar botón en el perfil'}
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                        link.highlighted
+                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300/60'
+                          : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 dark:hover:bg-zinc-700'
+                      }`}
+                    >
+                      <Star className={`w-3 h-3 ${link.highlighted ? 'fill-amber-400 text-amber-500' : ''}`} />
+                      <span>{link.highlighted ? 'Destacado' : 'Destacar'}</span>
+                    </button>
                   </div>
 
                   <div className="flex items-center gap-1">
                     <button
+                      type="button"
                       onClick={() => moveLink(idx, 'up')}
                       disabled={idx === 0}
                       className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
@@ -426,6 +537,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                       <ArrowUp className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => moveLink(idx, 'down')}
                       disabled={idx === business.links.length - 1}
                       className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
@@ -433,6 +545,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                       <ArrowDown className="w-3.5 h-3.5" />
                     </button>
                     <button
+                      type="button"
                       onClick={() => deleteLink(link.id)}
                       className="p-1 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
                     >
@@ -441,35 +554,113 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                   <div>
+                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                      Título en el botón:
+                    </label>
                     <input
                       type="text"
                       value={link.title}
                       onChange={(e) => updateLink(link.id, { title: e.target.value })}
-                      placeholder="Título del botón"
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-semibold"
+                      placeholder="Ej: Ver Menú Digital o Reservar Cita"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-semibold bg-white dark:bg-zinc-900"
                     />
                   </div>
                   <div>
+                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                      Subtítulo o descripción:
+                    </label>
                     <input
                       type="text"
                       value={link.subtitle || ''}
                       onChange={(e) => updateLink(link.id, { subtitle: e.target.value })}
-                      placeholder="Subtítulo descriptivo"
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs"
+                      placeholder="Ej: Platillos del día / Horarios disponibles"
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
                     />
                   </div>
                 </div>
 
                 <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                    Enlace de destino (URL):
+                  </label>
                   <input
                     type="text"
                     value={link.url}
                     onChange={(e) => updateLink(link.id, { url: e.target.value })}
-                    placeholder="URL de destino"
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono"
+                    placeholder="https://..."
+                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
                   />
+                </div>
+
+                {/* Visual Icon & Color Customization */}
+                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-700/80 space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Ícono del botón:
+                    </span>
+                    <span className="text-[10px] text-slate-400 font-mono">
+                      Seleccionado: {link.iconName || 'predeterminado'}
+                    </span>
+                  </div>
+
+                  {/* Icon chips */}
+                  <div className="flex flex-wrap gap-1.5 max-h-24 overflow-y-auto no-scrollbar py-0.5">
+                    {AVAILABLE_ICONS.map((item) => {
+                      const IconComp = item.icon;
+                      const isSelected = link.iconName === item.id;
+                      return (
+                        <button
+                          key={item.id}
+                          type="button"
+                          onClick={() => updateLink(link.id, { iconName: item.id })}
+                          className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
+                            isSelected
+                              ? 'bg-blue-600 text-white shadow-xs font-semibold'
+                              : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
+                          }`}
+                        >
+                          <IconComp className="w-3.5 h-3.5" />
+                          <span>{item.label}</span>
+                        </button>
+                      );
+                    })}
+                  </div>
+
+                  {/* Color Swatches */}
+                  <div className="flex items-center gap-2 pt-1.5">
+                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                      Color / Estilo:
+                    </span>
+                    <div className="flex items-center gap-1.5 flex-wrap">
+                      {COLOR_OPTIONS.map((col) => {
+                        const isSelected = link.customColor === col.id;
+                        return (
+                          <button
+                            key={col.id}
+                            type="button"
+                            title={col.label}
+                            onClick={() => updateLink(link.id, { customColor: col.id })}
+                            className={`w-5 h-5 rounded-full ${col.bg} transition-all ${
+                              isSelected
+                                ? 'ring-2 ring-offset-2 ring-blue-600 dark:ring-white scale-110'
+                                : 'opacity-75 hover:opacity-100'
+                            }`}
+                          />
+                        );
+                      })}
+                      {link.customColor && (
+                        <button
+                          type="button"
+                          onClick={() => updateLink(link.id, { customColor: undefined })}
+                          className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-1"
+                        >
+                          Automático
+                        </button>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </div>
             ))}
