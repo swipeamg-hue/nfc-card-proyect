@@ -17,21 +17,40 @@ interface PublicProfileProps {
 }
 
 export function PublicProfile({
-  business,
+  business: initialBusiness,
   source = 'DIRECT',
   cardCode,
 }: PublicProfileProps) {
+  const [business, setBusiness] = useState<Business>(initialBusiness);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
-  // Show small welcome badge when coming from NFC chip
+  // Sync with saved dashboard data from localStorage if available
   useEffect(() => {
-    if (source === 'NFC') {
-      showToast(`¡Leído vía Chip NFC${cardCode ? ` (${cardCode})` : ''}!`);
-    } else if (source === 'QR') {
-      showToast('¡Escaneado vía Código QR!');
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem('tapcard_business_data_nexo');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.slug === initialBusiness.slug) {
+            setBusiness(parsed);
+          }
+        }
+
+        // Also check URL parameters dynamically on client mount
+        const search = new URLSearchParams(window.location.search);
+        const srcParam = search.get('src') || source;
+        const codeParam = search.get('code') || cardCode;
+        if (srcParam === 'nfc' || srcParam === 'NFC') {
+          showToast(`¡Leído vía Chip NFC${codeParam ? ` (${codeParam})` : ''}!`);
+        } else if (srcParam === 'qr' || srcParam === 'QR') {
+          showToast('¡Escaneado vía Código QR!');
+        }
+      }
+    } catch {
+      // Ignore
     }
-  }, [source, cardCode]);
+  }, [initialBusiness.slug, source, cardCode]);
 
   const showToast = (msg: string) => {
     setToastMessage(msg);

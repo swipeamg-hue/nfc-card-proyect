@@ -12,16 +12,42 @@ interface NfcRedirectClientProps {
 
 export function NfcRedirectClient({ cardCode, targetSlug }: NfcRedirectClientProps) {
   const router = useRouter();
+  const [resolvedSlug, setResolvedSlug] = React.useState<string | null>(targetSlug);
+  const [isChecking, setIsChecking] = React.useState<boolean>(!targetSlug);
 
   useEffect(() => {
-    if (targetSlug && typeof window !== 'undefined') {
+    let slug = targetSlug;
+
+    // If card was not in static mock data, check user's saved cards in localStorage
+    if (!slug && typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem('tapcard_business_data_nexo');
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          const userCards = parsed.cards || [];
+          const found = userCards.find((c: { cardCode: string; status: string }) => 
+            c.cardCode.toUpperCase() === cardCode.toUpperCase() && c.status === 'ACTIVE'
+          );
+          if (found) {
+            slug = parsed.slug;
+          }
+        }
+      } catch {
+        // Ignore
+      }
+    }
+
+    setResolvedSlug(slug);
+    setIsChecking(false);
+
+    if (slug && typeof window !== 'undefined') {
       const search = new URLSearchParams(window.location.search);
       const sourceParam = search.get('type') === 'qr' ? 'qr' : 'nfc';
-      router.replace(`/${targetSlug}?src=${sourceParam}&code=${encodeURIComponent(cardCode)}`);
+      router.replace(`/${slug}?src=${sourceParam}&code=${encodeURIComponent(cardCode)}`);
     }
   }, [targetSlug, cardCode, router]);
 
-  if (targetSlug) {
+  if (resolvedSlug || isChecking) {
     return (
       <div className="min-h-screen bg-slate-900 text-white flex flex-col items-center justify-center p-4">
         <Loader2 className="w-10 h-10 text-blue-500 animate-spin mb-4" />

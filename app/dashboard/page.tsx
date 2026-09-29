@@ -18,19 +18,71 @@ import {
   Layers,
 } from 'lucide-react';
 
+const STORAGE_KEY = 'tapcard_business_data_nexo';
+
 export default function DashboardPage() {
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
+
+  // Load saved modifications from localStorage on client mount
+  React.useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          const parsed = JSON.parse(saved);
+          if (parsed && parsed.id) {
+            setBusiness(parsed);
+            setLastSavedTime('Sesión restaurada');
+          }
+        }
+      }
+    } catch (e) {
+      console.error('Error loading saved business', e);
+    }
+  }, []);
+
+  // Automatic instantaneous save on any change
+  const handleBusinessChange = (updated: Business) => {
+    setBusiness(updated);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+        const now = new Date();
+        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+        setLastSavedTime(`Autoguardado a las ${timeStr}`);
+      }
+    } catch (e) {
+      console.error('Error auto-saving business', e);
+    }
+  };
 
   const handleSave = () => {
-    setSavedSuccess(true);
-    setTimeout(() => setSavedSuccess(false), 2000);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(business));
+      }
+      setSavedSuccess(true);
+      const now = new Date();
+      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+      setLastSavedTime(`Guardado a las ${timeStr}`);
+      setTimeout(() => setSavedSuccess(false), 2000);
+    } catch (e) {
+      alert('Error al guardar datos');
+    }
   };
 
   const handleReset = () => {
-    if (confirm('¿Deseas restaurar la información predeterminada de Nexo Soluciones?')) {
+    if (confirm('¿Deseas restaurar la información predeterminada y borrar los cambios guardados?')) {
+      try {
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem(STORAGE_KEY);
+        }
+      } catch {}
       setBusiness(mockNexoBusiness);
+      setLastSavedTime('Restaurado a demo inicial');
     }
   };
 
@@ -92,6 +144,13 @@ export default function DashboardPage() {
               <RotateCcw className="w-4 h-4" />
             </button>
 
+            {lastSavedTime && (
+              <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span>{lastSavedTime}</span>
+              </div>
+            )}
+
             <button
               onClick={handleSave}
               className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
@@ -134,12 +193,12 @@ export default function DashboardPage() {
                     Personalización en Tiempo Real
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-zinc-400 mt-0.5">
-                    Modifica los datos, enlaces o diseño. Cada cambio se refleja instantáneamente en el simulador móvil de la derecha.
+                    Modifica los datos, enlaces o diseño. Cada cambio se guarda automáticamente y se refleja instantáneamente en el simulador móvil.
                   </p>
                 </div>
               </div>
 
-              <ProfileEditor business={business} onChange={setBusiness} />
+              <ProfileEditor business={business} onChange={handleBusinessChange} />
             </div>
 
             {/* Right Column: Live Phone Simulator */}
