@@ -4,6 +4,7 @@ import React, { useEffect, useState, useRef } from 'react';
 import QRCode from 'qrcode';
 import { X, Download, Copy, Check, Share2 } from 'lucide-react';
 import { Business } from '@/types/business';
+import { getAppBaseUrl } from '@/lib/supabase';
 
 interface QrModalProps {
   business: Business;
@@ -17,7 +18,7 @@ export function QrModal({ business, isOpen, onClose }: QrModalProps) {
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const profileUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/${business.slug}`
+    ? `${getAppBaseUrl()}/${business.slug}`
     : `https://tapcard.link/${business.slug}`;
 
   useEffect(() => {

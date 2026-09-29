@@ -38,7 +38,7 @@ import {
   mockSalonBusiness,
 } from '@/lib/mock-data';
 
-import { getAllBusinesses, saveBusinessToSupabase, supabase } from '@/lib/supabase';
+import { getAllBusinesses, saveBusinessToSupabase, supabase, getAppBaseUrl } from '@/lib/supabase';
 
 const STORAGE_BUSINESSES_LIST_KEY = 'tapcard_saas_all_businesses';
 const STORAGE_CURRENT_ACTIVE_ID = 'tapcard_active_business_id';
@@ -303,7 +303,7 @@ export default function SuperAdminPage() {
 
   // Copy URL helper
   const handleCopyUrl = (slug: string) => {
-    const fullUrl = `${window.location.origin}/${slug}`;
+    const fullUrl = `${getAppBaseUrl()}/${slug}`;
     navigator.clipboard.writeText(fullUrl);
     setCopiedSlug(slug);
     setTimeout(() => setCopiedSlug(null), 2000);

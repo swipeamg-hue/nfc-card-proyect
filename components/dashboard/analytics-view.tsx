@@ -15,6 +15,7 @@ import {
   Check,
 } from 'lucide-react';
 import { Business } from '@/types/business';
+import { getAppBaseUrl } from '@/lib/supabase';
 
 interface AnalyticsViewProps {
   business: Business;
@@ -25,7 +26,7 @@ export function AnalyticsView({ business }: AnalyticsViewProps) {
   const [copied, setCopied] = useState<boolean>(false);
 
   const profileUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/${business.slug}`
+    ? `${getAppBaseUrl()}/${business.slug}`
     : `https://tapcard.mx/${business.slug}`;
 
   useEffect(() => {

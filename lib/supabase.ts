@@ -11,6 +11,18 @@ export const SUPABASE_ANON_KEY =
 
 export const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+/**
+ * Resolves the full base URL dynamically supporting GitHub Pages subpath (/nfc-card-proyect), custom domains, and local development.
+ */
+export function getAppBaseUrl(): string {
+  if (typeof window === 'undefined') return '';
+  const pathname = window.location.pathname;
+  if (pathname.includes('/nfc-card-proyect')) {
+    return `${window.location.origin}/nfc-card-proyect`;
+  }
+  return window.location.origin;
+}
+
 // Helper mappers between Supabase snake_case and TypeScript camelCase
 export function mapDbToBusiness(row: any, links: BusinessLink[] = [], cards: NfcCard[] = []): Business {
   return {

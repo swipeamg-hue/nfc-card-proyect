@@ -21,7 +21,7 @@ import {
   Phone,
 } from 'lucide-react';
 import { login, loginAsync, registerClient, registerClientAsync, getActiveSession, setActiveSession } from '@/lib/auth';
-import { supabase, SUPABASE_URL } from '@/lib/supabase';
+import { supabase, SUPABASE_URL, getAppBaseUrl } from '@/lib/supabase';
 import { AuthUser } from '@/types/auth';
 
 function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
@@ -166,11 +166,12 @@ export default function LoginPage() {
     setIsGoogleLoading(true);
 
     try {
-      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const baseUrl = getAppBaseUrl();
+      const redirectUrl = `${baseUrl}/login/`;
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${origin}/login`,
+          redirectTo: redirectUrl,
         },
       });
 
