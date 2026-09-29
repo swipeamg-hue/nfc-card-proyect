@@ -15,14 +15,54 @@ import {
   Check,
   AlertCircle,
   Zap,
+  Info,
+  ExternalLink,
+  X,
+  Phone,
 } from 'lucide-react';
-import { login, loginAsync, registerClient, registerClientAsync, getActiveSession } from '@/lib/auth';
+import { login, loginAsync, registerClient, registerClientAsync, getActiveSession, setActiveSession } from '@/lib/auth';
+import { supabase, SUPABASE_URL } from '@/lib/supabase';
+import { AuthUser } from '@/types/auth';
+
+function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24">
+      <path
+        fill="#4285F4"
+        d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.66-5.17 3.66-9.17z"
+      />
+      <path
+        fill="#34A853"
+        d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.1-6.72-4.93H1.25v3.15C3.26 21.36 7.33 24 12 24z"
+      />
+      <path
+        fill="#FBBC05"
+        d="M5.28 14.27c-.25-.72-.38-1.49-.38-2.27s.13-1.55.38-2.27V6.58H1.25C.45 8.18 0 9.99 0 12s.45 3.82 1.25 5.42l4.03-3.15z"
+      />
+      <path
+        fill="#EA4335"
+        d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.33 0 3.26 2.64 1.25 6.58l4.03 3.15c.95-2.83 3.6-4.98 6.72-4.98z"
+      />
+    </svg>
+  );
+}
 
 export default function LoginPage() {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = useState(false);
+
+  // Google OAuth Guide Modal
+  const [showGoogleGuideModal, setShowGoogleGuideModal] = useState(false);
+
+  // First-time Google Onboarding state
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(false);
+  const [googleUserData, setGoogleUserData] = useState<{ email: string; name: string } | null>(null);
+  const [onboardBusinessName, setOnboardBusinessName] = useState('');
+  const [onboardCategory, setOnboardCategory] = useState('');
+  const [onboardPhone, setOnboardPhone] = useState('');
 
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
@@ -35,7 +75,7 @@ export default function LoginPage() {
   const [regBusinessName, setRegBusinessName] = useState('');
   const [regCategory, setRegCategory] = useState('');
 
-  // Check session and URL query parameter on mount
+  // Check active session and Google OAuth callback on mount
   useEffect(() => {
     const session = getActiveSession();
     if (session) {
@@ -54,7 +94,120 @@ export default function LoginPage() {
         setActiveTab('register');
       }
     } catch {}
+
+    // Check if user just returned from Supabase Google OAuth
+    async function checkGoogleAuth() {
+      try {
+        const { data: { session: supaSession } } = await supabase.auth.getSession();
+        if (supaSession?.user) {
+          const email = supaSession.user.email?.toLowerCase().trim();
+          const fullName =
+            supaSession.user.user_metadata?.full_name ||
+            supaSession.user.user_metadata?.name ||
+            '';
+
+          if (!email) return;
+
+          // Check if this user is already registered with a business in app_users
+          const { data: dbUser } = await supabase
+            .from('app_users')
+            .select('*')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (dbUser && dbUser.business_id) {
+            // Existing user: Log them directly into their business dashboard
+            const safeUser: AuthUser = {
+              id: dbUser.id,
+              email: dbUser.email,
+              name: dbUser.name,
+              role: dbUser.role,
+              businessId: dbUser.business_id,
+              businessSlug: dbUser.business_slug,
+              createdAt: dbUser.created_at,
+            };
+            setActiveSession(safeUser);
+            router.push(safeUser.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
+            return;
+          }
+
+          // First time user via Google! Prompt onboarding to gather business info
+          setGoogleUserData({
+            email,
+            name: fullName || email.split('@')[0],
+          });
+          setIsOnboardingOpen(true);
+        }
+      } catch (err) {
+        console.warn('OAuth session check notice:', err);
+      }
+    }
+
+    checkGoogleAuth();
   }, [router]);
+
+  // Handle Google OAuth trigger
+  const handleGoogleSignIn = async () => {
+    setErrorMsg(null);
+    setIsGoogleLoading(true);
+
+    try {
+      const origin = typeof window !== 'undefined' ? window.location.origin : '';
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo: `${origin}/login`,
+        },
+      });
+
+      if (error) {
+        setIsGoogleLoading(false);
+        // If Google provider hasn't been configured in Supabase yet, show helpful guide modal
+        if (
+          error.message.toLowerCase().includes('not enabled') ||
+          error.message.toLowerCase().includes('unsupported provider') ||
+          error.message.toLowerCase().includes('provider is not')
+        ) {
+          setShowGoogleGuideModal(true);
+        } else {
+          setErrorMsg(`Error de conexión con Google: ${error.message}`);
+        }
+      }
+    } catch (err: any) {
+      setIsGoogleLoading(false);
+      setErrorMsg(err.message || 'Error al conectar con Google');
+    }
+  };
+
+  // Complete Google Registration with Business Onboarding
+  const handleCompleteGoogleOnboarding = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!googleUserData || !onboardBusinessName.trim()) return;
+
+    setIsLoading(true);
+    setErrorMsg(null);
+
+    try {
+      const res = await registerClientAsync({
+        userName: googleUserData.name,
+        email: googleUserData.email,
+        pass: 'google-oauth-' + Date.now(),
+        businessName: onboardBusinessName.trim(),
+        category: onboardCategory.trim() || 'Servicios Generales',
+      });
+
+      if (res.success && res.user) {
+        setIsOnboardingOpen(false);
+        router.push('/dashboard');
+      } else {
+        setErrorMsg(res.error || 'Error al guardar los datos del negocio');
+        setIsLoading(false);
+      }
+    } catch (err: any) {
+      setIsLoading(false);
+      setErrorMsg(err.message || 'Error al completar el registro');
+    }
+  };
 
   const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -189,9 +342,37 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* GOOGLE SIGN-IN BUTTON */}
+          <div className="space-y-4">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={isGoogleLoading}
+              className="w-full py-3 px-4 rounded-2xl bg-white hover:bg-slate-100 text-slate-900 font-bold text-xs shadow-md transition-all active:scale-95 flex items-center justify-center gap-3 border border-slate-300 group disabled:opacity-60"
+            >
+              {isGoogleLoading ? (
+                <div className="w-4 h-4 border-2 border-slate-900 border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <GoogleOfficialIcon className="w-4 h-4" />
+              )}
+              <span>
+                {activeTab === 'login' ? 'Continuar con Google' : 'Registrarme con Google'}
+              </span>
+            </button>
+
+            {/* Divider */}
+            <div className="relative flex items-center justify-center">
+              <div className="border-t border-slate-800 w-full" />
+              <span className="bg-slate-900 px-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider relative">
+                o con correo
+              </span>
+              <div className="border-t border-slate-800 w-full" />
+            </div>
+          </div>
+
           {/* LOGIN FORM */}
           {activeTab === 'login' ? (
-            <form onSubmit={handleLoginSubmit} className="space-y-4">
+            <form onSubmit={handleLoginSubmit} className="space-y-4 mt-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Correo Electrónico
@@ -229,18 +410,18 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50"
+                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
               >
-                <span>{isLoading ? 'Comprobando acceso...' : 'Entrar a mi Panel'}</span>
+                <span>{isLoading ? 'Iniciando sesión...' : 'Entrar al Panel'}</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </form>
           ) : (
-            /* REGISTER FORM (NEW TENANT) */
-            <form onSubmit={handleRegisterSubmit} className="space-y-3.5">
+            /* REGISTER FORM */
+            <form onSubmit={handleRegisterSubmit} className="space-y-3.5 mt-4">
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Nombre Comercial de tu Negocio *
+                  Nombre de tu Negocio o Marca *
                 </label>
                 <div className="relative">
                   <Building2 className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
@@ -249,7 +430,7 @@ export default function LoginPage() {
                     required
                     value={regBusinessName}
                     onChange={(e) => setRegBusinessName(e.target.value)}
-                    placeholder="Ej. Barbería Clásica / La Parrilla"
+                    placeholder="Ej. Tacos El Pastor, Clínica Dental..."
                     className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
@@ -257,14 +438,14 @@ export default function LoginPage() {
 
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
-                  Giro / Categoría *
+                  Giro o Categoría *
                 </label>
                 <input
                   type="text"
                   required
                   value={regCategory}
                   onChange={(e) => setRegCategory(e.target.value)}
-                  placeholder="Ej. Restaurante, Belleza, Consultoría, etc."
+                  placeholder="Ej. Restaurante, Salón de Belleza, Consultoría..."
                   className="w-full px-3.5 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 />
               </div>
@@ -367,6 +548,148 @@ export default function LoginPage() {
           </div>
         </div>
       </main>
+
+      {/* MODAL 1: FIRST TIME GOOGLE USER ONBOARDING (Crea el negocio del cliente) */}
+      {isOnboardingOpen && googleUserData && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl p-6 sm:p-8">
+            <div className="text-center mb-6">
+              <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center mx-auto mb-3">
+                <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
+              </div>
+              <h2 className="text-xl font-extrabold text-white">
+                ¡Bienvenido a TapCard NFC!
+              </h2>
+              <p className="text-xs text-slate-400 mt-1">
+                Conectado como <strong className="text-white">{googleUserData.email}</strong>. Configura tu negocio en 1 solo paso para generar tu tarjeta digital.
+              </p>
+            </div>
+
+            <form onSubmit={handleCompleteGoogleOnboarding} className="space-y-4">
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Nombre de tu Empresa o Negocio *
+                </label>
+                <div className="relative">
+                  <Building2 className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="text"
+                    required
+                    autoFocus
+                    value={onboardBusinessName}
+                    onChange={(e) => setOnboardBusinessName(e.target.value)}
+                    placeholder="Ej. Mariscos Los Arcos, Salón Bella..."
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  Giro o Categoría Comercial *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={onboardCategory}
+                  onChange={(e) => setOnboardCategory(e.target.value)}
+                  placeholder="Ej. Restaurante, Clínica Estética, Inmobiliaria..."
+                  className="w-full px-3.5 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                  WhatsApp o Teléfono (Opcional)
+                </label>
+                <div className="relative">
+                  <Phone className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                  <input
+                    type="tel"
+                    value={onboardPhone}
+                    onChange={(e) => setOnboardPhone(e.target.value)}
+                    placeholder="+52 55 1234 5678"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 mt-4"
+              >
+                <span>{isLoading ? 'Creando perfil digital...' : 'Comenzar a Diseñar mi Tarjeta'}</span>
+                <ArrowRight className="w-4 h-4" />
+              </button>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* MODAL 2: GUÍA PASO A PASO PARA ACTIVAR GOOGLE EN SUPABASE */}
+      {showGoogleGuideModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
+          <div className="relative w-full max-w-lg bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl p-6 sm:p-8">
+            <button
+              onClick={() => setShowGoogleGuideModal(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
+            <div className="flex items-center gap-3 mb-4">
+              <div className="w-10 h-10 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-400 flex items-center justify-center flex-shrink-0">
+                <Info className="w-5 h-5" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-white">Activar Google en Supabase</h3>
+                <p className="text-xs text-slate-400">Guía rápida de 3 pasos para habilitar el inicio de sesión real</p>
+              </div>
+            </div>
+
+            <div className="space-y-3 text-xs text-slate-300 bg-slate-950/60 p-4 rounded-2xl border border-slate-800">
+              <div className="flex gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center flex-shrink-0 text-[10px]">1</span>
+                <div>
+                  <p className="font-semibold text-white">Entra a tu consola de Supabase:</p>
+                  <p className="text-slate-400 mt-0.5">Ve a <strong>Authentication &gt; Providers</strong> y haz clic en <strong>Google</strong>.</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center flex-shrink-0 text-[10px]">2</span>
+                <div>
+                  <p className="font-semibold text-white">Copia tu URL de Callback de Supabase:</p>
+                  <div className="mt-1 p-2 rounded-lg bg-slate-900 border border-slate-700 font-mono text-[10px] text-cyan-300 break-all select-all">
+                    {SUPABASE_URL}/auth/v1/callback
+                  </div>
+                  <p className="text-[11px] text-slate-400 mt-1">Pega esta URL en tu consola de Google Cloud (OAuth 2.0 Client ID).</p>
+                </div>
+              </div>
+
+              <div className="flex gap-2.5">
+                <span className="w-5 h-5 rounded-full bg-blue-600 text-white font-bold flex items-center justify-center flex-shrink-0 text-[10px]">3</span>
+                <div>
+                  <p className="font-semibold text-white">Activa el interruptor en Supabase:</p>
+                  <p className="text-slate-400 mt-0.5">Pega el <strong>Client ID</strong> y <strong>Client Secret</strong> que te da Google y presiona <strong>Save</strong>.</p>
+                </div>
+              </div>
+            </div>
+
+            <div className="mt-5 flex items-center justify-between gap-3">
+              <span className="text-[11px] text-slate-500">Mientras tanto, el registro manual por formulario funciona al 100%.</span>
+              <button
+                type="button"
+                onClick={() => setShowGoogleGuideModal(false)}
+                className="py-2 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs"
+              >
+                Entendido
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="relative z-10 text-center py-6 text-xs text-slate-500">
