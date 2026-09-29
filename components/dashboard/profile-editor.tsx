@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+import QRCode from 'qrcode';
 import {
   Business,
   BusinessLink,
   LinkType,
   NfcCard,
-  QuickAccessConfig,
 } from '@/types/business';
 import {
   Building2,
   Share2,
   Palette,
   CreditCard,
-  Plus,
   Trash2,
   ArrowUp,
   ArrowDown,
@@ -24,11 +23,15 @@ import {
   Smartphone,
   ExternalLink,
   Star,
-  Upload,
-  Image as ImageIcon,
   Camera,
+  Save,
+  Pencil,
+  Copy,
+  Check,
+  Download,
+  QrCode,
 } from 'lucide-react';
-import { uploadBusinessAsset } from '@/lib/supabase';
+import { uploadBusinessAsset, getAppBaseUrl } from '@/lib/supabase';
 import {
   WhatsAppOfficialIcon,
   InstagramOfficialIcon,
@@ -38,55 +41,18 @@ import {
   XOfficialIcon,
   YouTubeOfficialIcon,
   TelegramOfficialIcon,
-  UtensilsSvg,
-  CalendarSvg,
-  SparklesBeautySvg,
-  ScissorsSvg,
-  CoffeeSvg,
-  ShoppingBagSvg,
-  FileTextSvg,
-  ClockSvg,
-  CreditCardSvg,
-  StarSvg,
   GlobeSvg,
   PhoneSvg,
-  MapPinSvg,
-  MailSvg,
 } from '@/components/ui/svg-icons';
-
-const OFFICIAL_SOCIAL_ICONS = [
-  { id: 'whatsapp', label: 'WhatsApp', icon: WhatsAppOfficialIcon, defaultColor: 'bg-[#25D366]' },
-  { id: 'instagram', label: 'Instagram', icon: InstagramOfficialIcon, defaultColor: 'bg-pink-600' },
-  { id: 'facebook', label: 'Facebook', icon: FacebookOfficialIcon, defaultColor: 'bg-[#1877F2]' },
-  { id: 'tiktok', label: 'TikTok', icon: TikTokOfficialIcon, defaultColor: 'bg-black' },
-  { id: 'linkedin', label: 'LinkedIn', icon: LinkedinOfficialIcon, defaultColor: 'bg-[#0A66C2]' },
-  { id: 'youtube', label: 'YouTube', icon: YouTubeOfficialIcon, defaultColor: 'bg-[#FF0000]' },
-  { id: 'x', label: 'X (Twitter)', icon: XOfficialIcon, defaultColor: 'bg-black' },
-  { id: 'telegram', label: 'Telegram', icon: TelegramOfficialIcon, defaultColor: 'bg-[#229ED9]' },
-];
-
-const SERVICE_SVG_ICONS = [
-  { id: 'utensils', label: 'Menú / Restaurante', icon: UtensilsSvg },
-  { id: 'calendar', label: 'Reservar Cita', icon: CalendarSvg },
-  { id: 'sparkles', label: 'Uñas / Belleza', icon: SparklesBeautySvg },
-  { id: 'scissors', label: 'Peluquería / Barba', icon: ScissorsSvg },
-  { id: 'coffee', label: 'Café / Bebidas', icon: CoffeeSvg },
-  { id: 'shopping-bag', label: 'Catálogo / Tienda', icon: ShoppingBagSvg },
-  { id: 'file-text', label: 'Menú PDF', icon: FileTextSvg },
-  { id: 'clock', label: 'Horarios', icon: ClockSvg },
-  { id: 'credit-card', label: 'Pagos', icon: CreditCardSvg },
-  { id: 'star', label: 'Destacado / Reseña', icon: StarSvg },
-  { id: 'phone', label: 'Llamar / Teléfono', icon: PhoneSvg },
-  { id: 'globe', label: 'Sitio Web', icon: GlobeSvg },
-  { id: 'map-pin', label: 'Ubicación / Maps', icon: MapPinSvg },
-];
+import { IconPickerModal } from '@/components/dashboard/icon-picker-modal';
+import { getBusinessIconComponent } from '@/components/ui/business-icons';
 
 const COLOR_OPTIONS = [
-  { id: 'amber', label: 'Naranja / Ámbar (Menú)', bg: 'bg-amber-500' },
-  { id: 'purple', label: 'Púrpura (Citas)', bg: 'bg-purple-600' },
-  { id: 'pink', label: 'Rosa (Uñas / Belleza)', bg: 'bg-pink-500' },
+  { id: 'amber', label: 'Naranja / Ámbar', bg: 'bg-amber-500' },
+  { id: 'purple', label: 'Púrpura / Citas', bg: 'bg-purple-600' },
+  { id: 'pink', label: 'Rosa / Belleza', bg: 'bg-pink-500' },
   { id: 'emerald', label: 'Verde Esmeralda', bg: 'bg-emerald-500' },
-  { id: 'blue', label: 'Azul', bg: 'bg-blue-600' },
+  { id: 'blue', label: 'Azul Eléctrico', bg: 'bg-blue-600' },
   { id: 'rose', label: 'Rojo / Rose', bg: 'bg-rose-500' },
   { id: 'dark', label: 'Grafito', bg: 'bg-zinc-800' },
 ];
@@ -94,19 +60,66 @@ const COLOR_OPTIONS = [
 interface ProfileEditorProps {
   business: Business;
   onChange: (updated: Business) => void;
+  onSave?: () => Promise<void> | void;
 }
 
-export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
+export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'links' | 'design' | 'cards'>('info');
   const [newCardCode, setNewCardCode] = useState('');
 
-  // Refs for local desktop file uploads
+  // Icon Picker Modal State
+  const [pickerModalOpen, setPickerModalOpen] = useState(false);
+  const [activePickingLinkId, setActivePickingLinkId] = useState<string | null>(null);
+
+  // Link Action feedback
+  const [savedLinkId, setSavedLinkId] = useState<string | null>(null);
+  const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
+
+  // QR Code state for NFC tab
+  const [qrPng, setQrPng] = useState<string>('');
+  const [copiedQr, setCopiedQr] = useState<boolean>(false);
+
+  // Refs for local file uploads
   const bannerFileRef = useRef<HTMLInputElement>(null);
   const logoFileRef = useRef<HTMLInputElement>(null);
   const [showBannerUrlInput, setShowBannerUrlInput] = useState(false);
   const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
-  // Intelligent background sync: automatically set cover background when profile photo is uploaded
   const [autoSyncCover, setAutoSyncCover] = useState(true);
+
+  const profileUrl = typeof window !== 'undefined'
+    ? `${getAppBaseUrl()}/${business.slug}`
+    : `https://tapcard.mx/${business.slug}`;
+
+  useEffect(() => {
+    QRCode.toDataURL(
+      profileUrl,
+      {
+        width: 600,
+        margin: 2,
+        color: {
+          dark: '#0f172a',
+          light: '#ffffff',
+        },
+      },
+      (err, url) => {
+        if (!err && url) setQrPng(url);
+      }
+    );
+  }, [profileUrl]);
+
+  const handleDownloadQr = () => {
+    if (!qrPng) return;
+    const link = document.createElement('a');
+    link.href = qrPng;
+    link.download = `QR-Oficial-${business.slug}.png`;
+    link.click();
+  };
+
+  const handleCopyLink = () => {
+    navigator.clipboard.writeText(profileUrl);
+    setCopiedQr(true);
+    setTimeout(() => setCopiedQr(false), 2000);
+  };
 
   // Handle generic property updates
   const updateField = <K extends keyof Business>(key: K, value: Business[K]) => {
@@ -116,7 +129,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     });
   };
 
-  // Handle desktop file upload (Supabase Storage with Data URL fallback)
+  // Handle desktop file upload
   const handleFileUpload = async (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
@@ -153,7 +166,6 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       const dataUrl = e.target?.result as string;
       if (dataUrl) {
         if (field === 'logoUrl') {
-          // Intelligent behavior: when uploading profile picture, also set as background banner
           const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
           onChange({
             ...business,
@@ -166,21 +178,6 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       }
     };
     reader.readAsDataURL(file);
-  };
-
-  // Update quick access settings
-  const updateQuickAccess = (key: keyof QuickAccessConfig, value: boolean) => {
-    const current = business.quickAccess || {
-      enabled: true,
-      showPhone: false,
-      showEmail: true,
-      showMaps: true,
-      showCatalog: true,
-    };
-    updateField('quickAccess', {
-      ...current,
-      [key]: value,
-    });
   };
 
   // Toggle link active status
@@ -201,7 +198,6 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     newLinks[index] = newLinks[targetIndex];
     newLinks[targetIndex] = temp;
 
-    // Reassign order
     const ordered = newLinks.map((link, idx) => ({ ...link, order: idx + 1 }));
     updateField('links', ordered);
   };
@@ -220,6 +216,17 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     updateField('links', filtered);
   };
 
+  // Explicit diskette save action
+  const handleSaveLink = async (linkId: string) => {
+    setSavedLinkId(linkId);
+    if (onSave) {
+      await onSave();
+    }
+    setTimeout(() => {
+      setSavedLinkId(null);
+    }, 2000);
+  };
+
   // Add a new link with template defaults
   const addLink = (type: LinkType) => {
     const id = 'link-' + Math.random().toString(36).substring(2, 7);
@@ -229,13 +236,19 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
     let iconName = 'globe';
     let customColor: string | undefined = undefined;
 
-    if (type === 'whatsapp') {
+    if (type === 'custom') {
+      title = 'Botón Personalizado';
+      subtitle = 'Servicio o enlace personalizado';
+      url = 'https://';
+      iconName = 'sparkles';
+      customColor = 'blue';
+    } else if (type === 'whatsapp') {
       title = 'WhatsApp';
       subtitle = 'Chatea con nosotros';
       url = 'https://wa.me/5215500000000';
       iconName = 'whatsapp';
     } else if (type === 'phone') {
-      title = 'Llamar ahora';
+      title = 'Llamar por Teléfono';
       subtitle = '+52 55 0000 0000';
       url = 'tel:+525500000000';
       iconName = 'phone';
@@ -244,59 +257,26 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       subtitle = '@tunegocio';
       url = 'https://instagram.com/tunegocio';
       iconName = 'instagram';
+    } else if (type === 'tiktok') {
+      title = 'TikTok Oficial';
+      subtitle = 'Mira nuestros videos';
+      url = 'https://tiktok.com/@tunegocio';
+      iconName = 'tiktok';
     } else if (type === 'facebook') {
       title = 'Visítanos en Facebook';
       subtitle = '/tunegocio';
       url = 'https://facebook.com/tunegocio';
       iconName = 'facebook';
-    } else if (type === 'linkedin') {
-      title = 'Conéctate en LinkedIn';
-      subtitle = 'Empresa en LinkedIn';
-      url = 'https://linkedin.com/company/tunegocio';
-      iconName = 'linkedin';
-    } else if (type === 'tiktok') {
-      title = 'TikTok Oficial';
-      subtitle = 'Mira nuestros videos y novedades';
-      url = 'https://tiktok.com/@tunegocio';
-      iconName = 'tiktok';
     } else if (type === 'youtube') {
       title = 'Canal de YouTube';
       subtitle = 'Suscríbete a nuestro canal';
       url = 'https://youtube.com/@tunegocio';
       iconName = 'youtube';
-    } else if (type === 'x') {
-      title = 'Síguenos en X';
-      subtitle = '@tunegocio';
-      url = 'https://x.com/tunegocio';
-      iconName = 'x';
-    } else if (type === 'telegram') {
-      title = 'Canal de Telegram';
-      subtitle = 'Únete a nuestra comunidad';
-      url = 'https://t.me/tunegocio';
-      iconName = 'telegram';
-    } else if (type === 'catalog') {
-      title = 'Ver Catálogo / Menú';
-      subtitle = 'Descarga nuestro brochure en PDF';
-      url = 'https://ejemplo.com/catalogo.pdf';
-      iconName = 'file-text';
-    } else if (type === 'menu') {
-      title = 'Menú del Restaurante';
-      subtitle = 'Consulta nuestros platillos y bebidas';
-      url = 'https://ejemplo.com/menu-digital';
-      iconName = 'utensils';
-      customColor = 'amber';
-    } else if (type === 'booking') {
-      title = 'Reservar Cita';
-      subtitle = 'Agenda tu horario o servicio en línea';
-      url = 'https://citas.com/reservar';
-      iconName = 'calendar';
-      customColor = 'purple';
-    } else if (type === 'custom') {
-      title = 'Botón Personalizado';
-      subtitle = 'Escribe un subtítulo o llamado a la acción';
-      url = 'https://';
-      iconName = 'sparkles';
-      customColor = 'pink';
+    } else if (type === 'website') {
+      title = 'Sitio Web Oficial';
+      subtitle = 'Visita nuestra tienda o portal';
+      url = 'https://tunegocio.com';
+      iconName = 'globe';
     }
 
     const newLink: BusinessLink = {
@@ -480,160 +460,6 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
               className="w-5 h-5 accent-blue-600 cursor-pointer rounded"
             />
           </div>
-
-          {/* Quick contact info & Accesos Rapidos */}
-          <div className="pt-2 border-t border-slate-100 dark:border-zinc-800 space-y-3">
-            <div className="flex items-center justify-between p-3 rounded-2xl bg-slate-50/80 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider flex items-center gap-1.5">
-                  Accesos Rápidos Directos (Botonera Inferior)
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Activa o desactiva qué botones de contacto directo y catálogo ve tu cliente
-                </p>
-              </div>
-
-              {/* Master toggle */}
-              <div className="flex items-center gap-2">
-                <span className="text-[11px] font-semibold text-slate-600 dark:text-zinc-400">
-                  {business.quickAccess?.enabled !== false ? 'Activado' : 'Oculto'}
-                </span>
-                <input
-                  type="checkbox"
-                  checked={business.quickAccess?.enabled !== false}
-                  onChange={(e) => updateQuickAccess('enabled', e.target.checked)}
-                  className="w-4 h-4 accent-blue-600 cursor-pointer rounded"
-                />
-              </div>
-            </div>
-
-            {/* Individual access option cards with toggle and field */}
-            <div className={`space-y-2.5 transition-opacity ${business.quickAccess?.enabled !== false ? 'opacity-100' : 'opacity-40 pointer-events-none'}`}>
-              
-              {/* 1. Teléfono */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    <PhoneSvg className="w-3.5 h-3.5 text-blue-500" />
-                    Botón de Llamar Directo
-                  </label>
-                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={business.quickAccess?.showPhone ?? false}
-                      onChange={(e) => updateQuickAccess('showPhone', e.target.checked)}
-                      className="w-3.5 h-3.5 accent-blue-600 rounded"
-                    />
-                    <span>Mostrar botón</span>
-                  </label>
-                </div>
-                <input
-                  type="text"
-                  value={business.phone || ''}
-                  onChange={(e) => updateField('phone', e.target.value)}
-                  placeholder="Ej: +52 55 1234 5678"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
-                />
-              </div>
-
-              {/* 2. Correo Electrónico */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    <MailSvg className="w-3.5 h-3.5 text-indigo-500" />
-                    Botón de Correo Electrónico
-                  </label>
-                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={business.quickAccess?.showEmail ?? true}
-                      onChange={(e) => updateQuickAccess('showEmail', e.target.checked)}
-                      className="w-3.5 h-3.5 accent-blue-600 rounded"
-                    />
-                    <span>Mostrar botón</span>
-                  </label>
-                </div>
-                <input
-                  type="email"
-                  value={business.email || ''}
-                  onChange={(e) => updateField('email', e.target.value)}
-                  placeholder="contacto@tunegocio.com"
-                  className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
-                />
-              </div>
-
-              {/* 3. Ubicación y Maps */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    <MapPinSvg className="w-3.5 h-3.5 text-rose-500" />
-                    Botón de Ubicación / Google Maps
-                  </label>
-                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={business.quickAccess?.showMaps ?? true}
-                      onChange={(e) => updateQuickAccess('showMaps', e.target.checked)}
-                      className="w-3.5 h-3.5 accent-blue-600 rounded"
-                    />
-                    <span>Mostrar botón</span>
-                  </label>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    value={business.address || ''}
-                    onChange={(e) => updateField('address', e.target.value)}
-                    placeholder="Dirección física (calle, ciudad)"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
-                  />
-                  <input
-                    type="text"
-                    value={business.googleMapsUrl || ''}
-                    onChange={(e) => updateField('googleMapsUrl', e.target.value)}
-                    placeholder="URL Google Maps (https://maps.app.goo.gl/...)"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
-                  />
-                </div>
-              </div>
-
-              {/* 4. Catálogo / Menú / PDF */}
-              <div className="p-3 rounded-xl border border-slate-200 dark:border-zinc-700/80 bg-slate-50/50 dark:bg-zinc-800/40">
-                <div className="flex items-center justify-between mb-1.5">
-                  <label className="text-[11px] font-bold text-slate-700 dark:text-zinc-300 flex items-center gap-1.5">
-                    <FileTextSvg className="w-3.5 h-3.5 text-amber-500" />
-                    Botón de Catálogo / Menú / PDF
-                  </label>
-                  <label className="flex items-center gap-1.5 text-[11px] font-medium text-slate-600 dark:text-zinc-400 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={business.quickAccess?.showCatalog ?? true}
-                      onChange={(e) => updateQuickAccess('showCatalog', e.target.checked)}
-                      className="w-3.5 h-3.5 accent-blue-600 rounded"
-                    />
-                    <span>Mostrar botón</span>
-                  </label>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                  <input
-                    type="text"
-                    value={business.catalogTitle || ''}
-                    onChange={(e) => updateField('catalogTitle', e.target.value)}
-                    placeholder="Texto del botón (ej. Catálogo PDF, Menú)"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
-                  />
-                  <input
-                    type="text"
-                    value={business.catalogUrl || ''}
-                    onChange={(e) => updateField('catalogUrl', e.target.value)}
-                    placeholder="URL del PDF o Catálogo (https://...)"
-                    className="w-full px-3 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
-                  />
-                </div>
-              </div>
-
-            </div>
-          </div>
         </div>
       )}
 
@@ -643,299 +469,309 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
           <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800 space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Agregar botón rápido:
+                Agregar botón de enlace:
               </span>
               <span className="text-[11px] text-slate-500">
-                Elige un acceso directo o crea uno a tu medida
+                Selecciona una opción rápida
               </span>
             </div>
+            {/* Quick add buttons - Botón Personalizado FIRST */}
             <div className="flex flex-wrap items-center gap-1.5 pt-1">
               <button
                 type="button"
+                onClick={() => addLink('custom')}
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 ring-2 ring-blue-400/30"
+              >
+                <Sparkles className="w-3.5 h-3.5 text-amber-300" />
+                <span>+ Botón Personalizado</span>
+              </button>
+
+              <button
+                type="button"
                 onClick={() => addLink('whatsapp')}
-                className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
               >
                 <WhatsAppOfficialIcon className="w-3.5 h-3.5" />
                 <span>+ WhatsApp</span>
               </button>
-              <button
-                type="button"
-                onClick={() => addLink('phone')}
-                className="px-2.5 py-1 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
-              >
-                <PhoneSvg className="w-3.5 h-3.5" />
-                <span>+ Teléfono</span>
-              </button>
+
               <button
                 type="button"
                 onClick={() => addLink('instagram')}
-                className="px-2.5 py-1 rounded-lg bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-xl bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
               >
                 <InstagramOfficialIcon className="w-3.5 h-3.5" />
                 <span>+ Instagram</span>
               </button>
+
               <button
                 type="button"
                 onClick={() => addLink('tiktok')}
-                className="px-2.5 py-1 rounded-lg bg-zinc-800 text-white hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
               >
                 <TikTokOfficialIcon className="w-3.5 h-3.5 text-white" />
                 <span>+ TikTok</span>
               </button>
+
+              <button
+                type="button"
+                onClick={() => addLink('facebook')}
+                className="px-2.5 py-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
+              >
+                <FacebookOfficialIcon className="w-3.5 h-3.5" />
+                <span>+ Facebook</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => addLink('youtube')}
+                className="px-2.5 py-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
+              >
+                <YouTubeOfficialIcon className="w-3.5 h-3.5" />
+                <span>+ YouTube</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => addLink('phone')}
+                className="px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
+              >
+                <PhoneSvg className="w-3.5 h-3.5" />
+                <span>+ Teléfono</span>
+              </button>
+
               <button
                 type="button"
                 onClick={() => addLink('website')}
-                className="px-2.5 py-1 rounded-lg bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors flex items-center gap-1"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-200/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-300/80 text-xs font-semibold transition-colors flex items-center gap-1.5"
               >
                 <GlobeSvg className="w-3.5 h-3.5" />
                 <span>+ Sitio Web</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => addLink('menu')}
-                title="Ideal para restaurantes, cafeterías o bares"
-                className="px-2.5 py-1 rounded-lg bg-amber-500/15 text-amber-700 dark:text-amber-400 hover:bg-amber-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
-              >
-                <UtensilsSvg className="w-3.5 h-3.5" />
-                <span>+ Menú / Carta</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => addLink('booking')}
-                title="Ideal para salones de uñas, estética o consultorios"
-                className="px-2.5 py-1 rounded-lg bg-purple-500/15 text-purple-700 dark:text-purple-400 hover:bg-purple-500/25 text-xs font-semibold transition-colors flex items-center gap-1"
-              >
-                <CalendarSvg className="w-3.5 h-3.5" />
-                <span>+ Reservar Cita</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => addLink('custom')}
-                className="px-3 py-1 rounded-lg bg-gradient-to-r from-violet-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-sm flex items-center gap-1.5"
-              >
-                <SparklesBeautySvg className="w-3.5 h-3.5 text-amber-300" />
-                <span>+ Personalizado</span>
               </button>
             </div>
           </div>
 
           {/* Links list */}
           <div className="space-y-3">
-            {business.links.map((link, idx) => (
-              <div
-                key={link.id}
-                className={`p-4 rounded-2xl border transition-all space-y-3 ${
-                  link.highlighted
-                    ? 'border-amber-400/70 dark:border-amber-500/50 bg-amber-500/5 dark:bg-amber-950/15 shadow-sm'
-                    : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50'
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2 flex-1">
-                    <button
-                      type="button"
-                      onClick={() => toggleLinkActive(link.id)}
-                      title={link.isActive ? 'Desactivar botón' : 'Activar botón'}
-                      className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                        link.isActive
-                          ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                          : 'bg-slate-200 dark:bg-zinc-700 text-slate-500'
-                      }`}
-                    >
-                      {link.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                    </button>
-                    <span className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono">
-                      #{idx + 1} {link.type}
-                    </span>
+            {business.links.map((link, idx) => {
+              const isCustom = link.type === 'custom';
+              const IconDisplay = getBusinessIconComponent(link.iconName);
 
-                    {/* Star highlight badge toggle */}
-                    <button
-                      type="button"
-                      onClick={() => updateLink(link.id, { highlighted: !link.highlighted })}
-                      title={link.highlighted ? 'Quitar destacado' : 'Destacar botón en el perfil'}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
-                        link.highlighted
-                          ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300/60'
-                          : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 dark:hover:bg-zinc-700'
-                      }`}
-                    >
-                      <Star className={`w-3 h-3 ${link.highlighted ? 'fill-amber-400 text-amber-500' : ''}`} />
-                      <span>{link.highlighted ? 'Destacado' : 'Destacar'}</span>
-                    </button>
-                  </div>
+              return (
+                <div
+                  key={link.id}
+                  className={`p-4 rounded-2xl border transition-all space-y-3 ${
+                    link.highlighted
+                      ? 'border-amber-400/70 dark:border-amber-500/50 bg-amber-500/5 dark:bg-amber-950/15 shadow-sm'
+                      : 'border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/50'
+                  }`}
+                >
+                  {/* Card Header with Status & Action SVGs ONLY */}
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                      <button
+                        type="button"
+                        onClick={() => toggleLinkActive(link.id)}
+                        title={link.isActive ? 'Desactivar botón' : 'Activar botón'}
+                        className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
+                          link.isActive
+                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
+                            : 'bg-slate-200 dark:bg-zinc-700 text-slate-500'
+                        }`}
+                      >
+                        {link.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
+                      </button>
 
-                  <div className="flex items-center gap-1">
-                    <button
-                      type="button"
-                      onClick={() => moveLink(idx, 'up')}
-                      disabled={idx === 0}
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
-                    >
-                      <ArrowUp className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => moveLink(idx, 'down')}
-                      disabled={idx === business.links.length - 1}
-                      className="p-1 rounded text-slate-400 hover:text-slate-700 disabled:opacity-30"
-                    >
-                      <ArrowDown className="w-3.5 h-3.5" />
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => deleteLink(link.id)}
-                      className="p-1 rounded text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </button>
-                  </div>
-                </div>
+                      <span className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono truncate">
+                        #{idx + 1} {link.type}
+                      </span>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                  <div>
-                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
-                      Título en el botón:
-                    </label>
-                    <input
-                      type="text"
-                      value={link.title}
-                      onChange={(e) => updateLink(link.id, { title: e.target.value })}
-                      placeholder="Ej: Ver Menú Digital o Reservar Cita"
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-semibold bg-white dark:bg-zinc-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
-                      Subtítulo o descripción:
-                    </label>
-                    <input
-                      type="text"
-                      value={link.subtitle || ''}
-                      onChange={(e) => updateLink(link.id, { subtitle: e.target.value })}
-                      placeholder="Ej: Platillos del día / Horarios disponibles"
-                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
-                    />
-                  </div>
-                </div>
+                      {/* Star highlight badge toggle */}
+                      <button
+                        type="button"
+                        onClick={() => updateLink(link.id, { highlighted: !link.highlighted })}
+                        title={link.highlighted ? 'Quitar destacado' : 'Destacar botón en el perfil'}
+                        className={`flex items-center gap-1 px-2 py-0.5 rounded-md text-[10px] font-semibold transition-colors ${
+                          link.highlighted
+                            ? 'bg-amber-100 text-amber-800 dark:bg-amber-900/60 dark:text-amber-300 border border-amber-300/60'
+                            : 'text-slate-400 hover:text-slate-600 hover:bg-slate-200/60 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        <Star className={`w-3 h-3 ${link.highlighted ? 'fill-amber-400 text-amber-500' : ''}`} />
+                        <span>{link.highlighted ? 'Destacado' : 'Destacar'}</span>
+                      </button>
+                    </div>
 
-                <div>
-                  <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
-                    Enlace de destino (URL):
-                  </label>
-                  <input
-                    type="text"
-                    value={link.url}
-                    onChange={(e) => updateLink(link.id, { url: e.target.value })}
-                    placeholder="https://..."
-                    className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
-                  />
-                </div>
+                    {/* SVG Action Buttons WITHOUT TEXT */}
+                    <div className="flex items-center gap-1 flex-shrink-0">
+                      <button
+                        type="button"
+                        onClick={() => moveLink(idx, 'up')}
+                        disabled={idx === 0}
+                        title="Mover arriba"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-zinc-700 disabled:opacity-25 transition-colors"
+                      >
+                        <ArrowUp className="w-3.5 h-3.5" />
+                      </button>
 
-                {/* Visual Icon & Color Customization */}
-                <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-700/80 space-y-2.5">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-                      Ícono del botón:
-                    </span>
-                    <span className="text-[10px] text-slate-400 font-mono">
-                      Seleccionado: <strong className="text-blue-500">{link.iconName || 'predeterminado'}</strong>
-                    </span>
-                  </div>
+                      <button
+                        type="button"
+                        onClick={() => moveLink(idx, 'down')}
+                        disabled={idx === business.links.length - 1}
+                        title="Mover abajo"
+                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-700 dark:hover:text-zinc-200 hover:bg-slate-200/60 dark:hover:bg-zinc-700 disabled:opacity-25 transition-colors"
+                      >
+                        <ArrowDown className="w-3.5 h-3.5" />
+                      </button>
 
-                  {/* 1. Redes Sociales Oficiales */}
-                  <div>
-                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">
-                      Redes Sociales Oficiales:
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {OFFICIAL_SOCIAL_ICONS.map((item) => {
-                        const IconComp = item.icon;
-                        const isSelected = link.iconName === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => updateLink(link.id, { iconName: item.id })}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                              isSelected
-                                ? 'bg-blue-600 text-white shadow-xs font-semibold ring-1 ring-blue-400'
-                                : 'bg-white dark:bg-zinc-900 text-slate-700 dark:text-zinc-200 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
-                            }`}
-                          >
-                            <span className={`w-4 h-4 rounded-md flex items-center justify-center ${item.defaultColor} p-0.5`}>
-                              <IconComp className="w-3 h-3 text-white" />
-                            </span>
-                            <span>{item.label}</span>
-                          </button>
-                        );
-                      })}
+                      {/* Disket SVG (Save) */}
+                      <button
+                        type="button"
+                        onClick={() => handleSaveLink(link.id)}
+                        title={savedLinkId === link.id ? '¡Guardado con éxito!' : 'Guardar botón'}
+                        className={`p-1.5 rounded-lg transition-all ${
+                          savedLinkId === link.id
+                            ? 'bg-emerald-500 text-white shadow-sm scale-110'
+                            : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/50'
+                        }`}
+                      >
+                        {savedLinkId === link.id ? <Check className="w-3.5 h-3.5" /> : <Save className="w-3.5 h-3.5" />}
+                      </button>
+
+                      {/* Pencil SVG (Edit/Toggle details) */}
+                      <button
+                        type="button"
+                        onClick={() => setEditingLinkId(editingLinkId === link.id ? null : link.id)}
+                        title="Editar detalles"
+                        className={`p-1.5 rounded-lg transition-colors ${
+                          editingLinkId === link.id
+                            ? 'bg-blue-100 text-blue-700 dark:bg-blue-900/60 dark:text-blue-300'
+                            : 'text-slate-500 hover:text-slate-800 hover:bg-slate-200/60 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        <Pencil className="w-3.5 h-3.5" />
+                      </button>
+
+                      {/* Trash2 SVG (Delete) */}
+                      <button
+                        type="button"
+                        onClick={() => deleteLink(link.id)}
+                        title="Eliminar botón"
+                        className="p-1.5 rounded-lg text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                      >
+                        <Trash2 className="w-3.5 h-3.5" />
+                      </button>
                     </div>
                   </div>
 
-                  {/* 2. Servicios & Negocios (SVGs) */}
-                  <div>
-                    <span className="text-[9px] font-bold text-slate-400 dark:text-zinc-500 uppercase tracking-wider block mb-1">
-                      Servicios & Negocios (SVG):
-                    </span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {SERVICE_SVG_ICONS.map((item) => {
-                        const IconComp = item.icon;
-                        const isSelected = link.iconName === item.id;
-                        return (
-                          <button
-                            key={item.id}
-                            type="button"
-                            onClick={() => updateLink(link.id, { iconName: item.id })}
-                            className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium transition-all ${
-                              isSelected
-                                ? 'bg-blue-600 text-white shadow-xs font-semibold ring-1 ring-blue-400'
-                                : 'bg-white dark:bg-zinc-900 text-slate-600 dark:text-zinc-300 border border-slate-200 dark:border-zinc-700 hover:bg-slate-100 dark:hover:bg-zinc-800'
-                            }`}
-                          >
-                            <IconComp className={`w-3.5 h-3.5 ${isSelected ? 'text-white' : 'text-slate-600 dark:text-zinc-300'}`} />
-                            <span>{item.label}</span>
-                          </button>
-                        );
-                      })}
+                  {/* Form fields */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                        Título en el botón:
+                      </label>
+                      <input
+                        type="text"
+                        value={link.title}
+                        onChange={(e) => updateLink(link.id, { title: e.target.value })}
+                        placeholder="Ej: Ver Menú Digital o Reservar Cita"
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-semibold bg-white dark:bg-zinc-900"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                        Subtítulo o descripción:
+                      </label>
+                      <input
+                        type="text"
+                        value={link.subtitle || ''}
+                        onChange={(e) => updateLink(link.id, { subtitle: e.target.value })}
+                        placeholder="Ej: Platillos del día / Horarios disponibles"
+                        className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs bg-white dark:bg-zinc-900"
+                      />
                     </div>
                   </div>
 
-                  {/* Color Swatches */}
-                  <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800">
-                    <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
-                      Color / Estilo:
-                    </span>
-                    <div className="flex items-center gap-1.5 flex-wrap">
-                      {COLOR_OPTIONS.map((col) => {
-                        const isSelected = link.customColor === col.id;
-                        return (
-                          <button
-                            key={col.id}
-                            type="button"
-                            title={col.label}
-                            onClick={() => updateLink(link.id, { customColor: col.id })}
-                            className={`w-5 h-5 rounded-full ${col.bg} transition-all ${
-                              isSelected
-                                ? 'ring-2 ring-offset-2 ring-blue-600 dark:ring-white scale-110'
-                                : 'opacity-75 hover:opacity-100'
-                            }`}
-                          />
-                        );
-                      })}
-                      {link.customColor && (
+                  <div>
+                    <label className="block text-[10px] font-semibold text-slate-500 dark:text-zinc-400 mb-1">
+                      Enlace de destino (URL):
+                    </label>
+                    <input
+                      type="text"
+                      value={link.url}
+                      onChange={(e) => updateLink(link.id, { url: e.target.value })}
+                      placeholder="https://..."
+                      className="w-full px-2.5 py-1.5 rounded-lg border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+
+                  {/* ONLY FOR CUSTOM BUTTONS: Choose SVG icon via modal library & custom colors */}
+                  {isCustom && (
+                    <div className="pt-2 border-t border-slate-200/80 dark:border-zinc-700/80 space-y-2.5">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                        <div>
+                          <span className="text-[10px] font-bold text-slate-600 dark:text-zinc-300 uppercase tracking-wider block">
+                            Ícono SVG Personalizado:
+                          </span>
+                          <span className="text-[11px] text-slate-400">
+                            Abre la librería para elegir el ícono exacto de tu negocio
+                          </span>
+                        </div>
+
+                        {/* Button that opens the SVG Icon Library Modal */}
                         <button
                           type="button"
-                          onClick={() => updateLink(link.id, { customColor: undefined })}
-                          className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-1"
+                          onClick={() => {
+                            setActivePickingLinkId(link.id);
+                            setPickerModalOpen(true);
+                          }}
+                          className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 hover:border-blue-500 text-xs font-semibold text-slate-800 dark:text-zinc-200 transition-all shadow-xs self-start sm:self-auto"
                         >
-                          Automático
+                          <div className="w-5 h-5 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center">
+                            <IconDisplay className="w-3.5 h-3.5" />
+                          </div>
+                          <span>Elegir Ícono SVG ({link.iconName || 'sparkles'})</span>
                         </button>
-                      )}
+                      </div>
+
+                      {/* Color Swatches */}
+                      <div className="flex items-center gap-2 pt-1 border-t border-slate-100 dark:border-zinc-800">
+                        <span className="text-[10px] font-bold text-slate-500 dark:text-zinc-400 uppercase tracking-wider">
+                          Color del botón:
+                        </span>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          {COLOR_OPTIONS.map((col) => {
+                            const isSelected = link.customColor === col.id;
+                            return (
+                              <button
+                                key={col.id}
+                                type="button"
+                                title={col.label}
+                                onClick={() => updateLink(link.id, { customColor: col.id })}
+                                className={`w-5 h-5 rounded-full ${col.bg} transition-all ${
+                                  isSelected
+                                    ? 'ring-2 ring-offset-2 ring-blue-600 dark:ring-white scale-110'
+                                    : 'opacity-75 hover:opacity-100'
+                                }`}
+                              />
+                            );
+                          })}
+                          {link.customColor && (
+                            <button
+                              type="button"
+                              onClick={() => updateLink(link.id, { customColor: undefined })}
+                              className="text-[10px] text-slate-400 hover:text-slate-600 underline ml-1"
+                            >
+                              Predeterminado
+                            </button>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                  </div>
+                  )}
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -943,12 +779,12 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
       {/* TAB 3: Design & Media */}
       {activeTab === 'design' && (
         <div className="space-y-6 animate-in fade-in duration-150">
-          {/* 1. Banner de Portada */}
+          {/* 1. Foto de Portada (Banner) */}
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <ImageIcon className="w-4 h-4 text-blue-600" />
+                  <Camera className="w-4 h-4 text-blue-600" />
                   Foto de Portada (Banner)
                 </h4>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
@@ -967,32 +803,36 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
               )}
             </div>
 
-            {/* Visual Thumbnail */}
+            {/* Clickable Banner Box with internal text */}
             <div
               onClick={() => bannerFileRef.current?.click()}
-              className="relative w-full h-36 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner"
+              className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-blue-500 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner transition-all"
             >
               {business.bannerUrl ? (
-                <img
-                  src={business.bannerUrl}
-                  alt="Vista previa del banner"
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
-                />
+                <>
+                  <img
+                    src={business.bannerUrl}
+                    alt="Vista previa del banner"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                  />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
+                    <Camera className="w-6 h-6 mb-1" />
+                    <span className="text-xs font-bold drop-shadow">Toca aquí para cambiar foto de portada</span>
+                  </div>
+                </>
               ) : (
-                <div className="flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 p-4 text-center">
-                  <Upload className="w-8 h-8 mb-1 opacity-50" />
-                  <span className="text-xs font-medium">Sin imagen de portada</span>
-                  <span className="text-[10px]">Haz clic aquí para subir una foto desde tu equipo</span>
+                <div className="flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400 p-4 text-center">
+                  <div className="w-10 h-10 rounded-full bg-blue-500/10 dark:bg-blue-500/20 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-2">
+                    <Camera className="w-5 h-5" />
+                  </div>
+                  <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
+                    Toca aquí para subir foto de portada
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-0.5">
+                    (Formato horizontal panorámico recomendado)
+                  </span>
                 </div>
               )}
-
-              {/* Upload trigger overlay button */}
-              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                <span className="px-3 py-1.5 rounded-lg bg-white/95 text-slate-900 text-xs font-bold shadow-lg flex items-center gap-1.5">
-                  <Upload className="w-3.5 h-3.5" />
-                  {business.bannerUrl ? 'Cambiar foto de portada' : 'Subir foto desde mi equipo'}
-                </span>
-              </div>
             </div>
 
             {/* Hidden Input file for Banner */}
@@ -1008,56 +848,20 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
               }}
             />
 
-            {/* Main Action Buttons */}
-            <div className="flex flex-wrap items-center gap-2 pt-1">
-              <button
-                type="button"
-                onClick={() => bannerFileRef.current?.click()}
-                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
-              >
-                <Upload className="w-3.5 h-3.5" />
-                Subir foto desde mi computadora
-              </button>
-
-              {business.logoUrl && (
-                <button
-                  type="button"
-                  onClick={() => updateField('bannerUrl', business.logoUrl!)}
-                  className="px-2.5 py-1.5 rounded-xl bg-purple-50 hover:bg-purple-100 dark:bg-purple-950/60 dark:hover:bg-purple-900/80 text-purple-700 dark:text-purple-300 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-purple-200 dark:border-purple-800"
-                >
-                  <span>🪄</span>
-                  <span>Usar foto de perfil como fondo</span>
-                </button>
-              )}
-
-              <button
-                type="button"
-                onClick={() => updateField('bannerUrl', '/images/nexo-banner.jpg')}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-200/70 hover:bg-slate-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-xs font-medium transition-colors"
-              >
-                Usar Banner High-Tech Nexo
-              </button>
-
+            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
+              <span>* Haz clic en el recuadro para seleccionar una foto de tu celular o computadora</span>
               <button
                 type="button"
                 onClick={() => setShowBannerUrlInput(!showBannerUrlInput)}
-                className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 ml-auto underline"
+                className="text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 underline"
               >
-                {showBannerUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
+                {showBannerUrlInput ? 'Ocultar URL' : 'O pegar URL'}
               </button>
             </div>
 
-            {/* Smart Banner Active Indicator */}
-            {business.bannerUrl && business.logoUrl && business.bannerUrl === business.logoUrl && (
-              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/40 dark:to-indigo-950/40 border border-blue-200/80 dark:border-blue-800/80 text-[11px] text-blue-700 dark:text-blue-300 font-medium">
-                <span>✨</span>
-                <span>Fondo Inteligente: Tu foto de perfil está adaptada automáticamente como portada panorámica.</span>
-              </div>
-            )}
-
             {/* Optional URL input toggle */}
             {showBannerUrlInput && (
-              <div className="pt-2 animate-in fade-in duration-150">
+              <div className="pt-1 animate-in fade-in duration-150">
                 <input
                   type="text"
                   value={business.bannerUrl}
@@ -1093,32 +897,40 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
               )}
             </div>
 
-            {/* Circular Preview & Action */}
-            <div className="flex items-center gap-4">
+            {/* Circular Preview directly clickable with internal text */}
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div
                 onClick={() => logoFileRef.current?.click()}
-                className="relative w-20 h-20 rounded-full border-2 border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-md group cursor-pointer"
-                title="Haz clic para cambiar foto de perfil"
+                className="relative w-24 h-24 rounded-full border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-purple-500 bg-slate-100 dark:bg-zinc-900 overflow-hidden flex flex-col items-center justify-center flex-shrink-0 shadow-md group cursor-pointer transition-all p-2 text-center"
               >
                 {business.logoUrl ? (
-                  <img
-                    src={business.logoUrl}
-                    alt="Logo circular preview"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
-                  />
+                  <>
+                    <img
+                      src={business.logoUrl}
+                      alt="Logo circular preview"
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                    />
+                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1">
+                      <Camera className="w-4 h-4 mb-0.5" />
+                      <span className="text-[8px] font-bold text-center leading-tight">Cambiar foto</span>
+                    </div>
+                  </>
                 ) : (
-                  <span className="text-lg font-bold text-slate-700 dark:text-zinc-300 uppercase">
-                    {business.name.slice(0, 2) || 'LOG'}
-                  </span>
+                  <div className="flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400 p-1 text-center">
+                    <Camera className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
+                    <span className="text-[9px] font-bold leading-tight text-slate-800 dark:text-zinc-200">
+                      Toca aquí para subir foto
+                    </span>
+                  </div>
                 )}
-                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                  <Upload className="w-5 h-5 text-white" />
-                </div>
               </div>
 
-              <div className="flex-1 space-y-2">
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <p className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                  Toca el círculo para subir tu foto o logo desde tu dispositivo
+                </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  Sube tu logotipo o foto personal desde tu computadora (PNG, JPG o WEBP).
+                  Recomendado: imagen cuadrada o circular en alta resolución (PNG, JPG o WEBP).
                 </p>
 
                 {/* Hidden Input file for Logo */}
@@ -1134,51 +946,34 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                   }}
                 />
 
-                <div className="flex flex-wrap items-center gap-2">
-                  <button
-                    type="button"
-                    onClick={() => logoFileRef.current?.click()}
-                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
-                  >
-                    <Upload className="w-3.5 h-3.5" />
-                    Subir foto o logo
-                  </button>
+                {/* Smart Background Sync Toggle */}
+                <div className="pt-1">
+                  <label className="flex items-center gap-2.5 cursor-pointer select-none p-2.5 rounded-xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40 text-left">
+                    <input
+                      type="checkbox"
+                      checked={autoSyncCover}
+                      onChange={(e) => setAutoSyncCover(e.target.checked)}
+                      className="rounded border-slate-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer flex-shrink-0"
+                    />
+                    <div className="flex-1 text-[11px]">
+                      <span className="font-bold text-slate-800 dark:text-zinc-200 block">
+                        Fondo Inteligente Automático
+                      </span>
+                      <span className="text-slate-500 dark:text-zinc-400 block text-[10px]">
+                        Al subir tu foto de perfil, se adaptará como portada panorámica automáticamente.
+                      </span>
+                    </div>
+                  </label>
+                </div>
 
-                  <button
-                    type="button"
-                    onClick={() => updateField('logoUrl', '/images/nexo-logo.jpg')}
-                    className="px-2.5 py-1.5 rounded-xl bg-slate-200/70 hover:bg-slate-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-xs font-medium transition-colors"
-                  >
-                    Usar Logo Nexo
-                  </button>
-
+                <div className="pt-1">
                   <button
                     type="button"
                     onClick={() => setShowLogoUrlInput(!showLogoUrlInput)}
                     className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 underline"
                   >
-                    {showLogoUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
+                    {showLogoUrlInput ? 'Ocultar URL' : 'O pegar URL directa'}
                   </button>
-                </div>
-
-                {/* Smart Background Sync Toggle */}
-                <div className="pt-1">
-                  <label className="flex items-center gap-2.5 cursor-pointer select-none p-2 rounded-xl bg-purple-50/70 dark:bg-purple-950/20 border border-purple-200/60 dark:border-purple-900/40">
-                    <input
-                      type="checkbox"
-                      checked={autoSyncCover}
-                      onChange={(e) => setAutoSyncCover(e.target.checked)}
-                      className="rounded border-slate-300 dark:border-zinc-700 text-purple-600 focus:ring-purple-500 w-4 h-4 cursor-pointer"
-                    />
-                    <div className="flex-1 text-[11px]">
-                      <span className="font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1">
-                        <span>🪄</span> Fondo Inteligente Automático
-                      </span>
-                      <span className="text-slate-500 dark:text-zinc-400 block text-[10px]">
-                        Al subir tu foto de perfil, se adaptará y colocará automáticamente como fondo de portada panorámico.
-                      </span>
-                    </div>
-                  </label>
                 </div>
 
                 {showLogoUrlInput && (
@@ -1216,16 +1011,17 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
         </div>
       )}
 
-      {/* TAB 4: Physical NFC Cards */}
+      {/* TAB 4: Physical NFC Cards & Official QR for Printing */}
       {activeTab === 'cards' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
+        <div className="space-y-5 animate-in fade-in duration-150">
+          {/* Card Link Form */}
           <div className="p-4 rounded-2xl bg-blue-50/70 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60">
             <h4 className="text-xs font-bold text-blue-900 dark:text-blue-300 flex items-center gap-1.5 mb-1">
               <Smartphone className="w-4 h-4 text-blue-600" />
               Vincular Nuevo Chip NFC Físico
             </h4>
             <p className="text-[11px] text-blue-700 dark:text-blue-400 mb-3">
-              Ingresa el código alfanumérico impreso o grabado en tu tarjeta física NFC para activarla de inmediato.
+              Ingresa el código alfanumérico grabado en tu tarjeta física NFC para activarla de inmediato.
             </p>
 
             <div className="flex gap-2">
@@ -1237,6 +1033,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 className="px-3 py-2 rounded-xl border border-blue-200 dark:border-blue-800 text-xs font-mono uppercase bg-white dark:bg-zinc-800 flex-1"
               />
               <button
+                type="button"
                 onClick={handleAddCard}
                 className="px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all"
               >
@@ -1247,58 +1044,137 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
           {/* Cards List */}
           <div className="space-y-2.5">
-            {(business.cards || []).map((card) => (
-              <div
-                key={card.id}
-                className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm"
-              >
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-xs">
-                    NFC
+            <span className="text-xs font-bold text-slate-700 dark:text-zinc-300 block">
+              Chips NFC Registrados ({business.cards?.length || 0}):
+            </span>
+
+            {(business.cards || []).length === 0 ? (
+              <div className="p-4 rounded-2xl border border-dashed border-slate-200 dark:border-zinc-800 text-center text-xs text-slate-400">
+                Aún no has registrado tarjetas o chips NFC físicos.
+              </div>
+            ) : (
+              (business.cards || []).map((card) => (
+                <div
+                  key={card.id}
+                  className="flex items-center justify-between p-3.5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center font-mono font-bold text-xs">
+                      NFC
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
+                          {card.cardCode}
+                        </span>
+                        <span
+                          className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
+                            card.status === 'ACTIVE'
+                              ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
+                              : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
+                          }`}
+                        >
+                          {card.status}
+                        </span>
+                      </div>
+                      <div className="text-[11px] text-slate-500 mt-0.5">
+                        {card.totalTaps} lecturas registradas
+                      </div>
+                    </div>
                   </div>
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <span className="font-mono font-bold text-sm text-slate-900 dark:text-white">
-                        {card.cardCode}
-                      </span>
-                      <span
-                        className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                          card.status === 'ACTIVE'
-                            ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300'
-                            : 'bg-amber-100 text-amber-700 dark:bg-amber-950 dark:text-amber-300'
-                        }`}
-                      >
-                        {card.status}
-                      </span>
-                    </div>
-                    <div className="text-[11px] text-slate-500 mt-0.5">
-                      {card.totalTaps} lecturas registradas
-                    </div>
+
+                  <div className="flex items-center gap-2">
+                    <a
+                      href={`/t/${card.cardCode}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title="Probar redirección de chip"
+                      className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => toggleCardStatus(card.id)}
+                      className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                    >
+                      {card.status === 'ACTIVE' ? 'Pausar' : 'Reactivar'}
+                    </button>
                   </div>
                 </div>
+              ))
+            )}
+          </div>
 
-                <div className="flex items-center gap-2">
-                  <a
-                    href={`/t/${card.cardCode}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    title="Probar redirección de chip"
-                    className="p-2 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-slate-100 dark:hover:bg-zinc-800 transition-colors"
-                  >
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+          {/* ITEM 9: Official QR for physical cards and exhibitor printing directly below registered NFC codes */}
+          <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row items-center gap-5">
+              <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm flex-shrink-0">
+                {qrPng ? (
+                  <img
+                    src={qrPng}
+                    alt="QR Oficial"
+                    className="w-32 h-32 object-contain"
+                  />
+                ) : (
+                  <div className="w-32 h-32 flex items-center justify-center text-xs text-slate-400">
+                    Generando QR...
+                  </div>
+                )}
+              </div>
+
+              <div className="flex-1 space-y-2 text-center sm:text-left">
+                <div className="flex items-center justify-center sm:justify-start gap-1.5 text-xs font-bold text-slate-900 dark:text-white uppercase tracking-wider">
+                  <QrCode className="w-4 h-4 text-blue-600" />
+                  <span>Código QR Oficial para Tarjetas y Exhibidores</span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-zinc-400">
+                  Este código QR enlaza directamente a tu perfil público y es el que se imprime o graba en tus tarjetas físicas y exhibidores de mostrador.
+                </p>
+
+                <div className="inline-block px-3 py-1 rounded-lg bg-slate-100 dark:bg-zinc-800 text-[11px] font-mono text-slate-700 dark:text-zinc-300 break-all">
+                  {profileUrl}
+                </div>
+
+                <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2 pt-1">
                   <button
-                    onClick={() => toggleCardStatus(card.id)}
-                    className="text-xs font-semibold px-2.5 py-1 rounded-lg border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-600 dark:text-zinc-300"
+                    type="button"
+                    onClick={handleDownloadQr}
+                    className="flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow transition-all active:scale-95"
                   >
-                    {card.status === 'ACTIVE' ? 'Pausar' : 'Reactivar'}
+                    <Download className="w-3.5 h-3.5" />
+                    <span>Descargar QR (Alta Resolución PNG)</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleCopyLink}
+                    className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 hover:bg-slate-50 dark:hover:bg-zinc-800 text-slate-700 dark:text-zinc-300 text-xs font-semibold transition-all active:scale-95"
+                  >
+                    {copiedQr ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                    <span>{copiedQr ? 'Enlace Copiado' : 'Copiar Enlace'}</span>
                   </button>
                 </div>
               </div>
-            ))}
+            </div>
           </div>
         </div>
       )}
+
+      {/* SVG Icon Picker Modal for custom business buttons */}
+      <IconPickerModal
+        isOpen={pickerModalOpen}
+        selectedIconId={business.links.find((l) => l.id === activePickingLinkId)?.iconName}
+        onSelect={(iconId) => {
+          if (activePickingLinkId) {
+            updateLink(activePickingLinkId, { iconName: iconId });
+          }
+        }}
+        onClose={() => {
+          setPickerModalOpen(false);
+          setActivePickingLinkId(null);
+        }}
+      />
     </div>
   );
 }

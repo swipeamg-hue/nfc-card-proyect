@@ -26,6 +26,7 @@ import {
   PhoneSvg,
   MapPinSvg,
 } from '@/components/ui/svg-icons';
+import { getBusinessIconComponent } from '@/components/ui/business-icons';
 
 interface ActionCardProps {
   link: BusinessLink;
@@ -127,44 +128,36 @@ export function ActionCard({ link, onTrackClick }: ActionCardProps) {
 
     // 3. Servicios y botones temáticos con SVGs dedicados
     const iconName = link.iconName || '';
-    let iconElement = <ExternalLink className="w-5 h-5 text-white" />;
+    const DynamicIcon = getBusinessIconComponent(iconName);
+    let iconElement = <DynamicIcon className="w-5 h-5 text-white" />;
     let defaultBg = 'bg-slate-700';
     let defaultBorder = 'hover:border-slate-400';
 
     if (link.type === 'menu' || iconName === 'utensils') {
-      iconElement = <UtensilsSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-amber-500 to-orange-500';
       defaultBorder = 'hover:border-amber-400';
     } else if (link.type === 'booking' || iconName === 'calendar') {
-      iconElement = <CalendarSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-violet-600 to-indigo-600';
       defaultBorder = 'hover:border-purple-300';
     } else if (iconName === 'sparkles') {
-      iconElement = <SparklesBeautySvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-pink-500 to-rose-500';
       defaultBorder = 'hover:border-pink-300';
     } else if (iconName === 'scissors') {
-      iconElement = <ScissorsSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-rose-500 to-pink-600';
       defaultBorder = 'hover:border-rose-300';
     } else if (iconName === 'coffee') {
-      iconElement = <CoffeeSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-amber-700 to-yellow-800';
       defaultBorder = 'hover:border-amber-400';
     } else if (iconName === 'shopping-bag') {
-      iconElement = <ShoppingBagSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-emerald-600 to-teal-600';
       defaultBorder = 'hover:border-emerald-300';
     } else if (iconName === 'star') {
-      iconElement = <StarSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-amber-400 to-yellow-500';
       defaultBorder = 'hover:border-yellow-300';
     } else if (iconName === 'clock') {
-      iconElement = <ClockSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-gradient-to-r from-blue-600 to-indigo-600';
       defaultBorder = 'hover:border-blue-300';
     } else if (iconName === 'credit-card') {
-      iconElement = <CreditCardSvg className="w-5 h-5 text-white" />;
       defaultBg = 'bg-slate-800';
       defaultBorder = 'hover:border-slate-500';
     }

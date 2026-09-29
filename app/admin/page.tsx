@@ -28,6 +28,7 @@ import {
   Lock,
   ShieldAlert,
   LogOut,
+  Crown,
 } from 'lucide-react';
 import { Business, NfcCard } from '@/types/business';
 import { AuthUser } from '@/types/auth';
@@ -107,8 +108,8 @@ export default function SuperAdminPage() {
     };
   }, []);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.replace('/login');
   };
 
@@ -413,7 +414,7 @@ export default function SuperAdminPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 h-16 sm:h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-amber-500 to-indigo-600 flex items-center justify-center text-white font-bold shadow-lg shadow-amber-500/20">
-              <span className="text-xl">👑</span>
+              <Crown className="w-5 h-5 text-white" />
             </div>
             <div>
               <div className="flex items-center gap-2">

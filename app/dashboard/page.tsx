@@ -26,6 +26,7 @@ import {
   Users,
   LogOut,
   ShieldAlert,
+  Crown,
 } from 'lucide-react';
 
 import { saveBusinessToSupabase, getAllBusinesses, getBusinessBySlug } from '@/lib/supabase';
@@ -134,8 +135,8 @@ export default function DashboardPage() {
     };
   }, [router]);
 
-  const handleLogout = () => {
-    logout();
+  const handleLogout = async () => {
+    await logout();
     router.replace('/login');
   };
 
@@ -250,7 +251,7 @@ export default function DashboardPage() {
               <>
                 <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/90 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700/80 shadow-xs">
                   <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1">
-                    <span>👑</span>
+                    <Crown className="w-3.5 h-3.5 text-amber-500" />
                     <span className="hidden xl:inline">Empresa:</span>
                   </span>
                   <select
@@ -324,23 +325,7 @@ export default function DashboardPage() {
               </div>
             )}
 
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-1.5 px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm active:scale-95 transition-all"
-            >
-              {savedSuccess ? (
-                <>
-                  <Check className="w-4 h-4 stroke-[3]" />
-                  <span>¡Guardado!</span>
-                </>
-              ) : (
-                <>
-                  <Sparkles className="w-4 h-4" />
-                  <span className="hidden xs:inline">Guardar Cambios</span>
-                  <span className="xs:hidden">Guardar</span>
-                </>
-              )}
-            </button>
+
 
             <Link
               href={`/${business.slug}`}
@@ -441,7 +426,11 @@ export default function DashboardPage() {
                   </div>
                 </div>
 
-                <ProfileEditor business={business} onChange={handleBusinessChange} />
+                <ProfileEditor
+                  business={business}
+                  onChange={handleBusinessChange}
+                  onSave={handleSave}
+                />
               </div>
 
               {/* Right Column: Live Phone Simulator */}

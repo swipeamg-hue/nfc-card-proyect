@@ -46,23 +46,30 @@ export function AnalyticsView({ business }: AnalyticsViewProps) {
     );
   }, [profileUrl]);
 
+  const totalNfcTaps = (business.cards || []).reduce((acc, c) => acc + (c.totalTaps || 0), 0);
+  const totalQrScans = 0;
+  const totalViews = totalNfcTaps + totalQrScans;
+  const vcardDownloads = 0;
+  const conversionRate = totalViews > 0 ? `${Math.round((vcardDownloads / totalViews) * 100)}%` : '0.0%';
+
   const metrics = {
-    totalViews: 470,
-    nfcTaps: 342,
-    qrScans: 98,
-    direct: 30,
-    vcardDownloads: 156,
-    conversionRate: '33.2%',
+    totalViews,
+    nfcTaps: totalNfcTaps,
+    qrScans: totalQrScans,
+    direct: 0,
+    vcardDownloads,
+    conversionRate,
   };
 
-  const linkBreakdown = [
-    { name: 'WhatsApp', clicks: 189, color: 'bg-emerald-500', share: 45 },
-    { name: 'Llamar ahora', clicks: 82, color: 'bg-blue-600', share: 20 },
-    { name: 'Descarga vCard', clicks: 156, color: 'bg-indigo-600', share: 37 },
-    { name: 'Instagram', clicks: 64, color: 'bg-pink-500', share: 15 },
-    { name: 'Sitio Web', clicks: 53, color: 'bg-cyan-500', share: 12 },
-    { name: 'LinkedIn', clicks: 39, color: 'bg-blue-800', share: 9 },
-  ];
+  const linkBreakdown = (business.links || []).map((l, index) => {
+    const colors = ['bg-emerald-500', 'bg-blue-600', 'bg-indigo-600', 'bg-pink-500', 'bg-cyan-500', 'bg-amber-500'];
+    return {
+      name: l.title || l.type,
+      clicks: 0,
+      color: colors[index % colors.length],
+      share: 0,
+    };
+  });
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(profileUrl);
@@ -142,26 +149,35 @@ export function AnalyticsView({ business }: AnalyticsViewProps) {
           Rendimiento por Botón de Enlace
         </h4>
 
-        <div className="space-y-3">
-          {linkBreakdown.map((item) => (
-            <div key={item.name} className="space-y-1">
-              <div className="flex items-center justify-between text-xs">
-                <span className="font-semibold text-slate-700 dark:text-zinc-300">
-                  {item.name}
-                </span>
-                <span className="text-slate-500 font-mono">
-                  {item.clicks} clics ({item.share}%)
-                </span>
+        {linkBreakdown.length === 0 ? (
+          <p className="text-xs text-slate-500 py-3 text-center">
+            No tienes botones de enlace configurados aún.
+          </p>
+        ) : (
+          <div className="space-y-3">
+            {linkBreakdown.map((item) => (
+              <div key={item.name} className="space-y-1">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-semibold text-slate-700 dark:text-zinc-300">
+                    {item.name}
+                  </span>
+                  <span className="text-slate-500 font-mono">
+                    {item.clicks} clics ({item.share}%)
+                  </span>
+                </div>
+                <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
+                  <div
+                    className={`h-full ${item.color} rounded-full transition-all duration-500`}
+                    style={{ width: `${Math.max(item.share, 2)}%` }}
+                  />
+                </div>
               </div>
-              <div className="w-full h-2 rounded-full bg-slate-100 dark:bg-zinc-800 overflow-hidden">
-                <div
-                  className={`h-full ${item.color} rounded-full transition-all duration-500`}
-                  style={{ width: `${Math.min(item.share * 2, 100)}%` }}
-                />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
+        <p className="text-[11px] text-slate-400 dark:text-zinc-500 mt-2 italic">
+          * Las métricas se registrarán y actualizarán en tiempo real tan pronto tus clientes toquen tu tarjeta NFC o escaneen tu QR.
+        </p>
       </div>
 
       {/* QR Code Ready for Printing */}

@@ -341,7 +341,21 @@ export function registerClient(params: {
   return { success: true, user: safeUser };
 }
 
-// Logout
-export function logout() {
+export async function logout(): Promise<void> {
   setActiveSession(null);
+  try {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('tapcard_current_auth_session');
+      localStorage.removeItem('tapcard_active_business_id');
+      for (let i = localStorage.length - 1; i >= 0; i--) {
+        const key = localStorage.key(i);
+        if (key && (key.startsWith('sb-') || key.includes('auth-token') || key.includes('supabase'))) {
+          localStorage.removeItem(key);
+        }
+      }
+      await supabase.auth.signOut();
+    }
+  } catch (err) {
+    console.warn('Error during Supabase sign out:', err);
+  }
 }
