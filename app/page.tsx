@@ -25,12 +25,16 @@ import {
   Check,
   Clock,
   Lock,
+  Cookie,
+  FileText,
+  X,
 } from 'lucide-react';
 import { AuthUser } from '@/types/auth';
 import { getActiveSession, logout } from '@/lib/auth';
 
 export default function HomePage() {
   const [session, setSession] = useState<AuthUser | null>(null);
+  const [legalModal, setLegalModal] = useState<'privacy' | 'cookies' | 'terms' | null>(null);
 
   useEffect(() => {
     try {
@@ -733,19 +737,33 @@ export default function HomePage() {
             <span>• Tecnología NFC & QR para Empresas</span>
           </div>
 
-          <div className="flex items-center gap-6 text-slate-400">
-            <a href="#servicios" className="hover:text-white transition-colors">
-              Servicios
-            </a>
-            <a href="#como-funciona" className="hover:text-white transition-colors">
-              Cómo Funciona
-            </a>
-            <a href="#planes" className="hover:text-white transition-colors">
-              Precios
-            </a>
-            <Link href="/login" className="hover:text-white transition-colors">
-              Acceso a Clientes
-            </Link>
+          <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-slate-400">
+            <button
+              type="button"
+              onClick={() => setLegalModal('privacy')}
+              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+            >
+              <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
+              <span>Política de Privacidad</span>
+            </button>
+            <span className="text-slate-700 hidden sm:inline">•</span>
+            <button
+              type="button"
+              onClick={() => setLegalModal('cookies')}
+              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+            >
+              <Cookie className="w-3.5 h-3.5 text-amber-500" />
+              <span>Política de Cookies</span>
+            </button>
+            <span className="text-slate-700 hidden sm:inline">•</span>
+            <button
+              type="button"
+              onClick={() => setLegalModal('terms')}
+              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+            >
+              <FileText className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Términos y Condiciones</span>
+            </button>
           </div>
 
           <div>
@@ -753,6 +771,127 @@ export default function HomePage() {
           </div>
         </div>
       </footer>
+
+      {/* MODAL DE POLÍTICAS LEGALES */}
+      {legalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
+          <div className="relative w-full max-w-xl bg-slate-900 border border-slate-700/80 rounded-3xl p-6 sm:p-8 shadow-2xl overflow-hidden max-h-[88vh] flex flex-col justify-between">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                  {legalModal === 'privacy' && <ShieldCheck className="w-5 h-5 text-blue-400" />}
+                  {legalModal === 'cookies' && <Cookie className="w-5 h-5 text-amber-400" />}
+                  {legalModal === 'terms' && <FileText className="w-5 h-5 text-emerald-400" />}
+                </div>
+                <div>
+                  <h3 className="text-base sm:text-lg font-bold text-white">
+                    {legalModal === 'privacy' && 'Política de Privacidad'}
+                    {legalModal === 'cookies' && 'Política de Cookies'}
+                    {legalModal === 'terms' && 'Términos y Condiciones del Servicio'}
+                  </h3>
+                  <span className="text-[11px] text-slate-400">
+                    TapCard SaaS • Actualizado para 2026
+                  </span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => setLegalModal(null)}
+                className="p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Modal Content Scrollable */}
+            <div className="my-4 overflow-y-auto pr-2 space-y-4 text-xs text-slate-300 leading-relaxed max-h-[55vh]">
+              {legalModal === 'privacy' && (
+                <>
+                  <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-slate-200">
+                    <strong className="block text-white mb-1">1. Compromiso de Protección de Datos</strong>
+                    En TapCard SaaS respetamos tu privacidad. Tus datos personales y de tu negocio son utilizados exclusivamente para la generación de tu micro-landing digital, tarjetas NFC y descarga de tu contacto vCard.
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">2. No Venta de Información</h4>
+                    <p>Bajo ninguna circunstancia vendemos, alquilamos ni compartimos tus números telefónicos, correos electrónicos ni la información de los clientes que escanean tus tarjetas con terceros para fines de publicidad masiva o spam.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">3. Derechos de Control y Supresión (ARCO)</h4>
+                    <p>Tienes en todo momento el control absoluto para modificar, actualizar o dar de baja la información de tu tarjeta digital directamente desde tu panel de administración.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">4. Seguridad y Cifrado SSL</h4>
+                    <p>Todas las comunicaciones y accesos a tu panel se transmiten bajo cifrado seguro SSL/TLS de 256 bits en servidores de alta disponibilidad.</p>
+                  </div>
+                </>
+              )}
+
+              {legalModal === 'cookies' && (
+                <>
+                  <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-slate-200">
+                    <strong className="block text-white mb-1">1. ¿Qué son y cómo usamos las Cookies?</strong>
+                    Las cookies son pequeños archivos de texto que se almacenan de forma segura en tu navegador para permitir el funcionamiento correcto del software.
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">2. Cookies Estrictamente Necesarias</h4>
+                    <p>Utilizamos cookies y almacenamiento local exclusivamente para mantener iniciada tu sesión de forma segura, recordar tu tienda asignada y guardar tus preferencias de diseño.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">3. Sin Rastreo Invasivo de Terceros</h4>
+                    <p>Nuestra plataforma no emplea cookies de rastreo publicitario invasivo ni monitorea tu actividad en otros sitios web.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">4. Administración y Desactivación</h4>
+                    <p>Puedes deshabilitar o limpiar las cookies en cualquier momento a través del menú de configuración de tu navegador (Chrome, Safari, Edge, Firefox).</p>
+                  </div>
+                </>
+              )}
+
+              {legalModal === 'terms' && (
+                <>
+                  <div className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 text-slate-200">
+                    <strong className="block text-white mb-1">1. Aceptación del Servicio</strong>
+                    Al registrarte en TapCard SaaS aceptas los presentes términos para la creación, personalización y uso de tarjetas inteligentes NFC y códigos QR corporativos.
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">2. Prueba Gratuita de 14 Días</h4>
+                    <p>El registro otorga acceso completo a una prueba sin costo durante 14 días sin necesidad de ingresar tarjetas bancarias ni compromisos de permanencia forzosa.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">3. Tarjetas Físicas y Displays Acrílicos</h4>
+                    <p>El equipamiento físico (tarjetas con chip NTAG y displays de mostrador) se suministran listos para usar y vinculados a tu enlace oficial. El usuario es responsable de la veracidad de los datos que publica.</p>
+                  </div>
+
+                  <div>
+                    <h4 className="font-bold text-white mb-1">4. Disponibilidad y Garantía</h4>
+                    <p>Ofrecemos una garantía de disponibilidad del 99.9% en nuestra red de servidores para asegurar que tus clientes siempre puedan acceder a tu perfil al hacer tap con tu tarjeta.</p>
+                  </div>
+                </>
+              )}
+            </div>
+
+            {/* Modal Footer */}
+            <div className="pt-3 border-t border-slate-800 flex justify-end">
+              <button
+                type="button"
+                onClick={() => setLegalModal(null)}
+                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md transition-all active:scale-95"
+              >
+                Entendido y Aceptar
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
