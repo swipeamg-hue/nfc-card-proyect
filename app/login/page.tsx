@@ -95,69 +95,117 @@ export default function LoginPage() {
       }
     } catch {}
 
-    // Check if user just returned from Supabase Google OAuth
-    async function checkGoogleAuth() {
+    // Authenticate user against Supabase and prevent duplicate onboarding
+    async function processAuthUser(user: { email?: string; user_metadata?: any }) {
       try {
-        const { data: { session: supaSession } } = await supabase.auth.getSession();
-        if (supaSession?.user) {
-          const email = supaSession.user.email?.toLowerCase().trim();
-          const fullName =
-            supaSession.user.user_metadata?.full_name ||
-            supaSession.user.user_metadata?.name ||
-            '';
+        const email = user.email?.toLowerCase().trim();
+        if (!email) return;
 
-          if (!email) return;
+        const fullName =
+          user.user_metadata?.full_name ||
+          user.user_metadata?.name ||
+          '';
 
-          // EXCLUSIVE SUPER ADMIN CHECK
-          if (email === 'swipeamg@gmail.com') {
-            const superAdminUser: AuthUser = {
-              id: 'usr-admin-swipeamg',
-              email: 'swipeamg@gmail.com',
-              name: fullName || 'Super Administrador (SwipeAMG)',
-              role: 'SUPER_ADMIN',
-              createdAt: new Date().toISOString(),
-            };
-            setActiveSession(superAdminUser);
-            router.push('/admin');
-            return;
-          }
-
-          // Check if this user is already registered with a business in app_users
-          const { data: dbUser } = await supabase
-            .from('app_users')
-            .select('*')
-            .eq('email', email)
-            .maybeSingle();
-
-          if (dbUser && (dbUser.business_id || dbUser.role === 'SUPER_ADMIN')) {
-            // Existing user: Log them directly into their business dashboard
-            const safeUser: AuthUser = {
-              id: dbUser.id,
-              email: dbUser.email,
-              name: dbUser.name,
-              role: dbUser.role,
-              businessId: dbUser.business_id,
-              businessSlug: dbUser.business_slug,
-              createdAt: dbUser.created_at,
-            };
-            setActiveSession(safeUser);
-            router.push(safeUser.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
-            return;
-          }
-
-          // First time user via Google! Prompt onboarding to gather business info
-          setGoogleUserData({
-            email,
-            name: fullName || email.split('@')[0],
-          });
-          setIsOnboardingOpen(true);
+        // 1. EXCLUSIVE SUPER ADMIN CHECK
+        if (email === 'swipeamg@gmail.com') {
+          const superAdminUser: AuthUser = {
+            id: 'usr-admin-swipeamg',
+            email: 'swipeamg@gmail.com',
+            name: fullName || 'Super Administrador (SwipeAMG)',
+            role: 'SUPER_ADMIN',
+            createdAt: new Date().toISOString(),
+          };
+          setActiveSession(superAdminUser);
+          router.push('/admin');
+          return;
         }
+
+        // 2. Check if this user is already registered in app_users
+        const { data: dbUser } = await supabase
+          .from('app_users')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (dbUser && (dbUser.business_id || dbUser.role === 'SUPER_ADMIN')) {
+          const safeUser: AuthUser = {
+            id: dbUser.id,
+            email: dbUser.email,
+            name: dbUser.name,
+            role: dbUser.role,
+            businessId: dbUser.business_id,
+            businessSlug: dbUser.business_slug,
+            createdAt: dbUser.created_at,
+          };
+          setActiveSession(safeUser);
+          router.push(safeUser.role === 'SUPER_ADMIN' ? '/admin' : '/dashboard');
+          return;
+        }
+
+        // 3. Fallback: Check if a business already exists with this email in businesses table
+        const { data: existingBiz } = await supabase
+          .from('businesses')
+          .select('*')
+          .eq('email', email)
+          .maybeSingle();
+
+        if (existingBiz) {
+          const newUserId = 'usr-' + Date.now();
+          await supabase.from('app_users').upsert(
+            {
+              id: newUserId,
+              email: email,
+              name: fullName || email.split('@')[0],
+              role: 'CLIENT',
+              business_id: existingBiz.id,
+              business_slug: existingBiz.slug,
+              password_hash: 'google-oauth-linked',
+            },
+            { onConflict: 'email' }
+          );
+
+          const safeUser: AuthUser = {
+            id: newUserId,
+            email: email,
+            name: fullName || email.split('@')[0],
+            role: 'CLIENT',
+            businessId: existingBiz.id,
+            businessSlug: existingBiz.slug,
+            createdAt: new Date().toISOString(),
+          };
+          setActiveSession(safeUser);
+          router.push('/dashboard');
+          return;
+        }
+
+        // 4. Truly new user via Google! Prompt onboarding
+        setGoogleUserData({
+          email,
+          name: fullName || email.split('@')[0],
+        });
+        setIsOnboardingOpen(true);
       } catch (err) {
         console.warn('OAuth session check notice:', err);
       }
     }
 
-    checkGoogleAuth();
+    // A. Check current Supabase session
+    supabase.auth.getSession().then(({ data: { session: currentSession } }) => {
+      if (currentSession?.user) {
+        processAuthUser(currentSession.user);
+      }
+    });
+
+    // B. Listen for OAuth redirect return (when redirected with access token hash)
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, authSession) => {
+      if ((event === 'SIGNED_IN' || event === 'INITIAL_SESSION') && authSession?.user) {
+        await processAuthUser(authSession.user);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
   }, [router]);
 
   // Handle Google OAuth trigger

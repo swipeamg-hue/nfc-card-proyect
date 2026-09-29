@@ -186,8 +186,68 @@ export async function registerClientAsync(params: {
   category: string;
 }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
   const cleanEmail = params.email.toLowerCase().trim();
-  const users = getStoredUsers();
 
+  // 1. Check if user already exists in Supabase app_users
+  try {
+    const { data: existingCloudUser } = await supabase
+      .from('app_users')
+      .select('*')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (existingCloudUser) {
+      const safeUser: AuthUser = {
+        id: existingCloudUser.id,
+        email: existingCloudUser.email,
+        name: existingCloudUser.name,
+        role: existingCloudUser.role,
+        businessId: existingCloudUser.business_id,
+        businessSlug: existingCloudUser.business_slug,
+        createdAt: existingCloudUser.created_at,
+      };
+      setActiveSession(safeUser);
+      return { success: true, user: safeUser };
+    }
+
+    // 2. Check if business already exists in businesses by email
+    const { data: existingBiz } = await supabase
+      .from('businesses')
+      .select('*')
+      .eq('email', cleanEmail)
+      .maybeSingle();
+
+    if (existingBiz) {
+      const existingUserId = 'usr-' + Date.now();
+      await supabase.from('app_users').upsert(
+        {
+          id: existingUserId,
+          email: cleanEmail,
+          name: params.userName.trim(),
+          role: 'CLIENT',
+          business_id: existingBiz.id,
+          business_slug: existingBiz.slug,
+          password_hash: params.pass.trim(),
+        },
+        { onConflict: 'email' }
+      );
+
+      const safeUser: AuthUser = {
+        id: existingUserId,
+        email: cleanEmail,
+        name: params.userName.trim(),
+        role: 'CLIENT',
+        businessId: existingBiz.id,
+        businessSlug: existingBiz.slug,
+        createdAt: new Date().toISOString(),
+      };
+      setActiveSession(safeUser);
+      return { success: true, user: safeUser };
+    }
+  } catch (err) {
+    console.warn('[Supabase] Error checking existing user:', err);
+  }
+
+  const users = getStoredUsers();
   if (users.some((u) => u.email.toLowerCase() === cleanEmail)) {
     return { success: false, error: 'Ya existe una cuenta con este correo electrónico.' };
   }
@@ -199,6 +259,19 @@ export async function registerClientAsync(params: {
     .replace(/[^a-z0-9]/g, '-')
     .replace(/-+/g, '-');
   if (!slug) slug = 'negocio-' + Date.now().toString(36);
+
+  // Verify slug uniqueness in Supabase
+  try {
+    const { data: slugCheck } = await supabase
+      .from('businesses')
+      .select('id, slug')
+      .eq('slug', slug)
+      .maybeSingle();
+
+    if (slugCheck) {
+      slug = `${slug}-${Math.floor(100 + Math.random() * 900)}`;
+    }
+  } catch {}
 
   const newBusinessId = 'biz-' + Date.now();
   const newUserId = 'usr-' + Date.now();
@@ -269,19 +342,26 @@ export async function registerClientAsync(params: {
     console.error('Error saving new business in register', e);
   }
 
-  // 2. Persist to Supabase in the cloud
+  // 2. Persist to Supabase in the cloud with retry for slug
   try {
-    await saveBusinessToSupabase(newBusiness);
+    const saveRes = await saveBusinessToSupabase(newBusiness);
+    if (!saveRes.success && saveRes.error?.includes('unique')) {
+      newBusiness.slug = `${newBusiness.slug}-${Date.now().toString(36)}`;
+      await saveBusinessToSupabase(newBusiness);
+    }
 
-    await supabase.from('app_users').insert({
-      id: newUserId,
-      email: cleanEmail,
-      name: params.userName.trim(),
-      role: 'CLIENT',
-      business_id: newBusinessId,
-      business_slug: slug,
-      password_hash: params.pass.trim(),
-    });
+    await supabase.from('app_users').upsert(
+      {
+        id: newUserId,
+        email: cleanEmail,
+        name: params.userName.trim(),
+        role: 'CLIENT',
+        business_id: newBusinessId,
+        business_slug: newBusiness.slug,
+        password_hash: params.pass.trim(),
+      },
+      { onConflict: 'email' }
+    );
   } catch (e) {
     console.warn('[Supabase] Failed to write new user to cloud:', e);
   }
