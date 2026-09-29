@@ -7,8 +7,8 @@ export const mockNexoBusiness: Business = {
   isVerified: true,
   category: 'Soluciones Tecnológicas & Consultoría B2B',
   bio: 'Impulsamos el crecimiento de empresas mediante infraestructura en la nube, digitalización de procesos y hardware NFC para networking corporativo.',
-  bannerUrl: '/images/nexo-banner.jpg',
-  logoUrl: '/images/nexo-logo.jpg',
+  bannerUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop',
+  logoUrl: 'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop',
   themeColor: '#0284c7', // Cyan / Sky blue
   phone: '+52 55 8421 9000',
   whatsapp: '+525584219000',
@@ -119,8 +119,8 @@ export const mockRestaurantBusiness: Business = {
   isVerified: true,
   category: 'Restaurante & Cortes Finos a la Parrilla',
   bio: 'La mejor experiencia gastronómica de cortes premium y cocina de autor al fuego de leña. Ambiente exclusivo y coctelería artesanal.',
-  bannerUrl: '',
-  logoUrl: '',
+  bannerUrl: 'https://images.unsplash.com/photo-1544025162-d76694265947?q=80&w=1200&auto=format&fit=crop',
+  logoUrl: 'https://images.unsplash.com/photo-1577219491135-ce391730fb2c?q=80&w=400&auto=format&fit=crop',
   themeColor: '#f59e0b', // Amber / Orange
   phone: '+52 55 9876 5432',
   whatsapp: '+525598765432',
@@ -218,8 +218,8 @@ export const mockSalonBusiness: Business = {
   isVerified: true,
   category: 'Estética, Uñas Esculpidas & Spa Facial',
   bio: 'Estudio de belleza especializado en manicura rusa, nail art de tendencia, lash lifting y tratamientos faciales personalizados.',
-  bannerUrl: '',
-  logoUrl: '',
+  bannerUrl: 'https://images.unsplash.com/photo-1560066984-138dadb4c035?q=80&w=1200&auto=format&fit=crop',
+  logoUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=400&auto=format&fit=crop',
   themeColor: '#ec4899', // Pink
   phone: '+52 55 4321 8765',
   whatsapp: '+525543218765',

@@ -35,6 +35,12 @@ export function PublicProfile({
         if (saved) {
           const parsed = JSON.parse(saved);
           if (parsed && parsed.slug === initialBusiness.slug) {
+            if (!parsed.bannerUrl || parsed.bannerUrl.startsWith('/images/')) {
+              parsed.bannerUrl = initialBusiness.bannerUrl;
+            }
+            if (!parsed.logoUrl || parsed.logoUrl.startsWith('/images/')) {
+              parsed.logoUrl = initialBusiness.logoUrl;
+            }
             setBusiness(parsed);
           }
         }

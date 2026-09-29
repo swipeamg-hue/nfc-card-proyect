@@ -67,8 +67,18 @@ export default function DashboardPage() {
         if (savedList) {
           const parsed = JSON.parse(savedList);
           if (Array.isArray(parsed) && parsed.length > 0) {
-            loadedBusinesses = parsed;
-            setAllBusinesses(parsed);
+            const healed = parsed.map((b) => {
+              if (b.slug === 'nexosoluciones') {
+                return {
+                  ...b,
+                  bannerUrl: b.bannerUrl?.startsWith('/images/') ? mockNexoBusiness.bannerUrl : (b.bannerUrl || mockNexoBusiness.bannerUrl),
+                  logoUrl: b.logoUrl?.startsWith('/images/') ? mockNexoBusiness.logoUrl : (b.logoUrl || mockNexoBusiness.logoUrl),
+                };
+              }
+              return b;
+            });
+            loadedBusinesses = healed;
+            setAllBusinesses(healed);
           }
         } else {
           localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(DEFAULT_BUSINESSES));
@@ -100,6 +110,14 @@ export default function DashboardPage() {
         if (savedActive) {
           const parsedActive = JSON.parse(savedActive);
           if (parsedActive && parsedActive.id) {
+            if (parsedActive.slug === 'nexosoluciones') {
+              if (!parsedActive.bannerUrl || parsedActive.bannerUrl.startsWith('/images/')) {
+                parsedActive.bannerUrl = mockNexoBusiness.bannerUrl;
+              }
+              if (!parsedActive.logoUrl || parsedActive.logoUrl.startsWith('/images/')) {
+                parsedActive.logoUrl = mockNexoBusiness.logoUrl;
+              }
+            }
             setBusiness(parsedActive);
             setLastSavedTime('Sesión restaurada');
           }
