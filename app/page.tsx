@@ -1,3 +1,6 @@
+'use client';
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Smartphone,
@@ -10,9 +13,29 @@ import {
   ExternalLink,
   Download,
   CheckCircle,
+  LogIn,
+  LogOut,
+  UserPlus,
 } from 'lucide-react';
+import { AuthUser } from '@/types/auth';
+import { getActiveSession, logout } from '@/lib/auth';
 
 export default function HomePage() {
+  const [session, setSession] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    try {
+      if (typeof window !== 'undefined') {
+        setSession(getActiveSession());
+      }
+    } catch {}
+  }, []);
+
+  const handleLogout = () => {
+    logout();
+    setSession(null);
+  };
+
   return (
     <div className="min-h-screen bg-slate-950 text-slate-100 selection:bg-blue-600 selection:text-white flex flex-col justify-between">
       {/* Background radial gradient glow */}
@@ -34,22 +57,57 @@ export default function HomePage() {
           </div>
 
           <div className="flex items-center gap-2 sm:gap-3">
-            <Link
-              href="/admin"
-              className="text-xs font-bold px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-all border border-amber-500/30 flex items-center gap-1"
-            >
-              <span>👑</span>
-              <span className="hidden xs:inline">Super Admin</span>
-            </Link>
-            <Link
-              href="/dashboard"
-              className="text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
-            >
-              Panel PyME
-            </Link>
+            {session ? (
+              <>
+                {session.role === 'SUPER_ADMIN' ? (
+                  <Link
+                    href="/admin"
+                    className="text-xs font-bold px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-all border border-amber-500/30 flex items-center gap-1"
+                  >
+                    <span>👑</span>
+                    <span className="hidden xs:inline">Super Admin</span>
+                  </Link>
+                ) : null}
+
+                <Link
+                  href="/dashboard"
+                  className="text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
+                >
+                  {session.role === 'SUPER_ADMIN' ? 'Panel SaaS' : 'Mi Tienda'}
+                </Link>
+
+                <button
+                  onClick={handleLogout}
+                  title="Cerrar sesión"
+                  className="p-2 rounded-xl border border-rose-900/40 text-rose-400 hover:bg-rose-950/40 transition-colors"
+                >
+                  <LogOut className="w-3.5 h-3.5" />
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60 flex items-center gap-1.5"
+                >
+                  <LogIn className="w-3.5 h-3.5" />
+                  <span>Iniciar Sesión</span>
+                </Link>
+
+                <Link
+                  href="/login"
+                  className="text-xs font-bold px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95 flex items-center gap-1.5"
+                >
+                  <UserPlus className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Crear Cuenta</span>
+                  <span className="sm:hidden">Registro</span>
+                </Link>
+              </>
+            )}
+
             <Link
               href="/nexosoluciones"
-              className="text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95"
+              className="hidden md:flex text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl border border-slate-700 hover:bg-slate-800 text-slate-300 transition-all"
             >
               Demo Móvil
             </Link>
@@ -78,21 +136,49 @@ export default function HomePage() {
 
         {/* CTA Buttons */}
         <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-xl sm:max-w-none mx-auto">
-          <Link
-            href="/admin"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-sm shadow-lg shadow-amber-500/10 transition-all active:scale-95 text-center"
-          >
-            <span>👑</span>
-            <span>Directorio Super Admin SaaS</span>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-white" />
-            <span>Abrir Dashboard PyME</span>
-          </Link>
+          {!session ? (
+            <>
+              <Link
+                href="/login"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center"
+              >
+                <LogIn className="w-4 h-4" />
+                <span>Iniciar Sesión en el SaaS</span>
+              </Link>
+              <Link
+                href="/login"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-sm shadow transition-all active:scale-95 text-center"
+              >
+                <UserPlus className="w-4 h-4 text-blue-400" />
+                <span>Registrar Mi Negocio (PyME)</span>
+              </Link>
+            </>
+          ) : session.role === 'SUPER_ADMIN' ? (
+            <>
+              <Link
+                href="/admin"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-sm shadow-lg shadow-amber-500/10 transition-all active:scale-95 text-center"
+              >
+                <span>👑</span>
+                <span>Directorio Super Admin SaaS</span>
+              </Link>
+              <Link
+                href="/dashboard"
+                className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center"
+              >
+                <SlidersHorizontal className="w-4 h-4 text-white" />
+                <span>Abrir Dashboard Global</span>
+              </Link>
+            </>
+          ) : (
+            <Link
+              href="/dashboard"
+              className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center"
+            >
+              <SlidersHorizontal className="w-4 h-4 text-white" />
+              <span>Ir a Mi Panel de Negocio</span>
+            </Link>
+          )}
 
           <Link
             href="/nexosoluciones"

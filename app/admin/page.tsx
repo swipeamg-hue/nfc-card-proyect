@@ -25,8 +25,13 @@ import {
   Mail,
   Copy,
   Check,
+  Lock,
+  ShieldAlert,
+  LogOut,
 } from 'lucide-react';
 import { Business, NfcCard } from '@/types/business';
+import { AuthUser } from '@/types/auth';
+import { getActiveSession, logout } from '@/lib/auth';
 import {
   mockNexoBusiness,
   mockRestaurantBusiness,
@@ -44,6 +49,8 @@ const INITIAL_BUSINESSES: Business[] = [
 
 export default function SuperAdminPage() {
   const router = useRouter();
+  const [session, setSession] = useState<AuthUser | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [businesses, setBusinesses] = useState<Business[]>(INITIAL_BUSINESSES);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterPlan, setFilterPlan] = useState<string>('ALL');
@@ -58,10 +65,14 @@ export default function SuperAdminPage() {
   const [newCardCode, setNewCardCode] = useState('');
   const [newPlan, setNewPlan] = useState<'STARTER' | 'PRO' | 'ENTERPRISE'>('PRO');
 
-  // Load businesses from localStorage on mount
+  // Load businesses & session from localStorage on mount
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
+        const curSession = getActiveSession();
+        setSession(curSession);
+        setIsAuthChecking(false);
+
         const saved = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
         if (saved) {
           const parsed = JSON.parse(saved);
@@ -75,8 +86,14 @@ export default function SuperAdminPage() {
       }
     } catch (e) {
       console.error('Error loading businesses list', e);
+      setIsAuthChecking(false);
     }
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
 
   // Save changes to localStorage
   const saveBusinesses = (updated: Business[]) => {
@@ -245,6 +262,80 @@ export default function SuperAdminPage() {
     0
   );
 
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-amber-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-400 font-medium">Verificando credenciales de Super Administrador...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 403 BARRIER: If not logged in or role is not SUPER_ADMIN
+  if (!session || session.role !== 'SUPER_ADMIN') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex items-center justify-center p-4">
+        <div className="max-w-md w-full bg-slate-900 border border-rose-900/50 rounded-3xl p-6 sm:p-8 shadow-2xl text-center space-y-5">
+          <div className="w-16 h-16 rounded-2xl bg-rose-950/60 border border-rose-800/60 text-rose-400 flex items-center justify-center mx-auto shadow-lg shadow-rose-950/50">
+            <ShieldAlert className="w-8 h-8" />
+          </div>
+
+          <div>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-400 bg-rose-950/80 px-2.5 py-1 rounded-full border border-rose-800/50">
+              Error 403 • Acceso Denegado
+            </span>
+            <h2 className="text-xl font-extrabold text-white mt-3">Área de Super Administrador</h2>
+            <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+              El directorio central de empresas y control de tenants del SaaS están reservados exclusivamente para el Super Administrador de la plataforma.
+            </p>
+            {session?.role === 'CLIENT' && (
+              <div className="mt-3 p-3 rounded-xl bg-slate-800/80 border border-slate-700 text-left">
+                <span className="text-[11px] font-semibold text-amber-300 block">
+                  Cuenta actual: Cliente PyME
+                </span>
+                <span className="text-xs text-slate-300 block font-bold mt-0.5">
+                  {session.name}
+                </span>
+                <span className="text-[11px] text-slate-400 block mt-1">
+                  Tu cuenta sólo tiene autorización para administrar tu propia tienda.
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="space-y-2 pt-2">
+            {session?.role === 'CLIENT' && (
+              <Link
+                href="/dashboard"
+                className="w-full py-2.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 flex items-center justify-center gap-2 transition-all active:scale-95"
+              >
+                <SlidersHorizontal className="w-4 h-4" />
+                <span>Ir al Panel de Mi Tienda</span>
+              </Link>
+            )}
+
+            <Link
+              href="/login"
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 font-semibold text-xs flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              <Lock className="w-4 h-4 text-amber-400" />
+              <span>Iniciar Sesión como Super Admin</span>
+            </Link>
+
+            <Link
+              href="/"
+              className="w-full py-2 text-xs text-slate-500 hover:text-slate-300 block transition-colors"
+            >
+              Volver al Inicio
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100 selection:bg-blue-600 selection:text-white">
       {/* Background ambient gradient glow */}
@@ -270,19 +361,29 @@ export default function SuperAdminPage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2.5 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
             <Link
               href="/"
-              className="text-xs font-semibold px-3 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700/60"
+              className="text-xs font-semibold px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all border border-slate-700/60"
             >
-              Página Principal
+              Inicio
             </Link>
+
             <button
               onClick={() => setIsNewModalOpen(true)}
               className="flex items-center gap-1.5 px-3.5 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold shadow-lg shadow-blue-600/30 transition-all active:scale-95"
             >
               <Plus className="w-4 h-4" />
               <span>Registrar Negocio</span>
+            </button>
+
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión de Super Admin"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl border border-rose-900/60 bg-rose-950/30 text-rose-400 hover:bg-rose-900/50 text-xs font-semibold transition-all active:scale-95"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Cerrar Sesión</span>
             </button>
           </div>
         </div>

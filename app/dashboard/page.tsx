@@ -1,13 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import {
   mockNexoBusiness,
   mockRestaurantBusiness,
   mockSalonBusiness,
 } from '@/lib/mock-data';
 import { Business } from '@/types/business';
+import { AuthUser } from '@/types/auth';
+import { getActiveSession, logout } from '@/lib/auth';
 import { ProfileEditor } from '@/components/dashboard/profile-editor';
 import { PhoneMockup } from '@/components/dashboard/phone-mockup';
 import { AnalyticsView } from '@/components/dashboard/analytics-view';
@@ -22,6 +25,8 @@ import {
   Layers,
   Building2,
   Users,
+  LogOut,
+  ShieldAlert,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'tapcard_business_data_nexo';
@@ -35,6 +40,9 @@ const DEFAULT_BUSINESSES: Business[] = [
 ];
 
 export default function DashboardPage() {
+  const router = useRouter();
+  const [session, setSession] = useState<AuthUser | null>(null);
+  const [isAuthChecking, setIsAuthChecking] = useState(true);
   const [allBusinesses, setAllBusinesses] = useState<Business[]>(DEFAULT_BUSINESSES);
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
@@ -42,10 +50,19 @@ export default function DashboardPage() {
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
 
-  // Load saved businesses list and active business on client mount
-  React.useEffect(() => {
+  // Authenticate user & load businesses list on client mount
+  useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
+        const currentSession = getActiveSession();
+        if (!currentSession) {
+          router.replace('/login');
+          return;
+        }
+
+        setSession(currentSession);
+        setIsAuthChecking(false);
+
         let loadedBusinesses = DEFAULT_BUSINESSES;
         const savedList = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
         if (savedList) {
@@ -58,7 +75,17 @@ export default function DashboardPage() {
           localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(DEFAULT_BUSINESSES));
         }
 
-        // Check if a specific business was chosen from Super Admin
+        // ROLE ISOLATION: If CLIENT, restrict strictly to user's assigned business
+        if (currentSession.role === 'CLIENT') {
+          const clientBiz = loadedBusinesses.find((b) => b.id === currentSession.businessId);
+          if (clientBiz) {
+            setBusiness(clientBiz);
+            setLastSavedTime('Panel de tu tienda cargado');
+            return;
+          }
+        }
+
+        // If SUPER_ADMIN, check if a specific business was chosen
         const activeId = localStorage.getItem(STORAGE_CURRENT_ACTIVE_ID);
         if (activeId) {
           const match = loadedBusinesses.find((b) => b.id === activeId);
@@ -81,11 +108,18 @@ export default function DashboardPage() {
       }
     } catch (e) {
       console.error('Error loading saved business', e);
+      setIsAuthChecking(false);
     }
-  }, []);
+  }, [router]);
 
-  // Switch active business in the dashboard
+  const handleLogout = () => {
+    logout();
+    router.replace('/login');
+  };
+
+  // Switch active business in the dashboard (SUPER_ADMIN ONLY)
   const switchActiveBusiness = (businessId: string) => {
+    if (session?.role !== 'SUPER_ADMIN') return;
     const target = allBusinesses.find((b) => b.id === businessId);
     if (!target) return;
 
@@ -150,6 +184,17 @@ export default function DashboardPage() {
     }
   };
 
+  if (isAuthChecking) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
+          <p className="text-xs text-slate-400 font-medium">Verificando sesión segura...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-100 dark:bg-zinc-950 text-slate-900 dark:text-zinc-100">
       {/* Top Navbar */}
@@ -164,49 +209,64 @@ export default function DashboardPage() {
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-sm sm:text-base tracking-tight">TapCard</span>
                 <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
-                  PyME SaaS
+                  {session?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Mi Tienda'}
                 </span>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate max-w-[130px] sm:max-w-none">
-                Panel de {business.name}
+                {session?.role === 'SUPER_ADMIN'
+                  ? `Gestionando: ${business.name}`
+                  : `Panel de ${business.name}`}
               </p>
             </div>
           </div>
 
           {/* Top Actions */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
-            {/* Multi-Tenant Business Selector */}
-            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/90 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700/80 shadow-xs">
-              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1">
-                <span>👑</span>
-                <span className="hidden xl:inline">Empresa:</span>
-              </span>
-              <select
-                value={business.id}
-                onChange={(e) => switchActiveBusiness(e.target.value)}
-                className="bg-transparent text-xs font-bold text-slate-800 dark:text-zinc-200 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate"
-              >
-                {allBusinesses.map((b) => (
-                  <option
-                    key={b.id}
-                    value={b.id}
-                    className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200"
+            {/* SUPER ADMIN ONLY: Multi-Tenant Business Selector & Portal Admin Button */}
+            {session?.role === 'SUPER_ADMIN' && (
+              <>
+                <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/90 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700/80 shadow-xs">
+                  <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1">
+                    <span>👑</span>
+                    <span className="hidden xl:inline">Empresa:</span>
+                  </span>
+                  <select
+                    value={business.id}
+                    onChange={(e) => switchActiveBusiness(e.target.value)}
+                    className="bg-transparent text-xs font-bold text-slate-800 dark:text-zinc-200 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate"
                   >
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </div>
+                    {allBusinesses.map((b) => (
+                      <option
+                        key={b.id}
+                        value={b.id}
+                        className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200"
+                      >
+                        {b.name}
+                      </option>
+                    ))}
+                  </select>
+                </div>
 
-            {/* Portal Super Admin Button */}
-            <Link
-              href="/admin"
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/30 transition-colors"
-              title="Ver todas las empresas registradas en el SaaS"
-            >
-              <Users className="w-3.5 h-3.5" />
-              <span className="hidden sm:inline">Portal Admin</span>
-            </Link>
+                <Link
+                  href="/admin"
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/30 transition-colors"
+                  title="Ver todas las empresas registradas en el SaaS"
+                >
+                  <Users className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">Portal Admin</span>
+                </Link>
+              </>
+            )}
+
+            {/* CLIENT ONLY: Badge showing their store ownership */}
+            {session?.role === 'CLIENT' && (
+              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/80 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs">
+                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                <span className="font-medium text-slate-700 dark:text-zinc-300 truncate max-w-[130px]">
+                  {session.name}
+                </span>
+              </div>
+            )}
 
             {/* View Switcher (Desktop) */}
             <div className="hidden md:flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
@@ -276,6 +336,15 @@ export default function DashboardPage() {
               <span className="sm:hidden">Ver Perfil</span>
               <ExternalLink className="w-3.5 h-3.5" />
             </Link>
+
+            <button
+              onClick={handleLogout}
+              title="Cerrar sesión"
+              className="flex items-center gap-1 px-2.5 sm:px-3 py-2 rounded-xl border border-rose-200 dark:border-rose-900/60 bg-rose-50/50 dark:bg-rose-950/30 text-rose-600 dark:text-rose-400 hover:bg-rose-100 dark:hover:bg-rose-900/50 text-xs font-semibold transition-all active:scale-95"
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Salir</span>
+            </button>
           </div>
 
           {/* View Switcher (Mobile Row) */}
