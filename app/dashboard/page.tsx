@@ -2,7 +2,11 @@
 
 import React, { useState } from 'react';
 import Link from 'next/link';
-import { mockNexoBusiness } from '@/lib/mock-data';
+import {
+  mockNexoBusiness,
+  mockRestaurantBusiness,
+  mockSalonBusiness,
+} from '@/lib/mock-data';
 import { Business } from '@/types/business';
 import { ProfileEditor } from '@/components/dashboard/profile-editor';
 import { PhoneMockup } from '@/components/dashboard/phone-mockup';
@@ -16,26 +20,61 @@ import {
   RotateCcw,
   Sparkles,
   Layers,
+  Building2,
+  Users,
 } from 'lucide-react';
 
 const STORAGE_KEY = 'tapcard_business_data_nexo';
+const STORAGE_BUSINESSES_LIST_KEY = 'tapcard_saas_all_businesses';
+const STORAGE_CURRENT_ACTIVE_ID = 'tapcard_active_business_id';
+
+const DEFAULT_BUSINESSES: Business[] = [
+  mockNexoBusiness,
+  mockRestaurantBusiness,
+  mockSalonBusiness,
+];
 
 export default function DashboardPage() {
+  const [allBusinesses, setAllBusinesses] = useState<Business[]>(DEFAULT_BUSINESSES);
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
   const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState<'editor' | 'preview'>('editor');
   const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
 
-  // Load saved modifications from localStorage on client mount
+  // Load saved businesses list and active business on client mount
   React.useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-          const parsed = JSON.parse(saved);
-          if (parsed && parsed.id) {
-            setBusiness(parsed);
+        let loadedBusinesses = DEFAULT_BUSINESSES;
+        const savedList = localStorage.getItem(STORAGE_BUSINESSES_LIST_KEY);
+        if (savedList) {
+          const parsed = JSON.parse(savedList);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            loadedBusinesses = parsed;
+            setAllBusinesses(parsed);
+          }
+        } else {
+          localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(DEFAULT_BUSINESSES));
+        }
+
+        // Check if a specific business was chosen from Super Admin
+        const activeId = localStorage.getItem(STORAGE_CURRENT_ACTIVE_ID);
+        if (activeId) {
+          const match = loadedBusinesses.find((b) => b.id === activeId);
+          if (match) {
+            setBusiness(match);
+            setLastSavedTime('Empresa cargada');
+            return;
+          }
+        }
+
+        // Fallback to active business data
+        const savedActive = localStorage.getItem(STORAGE_KEY);
+        if (savedActive) {
+          const parsedActive = JSON.parse(savedActive);
+          if (parsedActive && parsedActive.id) {
+            setBusiness(parsedActive);
             setLastSavedTime('Sesión restaurada');
           }
         }
@@ -45,12 +84,33 @@ export default function DashboardPage() {
     }
   }, []);
 
+  // Switch active business in the dashboard
+  const switchActiveBusiness = (businessId: string) => {
+    const target = allBusinesses.find((b) => b.id === businessId);
+    if (!target) return;
+
+    setBusiness(target);
+    try {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(STORAGE_CURRENT_ACTIVE_ID, target.id);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(target));
+        setLastSavedTime(`Cambiado a ${target.name}`);
+      }
+    } catch {}
+  };
+
   // Automatic instantaneous save on any change
   const handleBusinessChange = (updated: Business) => {
     setBusiness(updated);
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+
+        // Also update in allBusinesses list
+        const updatedList = allBusinesses.map((b) => (b.id === updated.id ? updated : b));
+        setAllBusinesses(updatedList);
+        localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(updatedList));
+
         const now = new Date();
         const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
         setLastSavedTime(`Autoguardado a las ${timeStr}`);
@@ -64,6 +124,9 @@ export default function DashboardPage() {
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(business));
+        const updatedList = allBusinesses.map((b) => (b.id === business.id ? business : b));
+        setAllBusinesses(updatedList);
+        localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(updatedList));
       }
       setSavedSuccess(true);
       const now = new Date();
@@ -112,6 +175,39 @@ export default function DashboardPage() {
 
           {/* Top Actions */}
           <div className="flex items-center gap-1.5 sm:gap-3 flex-wrap">
+            {/* Multi-Tenant Business Selector */}
+            <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/90 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700/80 shadow-xs">
+              <span className="text-[10px] font-bold text-amber-500 uppercase tracking-wider flex items-center gap-1">
+                <span>👑</span>
+                <span className="hidden xl:inline">Empresa:</span>
+              </span>
+              <select
+                value={business.id}
+                onChange={(e) => switchActiveBusiness(e.target.value)}
+                className="bg-transparent text-xs font-bold text-slate-800 dark:text-zinc-200 focus:outline-none cursor-pointer max-w-[130px] sm:max-w-[180px] truncate"
+              >
+                {allBusinesses.map((b) => (
+                  <option
+                    key={b.id}
+                    value={b.id}
+                    className="bg-white dark:bg-zinc-900 text-slate-800 dark:text-zinc-200"
+                  >
+                    {b.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Portal Super Admin Button */}
+            <Link
+              href="/admin"
+              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-600 dark:text-amber-400 text-xs font-semibold border border-amber-500/30 transition-colors"
+              title="Ver todas las empresas registradas en el SaaS"
+            >
+              <Users className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Portal Admin</span>
+            </Link>
+
             {/* View Switcher (Desktop) */}
             <div className="hidden md:flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
               <button

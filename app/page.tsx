@@ -33,16 +33,23 @@ export default function HomePage() {
             </div>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          <div className="flex items-center gap-2 sm:gap-3">
+            <Link
+              href="/admin"
+              className="text-xs font-bold px-2.5 sm:px-3 py-2 rounded-xl bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 transition-all border border-amber-500/30 flex items-center gap-1"
+            >
+              <span>👑</span>
+              <span className="hidden xs:inline">Super Admin</span>
+            </Link>
             <Link
               href="/dashboard"
-              className="text-xs font-semibold px-3 sm:px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
+              className="text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all border border-slate-700/60"
             >
               Panel PyME
             </Link>
             <Link
               href="/nexosoluciones"
-              className="text-xs font-semibold px-3 sm:px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95"
+              className="text-xs font-semibold px-2.5 sm:px-3 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white transition-all shadow-md shadow-blue-500/20 active:scale-95"
             >
               Demo Móvil
             </Link>
@@ -70,12 +77,28 @@ export default function HomePage() {
         </p>
 
         {/* CTA Buttons */}
-        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
+        <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row flex-wrap items-stretch sm:items-center justify-center gap-3 sm:gap-4 max-w-xl sm:max-w-none mx-auto">
+          <Link
+            href="/admin"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-amber-500/20 hover:bg-amber-500/30 text-amber-300 border border-amber-500/40 font-bold text-sm shadow-lg shadow-amber-500/10 transition-all active:scale-95 text-center"
+          >
+            <span>👑</span>
+            <span>Directorio Super Admin SaaS</span>
+          </Link>
+
+          <Link
+            href="/dashboard"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center"
+          >
+            <SlidersHorizontal className="w-4 h-4 text-white" />
+            <span>Abrir Dashboard PyME</span>
+          </Link>
+
           <Link
             href="/nexosoluciones"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-semibold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 group text-center"
+            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95 group text-center"
           >
-            <span>Ver Micro-Landing (Nexo Soluciones)</span>
+            <span>Ver Micro-Landing (Nexo)</span>
             <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </Link>
 
@@ -85,14 +108,6 @@ export default function HomePage() {
           >
             <Smartphone className="w-4 h-4 text-emerald-400" />
             <span>Simular Toque NFC (NX-8821)</span>
-          </Link>
-
-          <Link
-            href="/dashboard"
-            className="flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-slate-900 hover:bg-slate-800 text-slate-200 border border-slate-700/80 font-semibold text-sm shadow transition-all active:scale-95 text-center"
-          >
-            <SlidersHorizontal className="w-4 h-4 text-cyan-400" />
-            <span>Abrir Dashboard PyME</span>
           </Link>
         </div>
 

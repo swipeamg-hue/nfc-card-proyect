@@ -78,6 +78,8 @@ export interface Business {
   quickAccess?: QuickAccessConfig;
   cards?: NfcCard[];
   links: BusinessLink[];
+  plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
+  accountStatus?: 'ACTIVE' | 'TRIAL' | 'PAUSED';
   createdAt?: string;
   updatedAt?: string;
 }
