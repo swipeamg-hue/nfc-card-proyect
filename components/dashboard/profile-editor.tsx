@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import {
   Business,
   BusinessLink,
@@ -23,6 +23,9 @@ import {
   Smartphone,
   ExternalLink,
   Star,
+  Upload,
+  Image as ImageIcon,
+  Camera,
 } from 'lucide-react';
 import {
   WhatsAppOfficialIcon,
@@ -94,12 +97,40 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
   const [activeTab, setActiveTab] = useState<'info' | 'links' | 'design' | 'cards'>('info');
   const [newCardCode, setNewCardCode] = useState('');
 
+  // Refs for local desktop file uploads
+  const bannerFileRef = useRef<HTMLInputElement>(null);
+  const logoFileRef = useRef<HTMLInputElement>(null);
+  const [showBannerUrlInput, setShowBannerUrlInput] = useState(false);
+  const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
+
   // Handle generic property updates
   const updateField = <K extends keyof Business>(key: K, value: Business[K]) => {
     onChange({
       ...business,
       [key]: value,
     });
+  };
+
+  // Handle local desktop file upload as Data URL
+  const handleFileUpload = (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
+    if (!file) return;
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor selecciona una imagen válida (JPG, PNG, WEBP, etc.)');
+      return;
+    }
+    if (file.size > 8 * 1024 * 1024) {
+      alert('La imagen no debe superar los 8MB para un rendimiento óptimo');
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target?.result as string;
+      if (dataUrl) {
+        updateField(field, dataUrl);
+      }
+    };
+    reader.readAsDataURL(file);
   };
 
   // Toggle link active status
@@ -764,51 +795,224 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
 
       {/* TAB 3: Design & Media */}
       {activeTab === 'design' && (
-        <div className="space-y-4 animate-in fade-in duration-150">
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-              Banner de Portada (URL)
-            </label>
+        <div className="space-y-6 animate-in fade-in duration-150">
+          {/* 1. Banner de Portada */}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  <ImageIcon className="w-4 h-4 text-blue-600" />
+                  Foto de Portada (Banner)
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Se muestra en la parte superior de tu perfil digital NFC
+                </p>
+              </div>
+              {business.bannerUrl && (
+                <button
+                  type="button"
+                  onClick={() => updateField('bannerUrl', '')}
+                  className="text-[11px] text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Quitar foto
+                </button>
+              )}
+            </div>
+
+            {/* Visual Thumbnail */}
+            <div
+              onClick={() => bannerFileRef.current?.click()}
+              className="relative w-full h-36 rounded-xl overflow-hidden border border-slate-200 dark:border-zinc-700 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner"
+            >
+              {business.bannerUrl ? (
+                <img
+                  src={business.bannerUrl}
+                  alt="Vista previa del banner"
+                  className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                />
+              ) : (
+                <div className="flex flex-col items-center justify-center text-slate-400 dark:text-zinc-500 p-4 text-center">
+                  <Upload className="w-8 h-8 mb-1 opacity-50" />
+                  <span className="text-xs font-medium">Sin imagen de portada</span>
+                  <span className="text-[10px]">Haz clic aquí para subir una foto desde tu equipo</span>
+                </div>
+              )}
+
+              {/* Upload trigger overlay button */}
+              <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                <span className="px-3 py-1.5 rounded-lg bg-white/95 text-slate-900 text-xs font-bold shadow-lg flex items-center gap-1.5">
+                  <Upload className="w-3.5 h-3.5" />
+                  {business.bannerUrl ? 'Cambiar foto de portada' : 'Subir foto desde mi equipo'}
+                </span>
+              </div>
+            </div>
+
+            {/* Hidden Input file for Banner */}
             <input
-              type="text"
-              value={business.bannerUrl}
-              onChange={(e) => updateField('bannerUrl', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono"
+              ref={bannerFileRef}
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(e) => {
+                if (e.target.files?.[0]) {
+                  handleFileUpload('bannerUrl', e.target.files[0]);
+                }
+              }}
             />
-            <div className="mt-2 flex gap-2">
+
+            {/* Main Action Buttons */}
+            <div className="flex flex-wrap items-center gap-2 pt-1">
+              <button
+                type="button"
+                onClick={() => bannerFileRef.current?.click()}
+                className="px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+              >
+                <Upload className="w-3.5 h-3.5" />
+                Subir foto desde mi computadora
+              </button>
+
               <button
                 type="button"
                 onClick={() => updateField('bannerUrl', '/images/nexo-banner.jpg')}
-                className="text-[11px] px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium"
+                className="px-2.5 py-1.5 rounded-xl bg-slate-200/70 hover:bg-slate-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-xs font-medium transition-colors"
               >
                 Usar Banner High-Tech Nexo
               </button>
-            </div>
-          </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-              Avatar / Logo Circular (URL)
-            </label>
-            <input
-              type="text"
-              value={business.logoUrl}
-              onChange={(e) => updateField('logoUrl', e.target.value)}
-              className="w-full px-3 py-2 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono"
-            />
-            <div className="mt-2 flex gap-2">
               <button
                 type="button"
-                onClick={() => updateField('logoUrl', '/images/nexo-logo.jpg')}
-                className="text-[11px] px-2.5 py-1 rounded-md bg-blue-50 text-blue-600 font-medium"
+                onClick={() => setShowBannerUrlInput(!showBannerUrlInput)}
+                className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 ml-auto underline"
               >
-                Usar Logo Hexagonal Nexo
+                {showBannerUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
               </button>
+            </div>
+
+            {/* Optional URL input toggle */}
+            {showBannerUrlInput && (
+              <div className="pt-2 animate-in fade-in duration-150">
+                <input
+                  type="text"
+                  value={business.bannerUrl}
+                  onChange={(e) => updateField('bannerUrl', e.target.value)}
+                  placeholder="https://ejemplo.com/portada.jpg"
+                  className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
+                />
+              </div>
+            )}
+          </div>
+
+          {/* 2. Avatar / Logo Circular */}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  <Camera className="w-4 h-4 text-purple-600" />
+                  Foto de Perfil / Logo Circular
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Aparece en el círculo central sobre tu foto de portada
+                </p>
+              </div>
+              {business.logoUrl && (
+                <button
+                  type="button"
+                  onClick={() => updateField('logoUrl', '')}
+                  className="text-[11px] text-rose-500 hover:text-rose-600 hover:underline flex items-center gap-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Quitar foto
+                </button>
+              )}
+            </div>
+
+            {/* Circular Preview & Action */}
+            <div className="flex items-center gap-4">
+              <div
+                onClick={() => logoFileRef.current?.click()}
+                className="relative w-20 h-20 rounded-full border-2 border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 overflow-hidden flex items-center justify-center flex-shrink-0 shadow-md group cursor-pointer"
+                title="Haz clic para cambiar foto de perfil"
+              >
+                {business.logoUrl ? (
+                  <img
+                    src={business.logoUrl}
+                    alt="Logo circular preview"
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                  />
+                ) : (
+                  <span className="text-lg font-bold text-slate-700 dark:text-zinc-300 uppercase">
+                    {business.name.slice(0, 2) || 'LOG'}
+                  </span>
+                )}
+                <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                  <Upload className="w-5 h-5 text-white" />
+                </div>
+              </div>
+
+              <div className="flex-1 space-y-2">
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
+                  Sube tu logotipo o foto personal desde tu computadora (PNG, JPG o WEBP).
+                </p>
+
+                {/* Hidden Input file for Logo */}
+                <input
+                  ref={logoFileRef}
+                  type="file"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(e) => {
+                    if (e.target.files?.[0]) {
+                      handleFileUpload('logoUrl', e.target.files[0]);
+                    }
+                  }}
+                />
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={() => logoFileRef.current?.click()}
+                    className="px-3 py-1.5 rounded-xl bg-purple-600 hover:bg-purple-700 text-white text-xs font-semibold shadow-sm transition-all flex items-center gap-1.5"
+                  >
+                    <Upload className="w-3.5 h-3.5" />
+                    Subir foto o logo
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => updateField('logoUrl', '/images/nexo-logo.jpg')}
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-200/70 hover:bg-slate-200 dark:bg-zinc-700 dark:hover:bg-zinc-600 text-slate-700 dark:text-zinc-200 text-xs font-medium transition-colors"
+                  >
+                    Usar Logo Nexo
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setShowLogoUrlInput(!showLogoUrlInput)}
+                    className="text-[11px] text-slate-500 hover:text-slate-700 dark:hover:text-zinc-300 underline"
+                  >
+                    {showLogoUrlInput ? 'Ocultar URL' : 'O pegar enlace (URL)'}
+                  </button>
+                </div>
+
+                {showLogoUrlInput && (
+                  <div className="pt-1 animate-in fade-in duration-150">
+                    <input
+                      type="text"
+                      value={business.logoUrl}
+                      onChange={(e) => updateField('logoUrl', e.target.value)}
+                      placeholder="https://ejemplo.com/logo.png"
+                      className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+          {/* 3. Color de Acento */}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-2">
+            <label className="block text-xs font-bold text-slate-900 dark:text-zinc-100 mb-1">
               Color de Acento Primario
             </label>
             <div className="flex items-center gap-3">
@@ -816,7 +1020,7 @@ export function ProfileEditor({ business, onChange }: ProfileEditorProps) {
                 type="color"
                 value={business.themeColor}
                 onChange={(e) => updateField('themeColor', e.target.value)}
-                className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200"
+                className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5 bg-white dark:bg-zinc-900"
               />
               <span className="text-xs font-mono text-slate-600 dark:text-zinc-400">
                 {business.themeColor}

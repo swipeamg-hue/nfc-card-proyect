@@ -20,6 +20,7 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
             alt={`${businessName} Portada`}
             fill
             priority
+            unoptimized
             sizes="(max-width: 768px) 100vw, 450px"
             className="object-cover object-center"
           />
@@ -39,6 +40,7 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
               alt={`${businessName} Logo`}
               width={96}
               height={96}
+              unoptimized
               className="w-full h-full object-cover"
             />
           ) : (
