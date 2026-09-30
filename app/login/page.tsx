@@ -20,9 +20,10 @@ import {
   X,
   Phone,
 } from 'lucide-react';
-import { login, loginAsync, registerClient, registerClientAsync, getActiveSession, setActiveSession } from '@/lib/auth';
-import { supabase, SUPABASE_URL, getAppBaseUrl } from '@/lib/supabase';
+import { login, loginAsync, registerClient, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
+import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
 import { AuthUser } from '@/types/auth';
+import { Business } from '@/types/business';
 
 function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -178,14 +179,112 @@ export default function LoginPage() {
           return;
         }
 
-        // 4. Truly new user via Google! Prompt onboarding
-        setGoogleUserData({
-          email,
-          name: fullName || email.split('@')[0],
-        });
-        setIsOnboardingOpen(true);
+        // 4. New Google User: Auto-provision in Supabase cloud immediately
+        // Guarantees zero duplicate registrations and instant multi-device synchronization
+        setIsLoading(true);
+        const newBizId = 'biz-' + Date.now();
+        const newUserId = 'usr-' + Date.now();
+        const displayName = fullName || email.split('@')[0];
+        let slug = displayName
+          .toLowerCase()
+          .trim()
+          .replace(/[^a-z0-9]/g, '-')
+          .replace(/-+/g, '-')
+          .replace(/^-|-$/g, '');
+        if (!slug) slug = 'negocio-' + Date.now().toString(36);
+
+        // Check slug collision in Supabase
+        try {
+          const { data: slugCheck } = await supabase
+            .from('businesses')
+            .select('id')
+            .eq('slug', slug)
+            .maybeSingle();
+          if (slugCheck) {
+            slug = `${slug}-${Math.floor(100 + Math.random() * 900)}`;
+          }
+        } catch {}
+
+        const avatarUrl =
+          user.user_metadata?.avatar_url ||
+          user.user_metadata?.picture ||
+          'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop';
+
+        const autoBusiness: Business = {
+          id: newBizId,
+          slug,
+          name: displayName,
+          isVerified: true,
+          category: 'Servicios Profesionales',
+          bio: `Bienvenido a la tarjeta digital e interactiva de ${displayName}. Toca para contactarme.`,
+          bannerUrl: 'https://images.unsplash.com/photo-1486406146926-c627a92ad1ab?q=80&w=1200&auto=format&fit=crop',
+          logoUrl: avatarUrl,
+          themeColor: '#2563eb',
+          phone: '',
+          whatsapp: '',
+          email: email,
+          address: '',
+          googleMapsUrl: '',
+          websiteUrl: '',
+          plan: 'PRO',
+          accountStatus: 'ACTIVE',
+          createdAt: new Date().toISOString(),
+          cards: [],
+          links: [
+            {
+              id: 'link-wa-' + Date.now(),
+              businessId: newBizId,
+              type: 'whatsapp',
+              title: 'WhatsApp Oficial',
+              subtitle: 'Escríbeme directamente',
+              url: 'https://wa.me/',
+              iconName: 'whatsapp',
+              order: 1,
+              isActive: true,
+              highlighted: true,
+            },
+          ],
+          quickAccess: {
+            enabled: true,
+            showPhone: true,
+            showEmail: true,
+            showMaps: false,
+            showCatalog: false,
+          },
+        };
+
+        await saveBusinessToSupabase(autoBusiness);
+
+        await supabase.from('app_users').upsert(
+          {
+            id: newUserId,
+            email: email,
+            name: displayName,
+            role: 'CLIENT',
+            business_id: newBizId,
+            business_slug: slug,
+            password_hash: 'google-oauth-linked',
+          },
+          { onConflict: 'email' }
+        );
+
+        const safeUser: AuthUser = {
+          id: newUserId,
+          email: email,
+          name: displayName,
+          role: 'CLIENT',
+          businessId: newBizId,
+          businessSlug: slug,
+          createdAt: new Date().toISOString(),
+        };
+
+        setActiveSession(safeUser);
+        setIsLoading(false);
+        router.push('/dashboard');
+        return;
       } catch (err) {
         console.warn('OAuth session check notice:', err);
+        setIsLoading(false);
       }
     }
 
@@ -616,6 +715,19 @@ export default function LoginPage() {
       {isOnboardingOpen && googleUserData && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-in fade-in duration-200">
           <div className="relative w-full max-w-md bg-slate-900 rounded-3xl border border-slate-700 shadow-2xl p-6 sm:p-8">
+            <button
+              type="button"
+              onClick={async () => {
+                await logout();
+                setIsOnboardingOpen(false);
+                setGoogleUserData(null);
+              }}
+              title="Cerrar y volver al login"
+              className="absolute top-5 right-5 p-2 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+
             <div className="text-center mb-6">
               <div className="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center mx-auto mb-3">
                 <Sparkles className="w-6 h-6 text-amber-400 animate-pulse" />
@@ -684,6 +796,18 @@ export default function LoginPage() {
               >
                 <span>{isLoading ? 'Creando perfil digital...' : 'Comenzar a Diseñar mi Tarjeta'}</span>
                 <ArrowRight className="w-4 h-4" />
+              </button>
+
+              <button
+                type="button"
+                onClick={async () => {
+                  await logout();
+                  setIsOnboardingOpen(false);
+                  setGoogleUserData(null);
+                }}
+                className="w-full py-2.5 px-4 rounded-xl bg-slate-800/80 hover:bg-slate-800 text-slate-400 hover:text-white font-semibold text-xs transition-colors border border-slate-700/60 text-center"
+              >
+                Cancelar e iniciar con otra cuenta
               </button>
             </form>
           </div>

@@ -32,7 +32,8 @@ import {
   Star,
 } from 'lucide-react';
 import { AuthUser } from '@/types/auth';
-import { getActiveSession, logout } from '@/lib/auth';
+import { getActiveSession, setActiveSession, logout } from '@/lib/auth';
+import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
   const [session, setSession] = useState<AuthUser | null>(null);
@@ -41,7 +42,50 @@ export default function HomePage() {
   useEffect(() => {
     try {
       if (typeof window !== 'undefined') {
-        setSession(getActiveSession());
+        const localSession = getActiveSession();
+        if (localSession) {
+          setSession(localSession);
+          return;
+        }
+
+        // Check Supabase cloud session if localStorage doesn't have an active session yet
+        supabase.auth.getSession().then(async ({ data: { session: currentSession } }) => {
+          if (currentSession?.user?.email) {
+            const email = currentSession.user.email.toLowerCase().trim();
+            if (email === 'swipeamg@gmail.com') {
+              const superAdminUser: AuthUser = {
+                id: 'usr-admin-swipeamg',
+                email: 'swipeamg@gmail.com',
+                name: 'Super Administrador (SwipeAMG)',
+                role: 'SUPER_ADMIN',
+                createdAt: new Date().toISOString(),
+              };
+              setActiveSession(superAdminUser);
+              setSession(superAdminUser);
+              return;
+            }
+
+            const { data: dbUser } = await supabase
+              .from('app_users')
+              .select('*')
+              .eq('email', email)
+              .maybeSingle();
+
+            if (dbUser) {
+              const safeUser: AuthUser = {
+                id: dbUser.id,
+                email: dbUser.email,
+                name: dbUser.name,
+                role: dbUser.role,
+                businessId: dbUser.business_id,
+                businessSlug: dbUser.business_slug,
+                createdAt: dbUser.created_at,
+              };
+              setActiveSession(safeUser);
+              setSession(safeUser);
+            }
+          }
+        });
       }
     } catch {}
   }, []);
