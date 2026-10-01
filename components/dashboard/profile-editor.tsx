@@ -935,11 +935,8 @@ export function ProfileEditor({
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-blue-600" />
-                  Foto de Portada (Banner)
+                  Foto de Portada
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Se muestra en la parte superior de tu perfil digital NFC
-                </p>
               </div>
               {business.bannerUrl && (
                 <div className="flex items-center gap-1.5">
@@ -979,7 +976,7 @@ export function ProfileEditor({
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
                     <Camera className="w-6 h-6 mb-1" />
-                    <span className="text-xs font-bold drop-shadow">Toca aquí para cambiar foto de portada</span>
+                    <span className="text-xs font-bold drop-shadow">Cambiar foto de portada</span>
                   </div>
                 </>
               ) : (
@@ -988,10 +985,7 @@ export function ProfileEditor({
                     <Camera className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
-                    Toca aquí para subir foto de portada
-                  </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5">
-                    (Formato horizontal panorámico recomendado)
+                    Subir foto de portada
                   </span>
                 </div>
               )}
@@ -1011,8 +1005,7 @@ export function ProfileEditor({
               }}
             />
 
-            <div className="flex items-center justify-between text-[11px] text-slate-400 pt-1">
-              <span>* Haz clic en el recuadro para seleccionar una foto de tu celular o computadora</span>
+            <div className="flex items-center justify-end text-[11px] text-slate-400 pt-0.5">
               <button
                 type="button"
                 onClick={() => setShowBannerUrlInput(!showBannerUrlInput)}
@@ -1042,11 +1035,8 @@ export function ProfileEditor({
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-purple-600" />
-                  Foto de Perfil / Logo Circular
+                  Foto de Perfil
                 </h4>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Aparece en el círculo central sobre tu foto de portada
-                </p>
               </div>
               {business.logoUrl && (
                 <div className="flex items-center gap-1.5">
@@ -1094,20 +1084,13 @@ export function ProfileEditor({
                   <div className="flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400 p-1 text-center">
                     <Camera className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
                     <span className="text-[9px] font-bold leading-tight text-slate-800 dark:text-zinc-200">
-                      Toca aquí para subir foto
+                      Subir foto
                     </span>
                   </div>
                 )}
               </div>
 
               <div className="flex-1 space-y-2 text-center sm:text-left">
-                <p className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                  Toca el círculo para subir tu foto o logo desde tu dispositivo
-                </p>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-                  Recomendado: imagen cuadrada o circular en alta resolución (PNG, JPG o WEBP).
-                </p>
-
                 {/* Hidden Input file for Logo */}
                 <input
                   ref={logoFileRef}
