@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Image from 'next/image';
 
 interface HeroBannerProps {
@@ -17,26 +17,18 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
   const cleanBanner = bannerUrl && !bannerUrl.startsWith('/images/') ? bannerUrl : '';
   const cleanLogo = logoUrl && !logoUrl.startsWith('/images/') ? logoUrl : '';
 
-  const [bannerSrc, setBannerSrc] = useState<string>(cleanBanner || cleanLogo || FALLBACK_BANNER);
-  const [logoSrc, setLogoSrc] = useState<string>(cleanLogo || FALLBACK_LOGO);
+  const [bannerError, setBannerError] = useState(false);
+  const [logoError, setLogoError] = useState(false);
 
-  useEffect(() => {
-    if (bannerUrl && !bannerUrl.startsWith('/images/')) {
-      setBannerSrc(bannerUrl);
-    } else if (logoUrl && !logoUrl.startsWith('/images/')) {
-      setBannerSrc(logoUrl);
-    } else {
-      setBannerSrc(FALLBACK_BANNER);
-    }
-  }, [bannerUrl, logoUrl]);
+  const [prevUrls, setPrevUrls] = useState({ bannerUrl, logoUrl });
+  if (prevUrls.bannerUrl !== bannerUrl || prevUrls.logoUrl !== logoUrl) {
+    setPrevUrls({ bannerUrl, logoUrl });
+    setBannerError(false);
+    setLogoError(false);
+  }
 
-  useEffect(() => {
-    if (logoUrl && !logoUrl.startsWith('/images/')) {
-      setLogoSrc(logoUrl);
-    } else {
-      setLogoSrc(FALLBACK_LOGO);
-    }
-  }, [logoUrl]);
+  const bannerSrc = !bannerError ? (cleanBanner || cleanLogo || FALLBACK_BANNER) : FALLBACK_BANNER;
+  const logoSrc = !logoError ? (cleanLogo || FALLBACK_LOGO) : FALLBACK_LOGO;
 
   const isSameAsLogo = bannerSrc === logoSrc;
 
@@ -56,7 +48,7 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
                 unoptimized
                 sizes="(max-width: 768px) 100vw, 450px"
                 className="object-cover object-center scale-125 filter blur-md brightness-[0.70] contrast-125"
-                onError={() => setBannerSrc(FALLBACK_BANNER)}
+                onError={() => setBannerError(true)}
               />
             </div>
           )}
@@ -71,7 +63,7 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
             className={`object-cover object-center ${
               isSameAsLogo ? 'opacity-90 mix-blend-overlay scale-105' : 'opacity-100'
             }`}
-            onError={() => setBannerSrc(FALLBACK_BANNER)}
+            onError={() => setBannerError(true)}
           />
 
           {/* Smart cinematic vignette overlay for contrast and sleek finish */}
@@ -92,7 +84,7 @@ export function HeroBanner({ bannerUrl, logoUrl, businessName }: HeroBannerProps
             height={96}
             unoptimized
             className="w-full h-full object-cover"
-            onError={() => setLogoSrc(FALLBACK_LOGO)}
+            onError={() => setLogoError(true)}
           />
         </div>
       </div>

@@ -10,19 +10,11 @@ import {
   Plus,
   Search,
   ShieldCheck,
-  CreditCard,
   SlidersHorizontal,
   TrendingUp,
   Users,
-  Sparkles,
-  CheckCircle2,
   Trash2,
-  ArrowRight,
   Zap,
-  Globe,
-  Share2,
-  Phone,
-  Mail,
   Copy,
   Check,
   Lock,
@@ -580,6 +572,7 @@ export default function SuperAdminPage() {
                       {/* Banner Cover Top */}
                       <div className="relative h-28 w-full bg-gradient-to-r from-slate-950 via-blue-950 to-slate-900 overflow-hidden">
                         {biz.bannerUrl ? (
+                          /* eslint-disable-next-line @next/next/no-img-element */
                           <img
                             src={biz.bannerUrl}
                             alt=""
@@ -607,6 +600,7 @@ export default function SuperAdminPage() {
                         <div className="flex items-end justify-between mb-3">
                           <div className="w-16 h-16 rounded-2xl border-4 border-slate-800 bg-slate-900 shadow-xl flex items-center justify-center overflow-hidden flex-shrink-0">
                             {biz.logoUrl ? (
+                              /* eslint-disable-next-line @next/next/no-img-element */
                               <img
                                 src={biz.logoUrl}
                                 alt={biz.name}

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { UserPlus, Share2, Check, Download } from 'lucide-react';
+import { UserPlus, Share2, Check } from 'lucide-react';
 import { Business } from '@/types/business';
 import { downloadVCard } from '@/lib/vcard';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { ChevronRight, ExternalLink } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 import { BusinessLink } from '@/types/business';
 import {
   WhatsAppOfficialIcon,
@@ -12,16 +12,7 @@ import {
   XOfficialIcon,
   YouTubeOfficialIcon,
   TelegramOfficialIcon,
-  UtensilsSvg,
-  CalendarSvg,
-  SparklesBeautySvg,
-  ScissorsSvg,
-  CoffeeSvg,
-  ShoppingBagSvg,
   FileTextSvg,
-  ClockSvg,
-  CreditCardSvg,
-  StarSvg,
   GlobeSvg,
   PhoneSvg,
   MapPinSvg,
@@ -129,7 +120,7 @@ export function ActionCard({ link, onTrackClick }: ActionCardProps) {
     // 3. Servicios y botones temáticos con SVGs dedicados
     const iconName = link.iconName || '';
     const DynamicIcon = getBusinessIconComponent(iconName);
-    let iconElement = <DynamicIcon className="w-5 h-5 text-white" />;
+    const iconElement = <DynamicIcon className="w-5 h-5 text-white" />;
     let defaultBg = 'bg-slate-700';
     let defaultBorder = 'hover:border-slate-400';
 

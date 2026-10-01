@@ -7,7 +7,7 @@ import { ProfileHeader } from './profile-header';
 import { ActionCard } from './action-card';
 import { FloatingVCardButton } from './floating-vcard-button';
 import { QrModal } from './qr-modal';
-import { Smartphone, Zap, Sparkles } from 'lucide-react';
+import { Smartphone, Sparkles } from 'lucide-react';
 
 import { supabase, getBusinessBySlug, trackTapEvent } from '@/lib/supabase';
 
@@ -27,6 +27,15 @@ export function PublicProfile({
   const [business, setBusiness] = useState<Business>(initialBusiness);
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  const showToast = (msg: string) => {
+    setTimeout(() => {
+      setToastMessage(msg);
+      setTimeout(() => {
+        setToastMessage((prev) => (prev === msg ? null : prev));
+      }, 3500);
+    }, 50);
+  };
 
   // 1. Fetch live data from Supabase and subscribe to real-time changes
   useEffect(() => {
@@ -107,19 +116,12 @@ export function PublicProfile({
     } catch {}
   }, [source, cardCode, isMockup, business.id]);
 
-  const showToast = (msg: string) => {
-    setToastMessage(msg);
-    setTimeout(() => {
-      setToastMessage((prev) => (prev === msg ? null : prev));
-    }, 3500);
-  };
-
   const handleTrackClick = (linkId: string, linkType: string) => {
     if (isMockup) return;
     trackTapEvent({
       businessId: business.id,
       cardCode,
-      source: (source || 'DIRECT').toUpperCase() as any,
+      source: (source || 'DIRECT').toUpperCase() as 'NFC' | 'QR' | 'DIRECT',
       clickedItem: linkType,
     });
   };

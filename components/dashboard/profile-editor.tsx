@@ -33,18 +33,14 @@ import {
   FileText,
   Image as ImageIcon,
   Link as LinkIcon,
-  Upload,
 } from 'lucide-react';
 import { uploadBusinessAsset, getAppBaseUrl } from '@/lib/supabase';
 import {
   WhatsAppOfficialIcon,
   InstagramOfficialIcon,
   FacebookOfficialIcon,
-  LinkedinOfficialIcon,
   TikTokOfficialIcon,
-  XOfficialIcon,
   YouTubeOfficialIcon,
-  TelegramOfficialIcon,
   GlobeSvg,
   PhoneSvg,
 } from '@/components/ui/svg-icons';
@@ -917,6 +913,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
             >
               {business.bannerUrl ? (
                 <>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={business.bannerUrl}
                     alt="Vista previa del banner"
@@ -1012,6 +1009,7 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
               >
                 {business.logoUrl ? (
                   <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={business.logoUrl}
                       alt="Logo circular preview"
@@ -1218,11 +1216,14 @@ export function ProfileEditor({ business, onChange, onSave }: ProfileEditorProps
             <div className="flex flex-col sm:flex-row items-center gap-5">
               <div className="p-3 bg-white border border-slate-200 rounded-2xl shadow-sm flex-shrink-0">
                 {qrPng ? (
-                  <img
-                    src={qrPng}
-                    alt="QR Oficial"
-                    className="w-32 h-32 object-contain"
-                  />
+                  <>
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={qrPng}
+                      alt="QR Oficial"
+                      className="w-32 h-32 object-contain"
+                    />
+                  </>
                 ) : (
                   <div className="w-32 h-32 flex items-center justify-center text-xs text-slate-400">
                     Generando QR...

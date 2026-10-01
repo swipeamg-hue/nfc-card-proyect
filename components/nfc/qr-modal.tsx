@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import QRCode from 'qrcode';
 import { X, Download, Copy, Check, Share2 } from 'lucide-react';
 import { Business } from '@/types/business';
@@ -15,7 +15,6 @@ interface QrModalProps {
 export function QrModal({ business, isOpen, onClose }: QrModalProps) {
   const [qrDataUrl, setQrDataUrl] = useState<string>('');
   const [copied, setCopied] = useState<boolean>(false);
-  const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   const profileUrl = typeof window !== 'undefined'
     ? `${getAppBaseUrl()}/${business.slug}`

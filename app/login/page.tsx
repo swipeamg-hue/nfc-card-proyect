@@ -12,18 +12,23 @@ import {
   Sparkles,
   ArrowRight,
   ShieldCheck,
-  Check,
   AlertCircle,
-  Zap,
   Info,
-  ExternalLink,
   X,
   Phone,
 } from 'lucide-react';
-import { login, loginAsync, registerClient, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
+import { loginAsync, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
 import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
 import { AuthUser } from '@/types/auth';
 import { Business } from '@/types/business';
+
+interface SupabaseUserMetadata {
+  full_name?: string;
+  name?: string;
+  avatar_url?: string;
+  picture?: string;
+  [key: string]: unknown;
+}
 
 function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
   return (
@@ -50,7 +55,18 @@ function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
 
 export default function LoginPage() {
   const router = useRouter();
-  const [activeTab, setActiveTab] = useState<'login' | 'register'>('login');
+  const [activeTab, setActiveTab] = useState<'login' | 'register'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const tabParam = params.get('tab');
+        if (tabParam === 'register' || tabParam === 'trial') {
+          return 'register';
+        }
+      } catch {}
+    }
+    return 'login';
+  });
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = useState(false);
@@ -88,16 +104,8 @@ export default function LoginPage() {
       return;
     }
 
-    try {
-      const params = new URLSearchParams(window.location.search);
-      const tabParam = params.get('tab');
-      if (tabParam === 'register' || tabParam === 'trial') {
-        setActiveTab('register');
-      }
-    } catch {}
-
     // Authenticate user against Supabase and prevent duplicate onboarding
-    async function processAuthUser(user: { email?: string; user_metadata?: any }) {
+    async function processAuthUser(user: { email?: string; user_metadata?: SupabaseUserMetadata }) {
       try {
         const email = user.email?.toLowerCase().trim();
         if (!email) return;
@@ -315,7 +323,7 @@ export default function LoginPage() {
     try {
       const baseUrl = getAppBaseUrl();
       const redirectUrl = `${baseUrl}/login/`;
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: redirectUrl,
@@ -335,9 +343,10 @@ export default function LoginPage() {
           setErrorMsg(`Error de conexión con Google: ${error.message}`);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsGoogleLoading(false);
-      setErrorMsg(err.message || 'Error al conectar con Google');
+      const msg = err instanceof Error ? err.message : 'Error al conectar con Google';
+      setErrorMsg(msg);
     }
   };
 
@@ -365,9 +374,10 @@ export default function LoginPage() {
         setErrorMsg(res.error || 'Error al guardar los datos del negocio');
         setIsLoading(false);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsLoading(false);
-      setErrorMsg(err.message || 'Error al completar el registro');
+      const msg = err instanceof Error ? err.message : 'Error al completar el registro';
+      setErrorMsg(msg);
     }
   };
 
@@ -388,9 +398,10 @@ export default function LoginPage() {
       } else {
         setErrorMsg(res.error || 'Credenciales inválidas');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsLoading(false);
-      setErrorMsg(err.message || 'Error al iniciar sesión');
+      const msg = err instanceof Error ? err.message : 'Error al iniciar sesión';
+      setErrorMsg(msg);
     }
   };
 
@@ -413,9 +424,10 @@ export default function LoginPage() {
       } else {
         setErrorMsg(res.error || 'Error al crear la cuenta');
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       setIsLoading(false);
-      setErrorMsg(err.message || 'Error al crear la cuenta');
+      const msg = err instanceof Error ? err.message : 'Error al crear la cuenta';
+      setErrorMsg(msg);
     }
   };
 

@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     analyticsStore.push(metric);
 
     return NextResponse.json({ success: true, metric });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ success: false, error: 'Failed to record metric' }, { status: 400 });
   }
 }

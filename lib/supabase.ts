@@ -23,8 +23,62 @@ export function getAppBaseUrl(): string {
   return window.location.origin;
 }
 
+interface DbBusinessRow {
+  id: string;
+  slug: string;
+  name: string;
+  is_verified?: boolean;
+  category?: string;
+  bio?: string;
+  banner_url?: string;
+  logo_url?: string;
+  theme_color?: string;
+  phone?: string;
+  whatsapp?: string;
+  email?: string;
+  address?: string;
+  google_maps_url?: string;
+  website_url?: string;
+  catalog_url?: string;
+  catalog_title?: string;
+  quick_access?: QuickAccessConfig;
+  quick_access_enabled?: boolean;
+  quick_access_phone?: boolean;
+  quick_access_email?: boolean;
+  quick_access_maps?: boolean;
+  quick_access_catalog?: boolean;
+  plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
+  account_status?: 'ACTIVE' | 'TRIAL' | 'PAUSED';
+  created_at?: string;
+  updated_at?: string;
+}
+
+interface DbLinkRow {
+  id: string;
+  business_id: string;
+  type: BusinessLink['type'];
+  title: string;
+  subtitle?: string;
+  url: string;
+  icon_name: string;
+  sort_order?: number;
+  is_active?: boolean;
+  highlighted?: boolean;
+  custom_color?: string;
+}
+
+interface DbCardRow {
+  id: string;
+  card_code: string;
+  business_id: string;
+  status: NfcCard['status'];
+  total_taps?: number;
+  last_tap_at?: string;
+  created_at: string;
+}
+
 // Helper mappers between Supabase snake_case and TypeScript camelCase
-export function mapDbToBusiness(row: any, links: BusinessLink[] = [], cards: NfcCard[] = []): Business {
+export function mapDbToBusiness(row: DbBusinessRow, links: BusinessLink[] = [], cards: NfcCard[] = []): Business {
   return {
     id: row.id,
     slug: row.slug,
@@ -59,7 +113,7 @@ export function mapDbToBusiness(row: any, links: BusinessLink[] = [], cards: Nfc
   };
 }
 
-export function mapDbToLink(row: any): BusinessLink {
+export function mapDbToLink(row: DbLinkRow): BusinessLink {
   return {
     id: row.id,
     businessId: row.business_id,
@@ -75,7 +129,7 @@ export function mapDbToLink(row: any): BusinessLink {
   };
 }
 
-export function mapDbToCard(row: any): NfcCard {
+export function mapDbToCard(row: DbCardRow): NfcCard {
   return {
     id: row.id,
     cardCode: row.card_code,
@@ -278,9 +332,10 @@ export async function saveBusinessToSupabase(business: Business): Promise<{ succ
     }
 
     return { success: true };
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Error desconocido al guardar en Supabase';
     console.error('[Supabase] Unexpected error in saveBusinessToSupabase:', err);
-    return { success: false, error: err.message || 'Error desconocido al guardar en Supabase' };
+    return { success: false, error: msg };
   }
 }
 
@@ -350,7 +405,8 @@ export async function uploadBusinessAsset(file: File, businessSlug: string, type
       .getPublicUrl(data.path);
 
     return { url: pubUrl.publicUrl };
-  } catch (err: any) {
-    return { error: err.message || 'Error al subir imagen a Supabase Storage' };
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : 'Error al subir imagen a Supabase Storage';
+    return { error: msg };
   }
 }

@@ -19,13 +19,8 @@ import {
   Smartphone,
   BarChart3,
   SlidersHorizontal,
-  Check,
-  Sparkles,
-  Layers,
-  Building2,
   Users,
   LogOut,
-  ShieldAlert,
   Crown,
 } from 'lucide-react';
 
@@ -49,9 +44,7 @@ export default function DashboardPage() {
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
   const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState<'editor' | 'preview'>('editor');
-  const [savedSuccess, setSavedSuccess] = useState(false);
   const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
-  const [isCloudSyncing, setIsCloudSyncing] = useState(false);
 
   // Authenticate user & load businesses list on client mount
   useEffect(() => {
@@ -183,7 +176,6 @@ export default function DashboardPage() {
   };
 
   const handleSave = async () => {
-    setIsCloudSyncing(true);
     try {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(business));
@@ -195,16 +187,12 @@ export default function DashboardPage() {
       // Persist to Supabase
       await saveBusinessToSupabase(business);
 
-      setSavedSuccess(true);
       const now = new Date();
       const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
       setLastSavedTime(`Guardado en Supabase a las ${timeStr}`);
-      setTimeout(() => setSavedSuccess(false), 2000);
     } catch (e) {
       console.error('Error al guardar en Supabase:', e);
       setLastSavedTime('Guardado localmente (sin conexión a Supabase)');
-    } finally {
-      setIsCloudSyncing(false);
     }
   };
 

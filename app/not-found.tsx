@@ -1,16 +1,13 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { Smartphone, ArrowLeft } from 'lucide-react';
 import { ProfileViewer } from '@/components/nfc/profile-viewer';
 
 export default function NotFound() {
-  const [potentialSlug, setPotentialSlug] = useState<string | null>(null);
-  const [isChecking, setIsChecking] = useState<boolean>(true);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
+  const [potentialSlug] = useState<string | null>(() => {
+    if (typeof window === 'undefined') return null;
 
     // Check pathname: e.g. /nfc-card-proyect/tunegocio or /tunegocio
     const path = window.location.pathname;
@@ -27,24 +24,13 @@ export default function NotFound() {
     // Ignore known reserved system routes
     const reserved = ['login', 'admin', 'dashboard', 'api', 't', '_next', 'images'];
     if (candidate && !reserved.includes(candidate.toLowerCase())) {
-      setPotentialSlug(candidate);
+      return candidate;
     }
-    setIsChecking(false);
-  }, []);
+    return null;
+  });
 
   if (potentialSlug) {
     return <ProfileViewer slug={potentialSlug} />;
-  }
-
-  if (isChecking) {
-    return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-center">
-        <div className="w-10 h-10 rounded-2xl bg-blue-600/20 border border-blue-500/30 flex items-center justify-center text-blue-400 mb-3 animate-pulse">
-          <Smartphone className="w-5 h-5 animate-bounce" />
-        </div>
-        <p className="text-xs text-slate-400">Verificando enlace digital...</p>
-      </div>
-    );
   }
 
   return (

@@ -5,7 +5,6 @@ import Link from 'next/link';
 import {
   Smartphone,
   Zap,
-  QrCode,
   ShieldCheck,
   BarChart3,
   SlidersHorizontal,
@@ -15,15 +14,10 @@ import {
   CheckCircle2,
   LogIn,
   LogOut,
-  UserPlus,
-  Layers,
   Sparkles,
   Users,
   CreditCard,
-  PhoneCall,
-  Share2,
   Check,
-  Clock,
   Lock,
   Cookie,
   FileText,
@@ -36,7 +30,12 @@ import { getActiveSession, setActiveSession, logout } from '@/lib/auth';
 import { supabase } from '@/lib/supabase';
 
 export default function HomePage() {
-  const [session, setSession] = useState<AuthUser | null>(null);
+  const [session, setSession] = useState<AuthUser | null>(() => {
+    if (typeof window !== 'undefined') {
+      return getActiveSession();
+    }
+    return null;
+  });
   const [legalModal, setLegalModal] = useState<'privacy' | 'cookies' | 'terms' | null>(null);
 
   useEffect(() => {
@@ -44,7 +43,6 @@ export default function HomePage() {
       if (typeof window !== 'undefined') {
         const localSession = getActiveSession();
         if (localSession) {
-          setSession(localSession);
           return;
         }
 

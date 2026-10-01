@@ -109,7 +109,15 @@ export async function loginAsync(
   );
 
   if (localMatch) {
-    const { passwordHash: _, ...safeUser } = localMatch;
+    const safeUser: AuthUser = {
+      id: localMatch.id,
+      email: localMatch.email,
+      name: localMatch.name,
+      role: localMatch.role,
+      businessId: localMatch.businessId,
+      businessSlug: localMatch.businessSlug,
+      createdAt: localMatch.createdAt,
+    };
     setActiveSession(safeUser);
     return { success: true, user: safeUser };
   }
@@ -172,7 +180,15 @@ export function login(
     };
   }
 
-  const { passwordHash: _, ...safeUser } = found;
+  const safeUser: AuthUser = {
+    id: found.id,
+    email: found.email,
+    name: found.name,
+    role: found.role,
+    businessId: found.businessId,
+    businessSlug: found.businessSlug,
+    createdAt: found.createdAt,
+  };
   setActiveSession(safeUser);
   return { success: true, user: safeUser };
 }
@@ -383,7 +399,15 @@ export async function registerClientAsync(params: {
     localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(updatedUsers));
   } catch {}
 
-  const { passwordHash: _, ...safeUser } = newUser;
+  const safeUser: AuthUser = {
+    id: newUser.id,
+    email: newUser.email,
+    name: newUser.name,
+    role: newUser.role,
+    businessId: newUser.businessId,
+    businessSlug: newUser.businessSlug,
+    createdAt: newUser.createdAt,
+  };
   setActiveSession(safeUser);
   return { success: true, user: safeUser };
 }
