@@ -7,7 +7,8 @@ import { ProfileHeader } from './profile-header';
 import { ActionCard } from './action-card';
 import { FloatingVCardButton } from './floating-vcard-button';
 import { QrModal } from './qr-modal';
-import { Smartphone, Sparkles } from 'lucide-react';
+import { Smartphone, Sparkles, PauseCircle, ArrowLeft } from 'lucide-react';
+import Link from 'next/link';
 
 import { supabase, getBusinessBySlug, trackTapEvent } from '@/lib/supabase';
 
@@ -131,11 +132,66 @@ export function PublicProfile({
     .filter((l) => l.isActive)
     .sort((a, b) => a.order - b.order);
 
+  // If account is suspended / paused by admin due to non-payment, show friendly suspended screen to public visitors
+  if (business.accountStatus === 'PAUSED' && !isMockup) {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col items-center justify-center p-6 text-center selection:bg-amber-500 selection:text-black">
+        <div className="max-w-sm w-full bg-slate-900/90 border border-amber-500/30 rounded-3xl p-8 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+          <div className="absolute -top-24 -right-24 w-48 h-48 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+          <div className="w-16 h-16 rounded-2xl bg-amber-500/20 border border-amber-500/40 text-amber-400 flex items-center justify-center mx-auto mb-4 shadow-lg shadow-amber-500/10">
+            <PauseCircle className="w-8 h-8" />
+          </div>
+          <span className="px-3 py-1 rounded-full text-[10px] font-bold tracking-wider uppercase bg-amber-500/20 text-amber-300 border border-amber-500/30">
+            Perfil Suspendido
+          </span>
+          <h1 className="text-xl font-bold text-white mt-3">{business.name}</h1>
+          <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+            Esta tarjeta digital se encuentra temporalmente inactiva o en proceso de renovación.
+          </p>
+
+          <div className="mt-6 p-4 rounded-2xl bg-slate-950/60 border border-slate-800 text-left text-xs text-slate-400 space-y-1.5">
+            <div className="font-semibold text-slate-300 flex items-center gap-1.5">
+              <Smartphone className="w-3.5 h-3.5 text-amber-400" />
+              ¿Eres el titular de esta tarjeta?
+            </div>
+            <p className="text-[11px] text-slate-400">
+              Inicia sesión en tu panel de control para regularizar tu suscripción o comunícate con administración.
+            </p>
+          </div>
+
+          <div className="mt-6 flex flex-col gap-2.5">
+            <Link
+              href="/login"
+              className="w-full py-3 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold text-xs shadow-lg shadow-amber-500/20 transition-all active:scale-95 text-center"
+            >
+              Iniciar Sesión en TapCard
+            </Link>
+            <Link
+              href="/"
+              className="w-full py-2.5 px-4 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold text-xs transition-all text-center flex items-center justify-center gap-1.5"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" />
+              Ir a la página principal
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-slate-200 dark:bg-zinc-900 flex justify-center py-0 sm:py-6 selection:bg-blue-500 selection:text-white">
       {/* Mobile Container max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-zinc-950 shadow-xl overflow-hidden */}
       <main className="w-full max-w-md min-h-screen sm:min-h-[920px] bg-slate-50 dark:bg-zinc-950 shadow-2xl overflow-hidden relative flex flex-col justify-between sm:rounded-[36px] sm:border-[6px] sm:border-slate-800">
         
+        {/* Mockup Suspended Warning Banner */}
+        {business.accountStatus === 'PAUSED' && isMockup && (
+          <div className="bg-amber-500 text-slate-950 text-[11px] font-bold py-1.5 px-3 text-center flex items-center justify-center gap-1.5 z-30 shadow-md">
+            <PauseCircle className="w-3.5 h-3.5" />
+            <span>Perfil suspendido por falta de pago (Inactivo para visitantes)</span>
+          </div>
+        )}
+
         {/* Source Badge Floating Toast */}
         {toastMessage && (
           <div className="absolute top-4 left-1/2 -translate-x-1/2 z-50 animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-none">

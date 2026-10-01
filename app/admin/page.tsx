@@ -21,6 +21,8 @@ import {
   ShieldAlert,
   LogOut,
   Crown,
+  PauseCircle,
+  PlayCircle,
 } from 'lucide-react';
 import { Business, NfcCard } from '@/types/business';
 import { AuthUser } from '@/types/auth';
@@ -188,6 +190,27 @@ export default function SuperAdminPage() {
       await supabase.from('businesses').delete().eq('id', businessId);
     } catch (e) {
       console.error('Error deleting business from Supabase:', e);
+    }
+  };
+
+  // Toggle business account status (ACTIVE <-> PAUSED)
+  const handleToggleBusinessStatus = async (businessId: string, currentStatus?: string) => {
+    const newStatus: 'ACTIVE' | 'PAUSED' = currentStatus === 'PAUSED' ? 'ACTIVE' : 'PAUSED';
+    const updated = businesses.map((b) =>
+      b.id === businessId ? { ...b, accountStatus: newStatus } : b
+    );
+    saveBusinesses(updated);
+
+    try {
+      await supabase
+        .from('businesses')
+        .update({
+          account_status: newStatus,
+          updated_at: new Date().toISOString(),
+        })
+        .eq('id', businessId);
+    } catch (e) {
+      console.error('Error updating business account status in Supabase:', e);
     }
   };
 
@@ -588,10 +611,17 @@ export default function SuperAdminPage() {
                           <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-black/60 backdrop-blur-md text-amber-300 border border-amber-500/30">
                             {biz.plan || 'PRO'}
                           </span>
-                          <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                            Activo
-                          </span>
+                          {biz.accountStatus === 'PAUSED' ? (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-amber-950/90 text-amber-300 border border-amber-500/40">
+                              <PauseCircle className="w-2.5 h-2.5 text-amber-400" />
+                              Suspendido
+                            </span>
+                          ) : (
+                            <span className="flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-950/80 text-emerald-300 border border-emerald-800/60">
+                              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                              Activo
+                            </span>
+                          )}
                         </div>
                       </div>
 
@@ -731,6 +761,28 @@ export default function SuperAdminPage() {
                       >
                         <ExternalLink className="w-4 h-4" />
                       </Link>
+
+                      {/* Botón Suspender / Reactivar Cuenta */}
+                      <button
+                        type="button"
+                        onClick={() => handleToggleBusinessStatus(biz.id, biz.accountStatus)}
+                        className={`p-2.5 rounded-xl border transition-all active:scale-95 ${
+                          biz.accountStatus === 'PAUSED'
+                            ? 'bg-emerald-950/50 hover:bg-emerald-900/70 text-emerald-400 border-emerald-800/70 shadow-sm shadow-emerald-900/30'
+                            : 'bg-amber-950/40 hover:bg-amber-900/60 text-amber-400 border-amber-900/60'
+                        }`}
+                        title={
+                          biz.accountStatus === 'PAUSED'
+                            ? 'Reactivar cuenta (Habilitar perfil y tarjetas NFC)'
+                            : 'Suspender / Inhabilitar cuenta (Falta de pago)'
+                        }
+                      >
+                        {biz.accountStatus === 'PAUSED' ? (
+                          <PlayCircle className="w-4 h-4" />
+                        ) : (
+                          <PauseCircle className="w-4 h-4" />
+                        )}
+                      </button>
 
                       <button
                         type="button"
