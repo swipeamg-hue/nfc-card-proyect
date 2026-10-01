@@ -485,25 +485,27 @@ export function ProfileEditor({
             />
           </div>
 
-          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-5 h-5 text-blue-600" />
-              <div>
-                <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
-                  Insignia Oficial de Verificación
-                </span>
-                <p className="text-[11px] text-slate-500">
-                  Muestra el distintivo azul de negocio autenticado en tu perfil
-                </p>
+          {isSuperAdmin && (
+            <div className="flex items-center justify-between p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/60">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-blue-600" />
+                <div>
+                  <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                    Insignia Oficial de Verificación
+                  </span>
+                  <p className="text-[11px] text-slate-500">
+                    Muestra el distintivo azul de negocio autenticado en tu perfil
+                  </p>
+                </div>
               </div>
+              <input
+                type="checkbox"
+                checked={business.isVerified}
+                onChange={(e) => updateField('isVerified', e.target.checked)}
+                className="w-5 h-5 accent-blue-600 cursor-pointer rounded"
+              />
             </div>
-            <input
-              type="checkbox"
-              checked={business.isVerified}
-              onChange={(e) => updateField('isVerified', e.target.checked)}
-              className="w-5 h-5 accent-blue-600 cursor-pointer rounded"
-            />
-          </div>
+          )}
         </div>
       )}
 
