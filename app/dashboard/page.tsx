@@ -396,6 +396,7 @@ export default function DashboardPage() {
                   business={business}
                   onChange={handleBusinessChange}
                   onSave={handleSave}
+                  isSuperAdmin={session?.role === 'SUPER_ADMIN'}
                 />
               </div>
 
