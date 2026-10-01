@@ -324,7 +324,7 @@ export default function DashboardPage() {
               }`}
             >
               <SlidersHorizontal className="w-3.5 h-3.5" />
-              <span>Editor & Vista</span>
+              <span>Editor</span>
             </button>
             <button
               onClick={() => setActiveMainTab('analytics')}
