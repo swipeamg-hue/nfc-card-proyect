@@ -470,21 +470,23 @@ export function ProfileEditor({
             />
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
-                Slug Público (URL)
-              </label>
-              <div className="flex items-center rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/50 px-3">
-                <span className="text-xs text-slate-400">tapcard.link/</span>
-                <input
-                  type="text"
-                  value={business.slug}
-                  onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
-                  className="w-full py-2.5 bg-transparent text-sm focus:outline-none font-medium text-slate-800 dark:text-zinc-200"
-                />
+          <div className={isSuperAdmin ? 'grid grid-cols-1 sm:grid-cols-2 gap-3' : 'space-y-3'}>
+            {isSuperAdmin && (
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
+                  Slug Público (URL)
+                </label>
+                <div className="flex items-center rounded-xl border border-slate-200 dark:border-zinc-700 bg-slate-50 dark:bg-zinc-800/50 px-3">
+                  <span className="text-xs text-slate-400">tapcard.link/</span>
+                  <input
+                    type="text"
+                    value={business.slug}
+                    onChange={(e) => updateField('slug', e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, ''))}
+                    className="w-full py-2.5 bg-transparent text-sm focus:outline-none font-medium text-slate-800 dark:text-zinc-200"
+                  />
+                </div>
               </div>
-            </div>
+            )}
 
             <div>
               <label className="block text-xs font-semibold text-slate-700 dark:text-zinc-300 mb-1">
