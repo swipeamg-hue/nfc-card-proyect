@@ -24,6 +24,7 @@ import {
   ExternalLink,
   Star,
   Camera,
+  Crop,
   Save,
   Pencil,
   Copy,
@@ -35,6 +36,7 @@ import {
   Link as LinkIcon,
 } from 'lucide-react';
 import { uploadBusinessAsset, getAppBaseUrl } from '@/lib/supabase';
+import { ImageCropperModal, CropType } from '@/components/dashboard/image-cropper-modal';
 import {
   WhatsAppOfficialIcon,
   InstagramOfficialIcon,
@@ -95,6 +97,12 @@ export function ProfileEditor({
   const [showLogoUrlInput, setShowLogoUrlInput] = useState(false);
   const [autoSyncCover, setAutoSyncCover] = useState(true);
 
+  // Image Cropper Modal State
+  const [cropperOpen, setCropperOpen] = useState(false);
+  const [cropperImageSrc, setCropperImageSrc] = useState<string>('');
+  const [cropperType, setCropperType] = useState<CropType>('banner');
+  const [cropperField, setCropperField] = useState<'bannerUrl' | 'logoUrl'>('bannerUrl');
+
   const profileUrl = typeof window !== 'undefined'
     ? `${getAppBaseUrl()}/${business.slug}`
     : `https://tapcard.mx/${business.slug}`;
@@ -138,20 +146,60 @@ export function ProfileEditor({
     });
   };
 
-  // Handle desktop file upload
-  const handleFileUpload = async (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
+  // Trigger file selection and open the cropper modal
+  const handleFileSelected = (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       alert('Por favor selecciona una imagen válida (JPG, PNG, WEBP, etc.)');
       return;
     }
-    if (file.size > 8 * 1024 * 1024) {
-      alert('La imagen no debe superar los 8MB para un rendimiento óptimo');
+    if (file.size > 15 * 1024 * 1024) {
+      alert('La imagen no debe superar los 15MB');
       return;
     }
 
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const result = e.target?.result as string;
+      if (result) {
+        setCropperImageSrc(result);
+        setCropperType(field === 'logoUrl' ? 'circle' : 'banner');
+        setCropperField(field);
+        setCropperOpen(true);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
+  // Re-open cropper on an already saved image URL
+  const handleOpenExistingCropper = (field: 'bannerUrl' | 'logoUrl') => {
+    const currentUrl = field === 'bannerUrl' ? business.bannerUrl : business.logoUrl;
+    if (!currentUrl) return;
+    setCropperImageSrc(currentUrl);
+    setCropperType(field === 'logoUrl' ? 'circle' : 'banner');
+    setCropperField(field);
+    setCropperOpen(true);
+  };
+
+  // When user finishes cropping in the modal
+  const handleCropperConfirm = async (croppedDataUrl: string, croppedFile: File) => {
+    const field = cropperField;
+
+    // 1. Immediately apply locally for 0ms visual latency
+    if (field === 'logoUrl') {
+      const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
+      onChange({
+        ...business,
+        logoUrl: croppedDataUrl,
+        bannerUrl: shouldSyncBanner ? croppedDataUrl : business.bannerUrl,
+      });
+    } else {
+      updateField(field, croppedDataUrl);
+    }
+
+    // 2. Upload the optimized cropped file to Supabase Storage
     try {
-      const uploadRes = await uploadBusinessAsset(file, business.slug, field === 'logoUrl' ? 'logo' : 'banner');
+      const uploadRes = await uploadBusinessAsset(croppedFile, business.slug, field === 'logoUrl' ? 'logo' : 'banner');
       if (uploadRes.url) {
         if (field === 'logoUrl') {
           const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
@@ -163,30 +211,10 @@ export function ProfileEditor({
         } else {
           updateField(field, uploadRes.url);
         }
-        return;
       }
     } catch (err) {
-      console.warn('Storage upload fallback to dataURL:', err);
+      console.warn('Storage upload fallback kept local cropped dataURL:', err);
     }
-
-    // Fallback to local Data URL
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const dataUrl = e.target?.result as string;
-      if (dataUrl) {
-        if (field === 'logoUrl') {
-          const shouldSyncBanner = autoSyncCover || !business.bannerUrl;
-          onChange({
-            ...business,
-            logoUrl: dataUrl,
-            bannerUrl: shouldSyncBanner ? dataUrl : business.bannerUrl,
-          });
-        } else {
-          updateField(field, dataUrl);
-        }
-      }
-    };
-    reader.readAsDataURL(file);
   };
 
   // Toggle link active status
@@ -914,14 +942,25 @@ export function ProfileEditor({
                 </p>
               </div>
               {business.bannerUrl && (
-                <button
-                  type="button"
-                  onClick={() => updateField('bannerUrl', '')}
-                  title="Eliminar foto de portada"
-                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenExistingCropper('bannerUrl')}
+                    title="Ajustar encuadre y zoom de portada"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
+                  >
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>Ajustar encuadre</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateField('bannerUrl', '')}
+                    title="Eliminar foto de portada"
+                    className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -966,7 +1005,8 @@ export function ProfileEditor({
               className="hidden"
               onChange={(e) => {
                 if (e.target.files?.[0]) {
-                  handleFileUpload('bannerUrl', e.target.files[0]);
+                  handleFileSelected('bannerUrl', e.target.files[0]);
+                  e.target.value = '';
                 }
               }}
             />
@@ -1009,14 +1049,25 @@ export function ProfileEditor({
                 </p>
               </div>
               {business.logoUrl && (
-                <button
-                  type="button"
-                  onClick={() => updateField('logoUrl', '')}
-                  title="Eliminar foto de perfil"
-                  className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </button>
+                <div className="flex items-center gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenExistingCropper('logoUrl')}
+                    title="Ajustar encuadre y zoom de perfil"
+                    className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-purple-50 hover:bg-purple-100 text-purple-600 dark:bg-purple-950/40 dark:text-purple-400 dark:hover:bg-purple-900/50 transition-colors"
+                  >
+                    <Crop className="w-3.5 h-3.5" />
+                    <span>Ajustar encuadre</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateField('logoUrl', '')}
+                    title="Eliminar foto de perfil"
+                    className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                </div>
               )}
             </div>
 
@@ -1065,7 +1116,8 @@ export function ProfileEditor({
                   className="hidden"
                   onChange={(e) => {
                     if (e.target.files?.[0]) {
-                      handleFileUpload('logoUrl', e.target.files[0]);
+                      handleFileSelected('logoUrl', e.target.files[0]);
+                      e.target.value = '';
                     }
                   }}
                 />
@@ -1308,6 +1360,19 @@ export function ProfileEditor({
         onClose={() => {
           setPickerModalOpen(false);
           setActivePickingLinkId(null);
+        }}
+      />
+
+      {/* Image Cropper Modal for Banner & Logo */}
+      <ImageCropperModal
+        isOpen={cropperOpen}
+        imageSrc={cropperImageSrc}
+        cropType={cropperType}
+        title={cropperField === 'logoUrl' ? 'Ajustar Foto de Perfil / Logo' : 'Ajustar Foto de Portada (Banner)'}
+        onConfirm={handleCropperConfirm}
+        onClose={() => {
+          setCropperOpen(false);
+          setCropperImageSrc('');
         }}
       />
     </div>
