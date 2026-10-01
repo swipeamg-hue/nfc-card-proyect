@@ -44,7 +44,6 @@ export default function DashboardPage() {
   const [business, setBusiness] = useState<Business>(mockNexoBusiness);
   const [activeMainTab, setActiveMainTab] = useState<'editor' | 'analytics'>('editor');
   const [mobileWorkspaceTab, setMobileWorkspaceTab] = useState<'editor' | 'preview'>('editor');
-  const [lastSavedTime, setLastSavedTime] = useState<string | null>(null);
 
   // Authenticate user & load businesses list on client mount
   useEffect(() => {
@@ -95,7 +94,6 @@ export default function DashboardPage() {
 
           if (clientBiz && isMounted) {
             setBusiness(clientBiz);
-            setLastSavedTime('Sincronizado con Supabase');
             return;
           }
         }
@@ -106,14 +104,12 @@ export default function DashboardPage() {
           const match = loadedBusinesses.find((b) => b.id === activeId);
           if (match && isMounted) {
             setBusiness(match);
-            setLastSavedTime('Sincronizado con Supabase');
             return;
           }
         }
 
         if (loadedBusinesses.length > 0 && isMounted) {
           setBusiness(loadedBusinesses[0]);
-          setLastSavedTime('Sincronizado con Supabase');
         }
       } catch (e) {
         console.error('Error loading dashboard:', e);
@@ -144,7 +140,6 @@ export default function DashboardPage() {
       if (typeof window !== 'undefined') {
         localStorage.setItem(STORAGE_CURRENT_ACTIVE_ID, target.id);
         localStorage.setItem(STORAGE_KEY, JSON.stringify(target));
-        setLastSavedTime(`Cambiado a ${target.name}`);
       }
     } catch {}
   };
@@ -160,10 +155,6 @@ export default function DashboardPage() {
         const updatedList = allBusinesses.map((b) => (b.id === updated.id ? updated : b));
         setAllBusinesses(updatedList);
         localStorage.setItem(STORAGE_BUSINESSES_LIST_KEY, JSON.stringify(updatedList));
-
-        const now = new Date();
-        const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-        setLastSavedTime(`Autoguardado a las ${timeStr}`);
       }
     } catch (e) {
       console.error('Error auto-saving business locally', e);
@@ -186,13 +177,8 @@ export default function DashboardPage() {
 
       // Persist to Supabase
       await saveBusinessToSupabase(business);
-
-      const now = new Date();
-      const timeStr = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-      setLastSavedTime(`Guardado en Supabase a las ${timeStr}`);
     } catch (e) {
       console.error('Error al guardar en Supabase:', e);
-      setLastSavedTime('Guardado localmente (sin conexión a Supabase)');
     }
   };
 
@@ -305,15 +291,6 @@ export default function DashboardPage() {
                 <span>Métricas</span>
               </button>
             </div>
-
-            {lastSavedTime && (
-              <div className="hidden xl:flex items-center gap-1.5 text-[11px] text-emerald-600 dark:text-emerald-400 font-medium bg-emerald-50 dark:bg-emerald-950/40 px-2.5 py-1.5 rounded-xl border border-emerald-200/80 dark:border-emerald-800/80">
-                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span>{lastSavedTime}</span>
-              </div>
-            )}
-
-
 
             <a
               href={`${getAppBaseUrl()}/${business.slug}`}
