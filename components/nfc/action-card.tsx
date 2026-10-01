@@ -198,7 +198,7 @@ export function ActionCard({ link, onTrackClick }: ActionCardProps) {
       target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? '_self' : '_blank'}
       rel="noopener noreferrer"
       onClick={handleClick}
-      className={`group relative flex items-center justify-between p-3.5 bg-white dark:bg-zinc-900 rounded-2xl border ${
+      className={`group relative flex items-center justify-between p-3.5 bg-white/90 dark:bg-zinc-900/85 backdrop-blur-md rounded-2xl border ${
         link.highlighted
           ? 'border-amber-400/60 dark:border-amber-500/40 shadow-sm ring-1 ring-amber-400/20'
           : 'border-slate-100 dark:border-zinc-800 shadow-sm'

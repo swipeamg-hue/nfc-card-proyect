@@ -25,7 +25,8 @@ export function PublicProfile({
   cardCode,
   isMockup = false,
 }: PublicProfileProps) {
-  const [business, setBusiness] = useState<Business>(initialBusiness);
+  const [internalBusiness, setInternalBusiness] = useState<Business>(initialBusiness);
+  const business = isMockup ? initialBusiness : internalBusiness;
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -46,7 +47,7 @@ export function PublicProfile({
       try {
         const fresh = await getBusinessBySlug(initialBusiness.slug);
         if (fresh && isMounted) {
-          setBusiness(fresh);
+          setInternalBusiness(fresh);
         }
       } catch (e) {
         console.warn('Could not fetch latest Supabase profile:', e);
@@ -179,11 +180,40 @@ export function PublicProfile({
     );
   }
 
+  const brandColor = business.themeColor || '#2563eb';
+
   return (
-    <div className="min-h-screen bg-slate-200 dark:bg-zinc-900 flex justify-center py-0 sm:py-6 selection:bg-blue-500 selection:text-white">
-      {/* Mobile Container max-w-md mx-auto min-h-screen bg-slate-50 dark:bg-zinc-950 shadow-xl overflow-hidden */}
+    <div className="min-h-screen bg-slate-200 dark:bg-zinc-900 flex justify-center py-0 sm:py-6 selection:bg-blue-500 selection:text-white relative overflow-hidden">
+      {/* Desktop outer background ambient glow */}
+      {!isMockup && (
+        <div
+          className="hidden sm:block absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[140px] opacity-25 dark:opacity-20 pointer-events-none transition-all duration-700"
+          style={{ backgroundColor: brandColor }}
+        />
+      )}
+
+      {/* Mobile Container */}
       <main className="w-full max-w-md min-h-screen sm:min-h-[920px] bg-slate-50 dark:bg-zinc-950 shadow-2xl overflow-hidden relative flex flex-col justify-between sm:rounded-[36px] sm:border-[6px] sm:border-slate-800">
         
+        {/* Ambient Brand Glow inside Card (Resplandor de Fondo) */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
+          {/* Top orb behind banner/avatar */}
+          <div
+            className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-3xl opacity-35 dark:opacity-30 transition-all duration-700"
+            style={{ backgroundColor: brandColor }}
+          />
+          {/* Mid orb behind action links */}
+          <div
+            className="absolute top-1/3 -right-20 w-64 h-64 rounded-full blur-3xl opacity-25 dark:opacity-20 transition-all duration-700"
+            style={{ backgroundColor: brandColor }}
+          />
+          {/* Bottom orb */}
+          <div
+            className="absolute bottom-28 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25 dark:opacity-20 transition-all duration-700"
+            style={{ backgroundColor: brandColor }}
+          />
+        </div>
+
         {/* Mockup Suspended Warning Banner */}
         {business.accountStatus === 'PAUSED' && isMockup && (
           <div className="bg-amber-500 text-slate-950 text-[11px] font-bold py-1.5 px-3 text-center flex items-center justify-center gap-1.5 z-30 shadow-md">
@@ -202,7 +232,7 @@ export function PublicProfile({
           </div>
         )}
 
-        <div>
+        <div className="relative z-10">
           {/* Hero Banner with Avatar */}
           <HeroBanner
             bannerUrl={business.bannerUrl}
@@ -231,7 +261,7 @@ export function PublicProfile({
         </div>
 
         {/* Footer & NFC Branding */}
-        <div className="px-4 pt-6 pb-32 text-center">
+        <div className="px-4 pt-6 pb-32 text-center relative z-10">
           <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-400 dark:text-zinc-500">
             <Smartphone className="w-3.5 h-3.5" />
             <span>Perfil interactivo compatible con NFC & QR</span>
