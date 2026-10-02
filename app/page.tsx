@@ -177,7 +177,7 @@ export default function HomePage() {
                 </Link>
 
                 <Link
-                  href="/login?tab=register"
+                  href="/login?tab=register&plan=pro"
                   className="text-xs font-bold px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition-all shadow-lg shadow-blue-600/30 active:scale-95 flex items-center gap-1.5"
                 >
                   <Sparkles className="w-3.5 h-3.5 text-amber-300" />
@@ -213,7 +213,7 @@ export default function HomePage() {
           {/* Primary Action Buttons */}
           <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-center justify-center gap-3 sm:gap-4 max-w-md sm:max-w-none mx-auto">
             <Link
-              href="/login?tab=register"
+              href="/login?tab=register&plan=pro"
               className="w-full sm:w-auto flex items-center justify-center gap-2 px-7 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 text-center group"
             >
               <Sparkles className="w-4 h-4 text-amber-300" />
@@ -495,7 +495,7 @@ export default function HomePage() {
                 </div>
               </div>
               <Link
-                href="/login?tab=register"
+                href="/login?tab=register&plan=pro"
                 className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md whitespace-nowrap active:scale-95 transition-all"
               >
                 Registrarme Gratis
@@ -535,7 +535,7 @@ export default function HomePage() {
                 </div>
               </div>
               <Link
-                href="/login?tab=register"
+                href="/login?tab=register&plan=pro"
                 className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md whitespace-nowrap active:scale-95 transition-all"
               >
                 Probar Gratis
@@ -605,7 +605,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login?tab=register"
+                  href="/login?tab=register&plan=starter"
                   className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block shadow-sm"
                 >
                   Comenzar Prueba Gratis (Starter)
@@ -685,7 +685,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login?tab=register"
+                  href="/login?tab=register&plan=pro"
                   className="mt-6 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-xs text-center shadow-lg shadow-blue-600/30 transition-all active:scale-95 block"
                 >
                   Comenzar Prueba Gratis (PRO)
@@ -760,7 +760,7 @@ export default function HomePage() {
                 </div>
 
                 <Link
-                  href="/login?tab=register"
+                  href="/login?tab=register&plan=enterprise"
                   className="mt-6 w-full py-3 rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs text-center border border-slate-700 transition-all active:scale-95 block shadow-sm"
                 >
                   Comenzar Prueba Gratis (Enterprise)
@@ -784,7 +784,7 @@ export default function HomePage() {
 
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
                 <Link
-                  href="/login?tab=register"
+                  href="/login?tab=register&plan=pro"
                   className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
                 >
                   <Sparkles className="w-4 h-4 text-amber-300" />

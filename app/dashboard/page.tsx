@@ -204,11 +204,16 @@ export default function DashboardPage() {
               <Smartphone className="w-4 h-4 sm:w-5 sm:h-5" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-1.5 flex-wrap">
                 <span className="font-bold text-sm sm:text-base tracking-tight">TapCard</span>
                 <span className="text-[9px] sm:text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded-full bg-blue-100 dark:bg-blue-950 text-blue-700 dark:text-blue-300">
                   {session?.role === 'SUPER_ADMIN' ? 'Super Admin' : 'Mi Tienda'}
                 </span>
+                {session?.role !== 'SUPER_ADMIN' && (
+                  <span className="text-[9px] sm:text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    Plan {business.plan || 'PRO'} • 30d Prueba
+                  </span>
+                )}
               </div>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 truncate max-w-[130px] sm:max-w-none">
                 {session?.role === 'SUPER_ADMIN'

@@ -200,6 +200,7 @@ export async function registerClientAsync(params: {
   pass: string;
   businessName: string;
   category: string;
+  plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
 }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
   const cleanEmail = params.email.toLowerCase().trim();
 
@@ -309,7 +310,7 @@ export async function registerClientAsync(params: {
     address: '',
     googleMapsUrl: '',
     websiteUrl: '',
-    plan: 'PRO',
+    plan: params.plan || 'PRO',
     accountStatus: 'ACTIVE',
     createdAt: new Date().toISOString(),
     cards: [],
@@ -418,6 +419,7 @@ export function registerClient(params: {
   pass: string;
   businessName: string;
   category: string;
+  plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
 }): { success: boolean; user?: AuthUser; error?: string } {
   // Call async version in background and return immediately
   registerClientAsync(params);

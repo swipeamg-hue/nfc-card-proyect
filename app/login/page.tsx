@@ -16,6 +16,7 @@ import {
   Info,
   X,
   Phone,
+  Check,
 } from 'lucide-react';
 import { loginAsync, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
 import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
@@ -92,8 +93,37 @@ export default function LoginPage() {
   const [regBusinessName, setRegBusinessName] = useState('');
   const [regCategory, setRegCategory] = useState('');
 
-  // Check active session and Google OAuth callback on mount
+  // Selected plan state (Starter, PRO, Enterprise)
+  const [selectedPlan, setSelectedPlan] = useState<'STARTER' | 'PRO' | 'ENTERPRISE'>('PRO');
+
+  const handleSelectPlan = (plan: 'STARTER' | 'PRO' | 'ENTERPRISE') => {
+    setSelectedPlan(plan);
+    if (typeof window !== 'undefined') {
+      try {
+        localStorage.setItem('tapcard_selected_plan', plan);
+      } catch {}
+    }
+  };
+
+  // Check active session, plan parameter, and Google OAuth callback on mount
   useEffect(() => {
+    // 1. Sync plan from URL or cache
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const planParam = params.get('plan')?.toUpperCase();
+        if (planParam === 'STARTER' || planParam === 'PRO' || planParam === 'ENTERPRISE') {
+          setSelectedPlan(planParam);
+          localStorage.setItem('tapcard_selected_plan', planParam);
+        } else {
+          const cachedPlan = localStorage.getItem('tapcard_selected_plan')?.toUpperCase();
+          if (cachedPlan === 'STARTER' || cachedPlan === 'PRO' || cachedPlan === 'ENTERPRISE') {
+            setSelectedPlan(cachedPlan);
+          }
+        }
+      } catch {}
+    }
+
     const session = getActiveSession();
     if (session) {
       if (session.role === 'SUPER_ADMIN') {
@@ -218,6 +248,14 @@ export default function LoginPage() {
           user.user_metadata?.picture ||
           'https://images.unsplash.com/photo-1560250097-0b93528c311a?q=80&w=400&auto=format&fit=crop';
 
+        let resolvedPlan: 'STARTER' | 'PRO' | 'ENTERPRISE' = 'PRO';
+        try {
+          const cachedPlan = localStorage.getItem('tapcard_selected_plan')?.toUpperCase();
+          if (cachedPlan === 'STARTER' || cachedPlan === 'PRO' || cachedPlan === 'ENTERPRISE') {
+            resolvedPlan = cachedPlan;
+          }
+        } catch {}
+
         const autoBusiness: Business = {
           id: newBizId,
           slug,
@@ -234,7 +272,7 @@ export default function LoginPage() {
           address: '',
           googleMapsUrl: '',
           websiteUrl: '',
-          plan: 'PRO',
+          plan: resolvedPlan,
           accountStatus: 'ACTIVE',
           createdAt: new Date().toISOString(),
           cards: [],
@@ -365,6 +403,7 @@ export default function LoginPage() {
         pass: 'google-oauth-' + Date.now(),
         businessName: onboardBusinessName.trim(),
         category: onboardCategory.trim() || 'Servicios Generales',
+        plan: selectedPlan,
       });
 
       if (res.success && res.user) {
@@ -417,6 +456,7 @@ export default function LoginPage() {
         pass: regPassword,
         businessName: regBusinessName,
         category: regCategory,
+        plan: selectedPlan,
       });
       setIsLoading(false);
       if (res.success && res.user) {
@@ -593,6 +633,125 @@ export default function LoginPage() {
           ) : (
             /* REGISTER FORM */
             <form onSubmit={handleRegisterSubmit} className="space-y-3.5 mt-4">
+              {/* PLAN SELECTION SELECTOR */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Selecciona tu Plan (Prueba 30 días gratis) *
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Sin tarjeta hoy
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  {/* STARTER */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('STARTER')}
+                    className={`p-2 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                      selectedPlan === 'STARTER'
+                        ? 'bg-blue-600/15 border-blue-500 shadow-md shadow-blue-500/10 ring-1 ring-blue-500'
+                        : 'bg-slate-800/60 border-slate-700/80 hover:border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                          selectedPlan === 'STARTER' ? 'text-blue-400' : 'text-slate-400'
+                        }`}>
+                          Starter
+                        </span>
+                        {selectedPlan === 'STARTER' && (
+                          <span className="w-3.5 h-3.5 rounded-full bg-blue-500 text-white flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm font-black text-white mt-0.5">$49</div>
+                    </div>
+                    <span className="text-[9px] text-slate-400 block mt-1 leading-tight">
+                      1-3 Tarjetas
+                    </span>
+                  </button>
+
+                  {/* PRO */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('PRO')}
+                    className={`p-2 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                      selectedPlan === 'PRO'
+                        ? 'bg-blue-600/20 border-cyan-400 shadow-md shadow-cyan-500/15 ring-1 ring-cyan-400'
+                        : 'bg-slate-800/60 border-slate-700/80 hover:border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    <div className="absolute -top-2 right-1.5 px-1.5 py-0.2 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[7px] font-black uppercase tracking-wider">
+                      Popular
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                          selectedPlan === 'PRO' ? 'text-cyan-300' : 'text-slate-400'
+                        }`}>
+                          PRO
+                        </span>
+                        {selectedPlan === 'PRO' && (
+                          <span className="w-3.5 h-3.5 rounded-full bg-cyan-400 text-slate-900 flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5 stroke-[3]" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm font-black text-white mt-0.5">$69</div>
+                    </div>
+                    <span className="text-[9px] text-cyan-300/90 block mt-1 leading-tight">
+                      4-8 + Acrílico
+                    </span>
+                  </button>
+
+                  {/* ENTERPRISE */}
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('ENTERPRISE')}
+                    className={`p-2 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                      selectedPlan === 'ENTERPRISE'
+                        ? 'bg-purple-600/15 border-purple-500 shadow-md shadow-purple-500/10 ring-1 ring-purple-500'
+                        : 'bg-slate-800/60 border-slate-700/80 hover:border-slate-600 text-slate-400'
+                    }`}
+                  >
+                    <div>
+                      <div className="flex items-center justify-between">
+                        <span className={`text-[10px] font-bold uppercase tracking-wider ${
+                          selectedPlan === 'ENTERPRISE' ? 'text-purple-400' : 'text-slate-400'
+                        }`}>
+                          Enterprise
+                        </span>
+                        {selectedPlan === 'ENTERPRISE' && (
+                          <span className="w-3.5 h-3.5 rounded-full bg-purple-500 text-white flex items-center justify-center">
+                            <Check className="w-2.5 h-2.5" />
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-sm font-black text-white mt-0.5">$99</div>
+                    </div>
+                    <span className="text-[9px] text-slate-400 block mt-1 leading-tight">
+                      8-12 + Acrílico
+                    </span>
+                  </button>
+                </div>
+
+                <div className="px-3 py-1.5 rounded-xl bg-slate-800/50 border border-slate-700/50 text-[11px] text-slate-300 flex items-center justify-between">
+                  <span>
+                    Plan asignado:{' '}
+                    <strong className="text-white">
+                      {selectedPlan === 'STARTER' && 'Plan Starter ($49/mes)'}
+                      {selectedPlan === 'PRO' && 'Plan PRO ($69/mes • Recomendado)'}
+                      {selectedPlan === 'ENTERPRISE' && 'Plan Enterprise ($99/mes)'}
+                    </strong>
+                  </span>
+                  <span className="text-emerald-400 font-semibold text-[10px]">30 días gratis</span>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1">
                   Nombre de tu Negocio o Marca *
@@ -753,6 +912,59 @@ export default function LoginPage() {
             </div>
 
             <form onSubmit={handleCompleteGoogleOnboarding} className="space-y-4">
+              {/* PLAN SELECTOR IN ONBOARDING */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Plan seleccionado (Prueba 30 días gratis) *
+                  </label>
+                  <span className="text-[10px] text-emerald-400 font-semibold flex items-center gap-1">
+                    <Check className="w-3 h-3" /> Sin cobro hoy
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-3 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('STARTER')}
+                    className={`p-2 rounded-xl border text-left transition-all ${
+                      selectedPlan === 'STARTER'
+                        ? 'bg-blue-600/15 border-blue-500 ring-1 ring-blue-500'
+                        : 'bg-slate-800 border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold block text-blue-400">Starter</span>
+                    <span className="text-xs font-bold text-white">$49</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('PRO')}
+                    className={`p-2 rounded-xl border text-left transition-all relative ${
+                      selectedPlan === 'PRO'
+                        ? 'bg-blue-600/20 border-cyan-400 ring-1 ring-cyan-400'
+                        : 'bg-slate-800 border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold block text-cyan-300">PRO</span>
+                    <span className="text-xs font-bold text-white">$69</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPlan('ENTERPRISE')}
+                    className={`p-2 rounded-xl border text-left transition-all ${
+                      selectedPlan === 'ENTERPRISE'
+                        ? 'bg-purple-600/15 border-purple-500 ring-1 ring-purple-500'
+                        : 'bg-slate-800 border-slate-700 text-slate-400'
+                    }`}
+                  >
+                    <span className="text-[10px] font-bold block text-purple-400">Enterprise</span>
+                    <span className="text-xs font-bold text-white">$99</span>
+                  </button>
+                </div>
+              </div>
+
               <div>
                 <label className="block text-xs font-semibold text-slate-300 mb-1.5">
                   Nombre de tu Empresa o Negocio *
