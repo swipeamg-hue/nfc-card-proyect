@@ -235,48 +235,7 @@ export default function HomePage() {
             </span>
           </div>
 
-          {/* Key Compatibility Strip */}
-          <div className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-3 max-w-4xl mx-auto text-left">
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center flex-shrink-0">
-                <Smartphone className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-white">100% Compatible</span>
-                <span className="text-[10px] text-slate-400">iOS & Android nativo</span>
-              </div>
-            </div>
 
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center flex-shrink-0">
-                <Zap className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-white">Carga en &lt;400ms</span>
-                <span className="text-[10px] text-slate-400">Velocidad ultrarrápida</span>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-400 flex items-center justify-center flex-shrink-0">
-                <Download className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-white">Guardado vCard</span>
-                <span className="text-[10px] text-slate-400">Directo a contactos</span>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/80 flex items-center gap-3">
-              <div className="w-9 h-9 rounded-xl bg-purple-500/10 text-purple-400 flex items-center justify-center flex-shrink-0">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <div>
-                <span className="block text-xs font-bold text-white">Sin Apps Extra</span>
-                <span className="text-[10px] text-slate-400">Todo en navegador web</span>
-              </div>
-            </div>
-          </div>
         </section>
 
         {/* SECTION: NUESTROS SERVICIOS Y SOLUCIONES */}
