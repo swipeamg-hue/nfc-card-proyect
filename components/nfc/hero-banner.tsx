@@ -62,25 +62,24 @@ export function HeroBanner({
 
   return (
     <div className="relative w-full">
-      {/* Banner Cover Clásico */}
-      <div className="relative h-44 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
+      {/* Banner Cover Clásico - Height and framing optimized for both vertical and horizontal formats */}
+      <div className="relative h-48 sm:h-52 w-full overflow-hidden bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900">
         <>
-          {/* Ambient blurred backdrop if banner is derived from avatar */}
-          {isSameAsLogo && (
-            <div className="absolute inset-0 overflow-hidden">
-              <Image
-                src={bannerSrc}
-                alt=""
-                fill
-                priority
-                unoptimized
-                sizes="(max-width: 768px) 100vw, 450px"
-                className="object-cover object-center scale-125 filter blur-md brightness-[0.70] contrast-125"
-                onError={() => setBannerError(true)}
-              />
-            </div>
-          )}
+          {/* Ambient blurred backdrop for rich atmospheric fill - ensures vertical images have gorgeous glowing wings */}
+          <div className="absolute inset-0 overflow-hidden pointer-events-none">
+            <Image
+              src={bannerSrc}
+              alt=""
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 450px"
+              className="object-cover object-center scale-125 filter blur-xl brightness-[0.55] contrast-125"
+              onError={() => setBannerError(true)}
+            />
+          </div>
 
+          {/* Main Foreground Banner Image with smart upper-center focal point */}
           <Image
             src={bannerSrc}
             alt={`${businessName} Fondo`}
@@ -88,18 +87,18 @@ export function HeroBanner({
             priority
             unoptimized
             sizes="(max-width: 768px) 100vw, 450px"
-            className={`object-cover object-center ${
+            className={`object-cover object-[center_28%] transition-transform duration-500 ${
               isSameAsLogo ? 'opacity-90 mix-blend-overlay scale-105' : 'opacity-100'
             }`}
             onError={() => setBannerError(true)}
           />
 
           {/* Smart cinematic vignette overlay for contrast and sleek finish */}
-          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-black/30 to-black/20 pointer-events-none" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950/90 via-slate-950/20 to-black/35 pointer-events-none" />
         </>
 
         {/* Subtle dark gradient overlay on bottom of banner */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/50 via-transparent to-transparent pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent pointer-events-none" />
       </div>
 
       {/* Overlapping Avatar Logo */}

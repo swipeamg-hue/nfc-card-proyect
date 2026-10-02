@@ -196,7 +196,8 @@ export function ProfileEditor({
       const result = e.target?.result as string;
       if (result) {
         setCropperImageSrc(result);
-        setCropperType(field === 'logoUrl' ? 'circle' : 'banner');
+        const isBanner = business.customization?.backgroundMode === 'banner';
+        setCropperType(field === 'logoUrl' ? 'circle' : (isBanner ? 'banner' : 'vertical'));
         setCropperField(field);
         setCropperOpen(true);
       }
@@ -209,14 +210,28 @@ export function ProfileEditor({
     const currentUrl = field === 'bannerUrl' ? business.bannerUrl : business.logoUrl;
     if (!currentUrl) return;
     setCropperImageSrc(currentUrl);
-    setCropperType(field === 'logoUrl' ? 'circle' : 'banner');
+    const isBanner = business.customization?.backgroundMode === 'banner';
+    setCropperType(field === 'logoUrl' ? 'circle' : (isBanner ? 'banner' : 'vertical'));
     setCropperField(field);
     setCropperOpen(true);
   };
 
   // When user finishes cropping in the modal
-  const handleCropperConfirm = async (croppedDataUrl: string, croppedFile: File) => {
+  const handleCropperConfirm = async (
+    croppedDataUrl: string,
+    croppedFile: File,
+    chosenCropType?: CropType
+  ) => {
     const field = cropperField;
+
+    // Automatically align presentation mode if user explicitly chose vertical vs banner in cropper
+    if (field === 'bannerUrl' && chosenCropType) {
+      if (chosenCropType === 'vertical' && business.customization?.backgroundMode !== 'full') {
+        updateCustomization('backgroundMode', 'full');
+      } else if (chosenCropType === 'banner' && business.customization?.backgroundMode !== 'banner') {
+        updateCustomization('backgroundMode', 'banner');
+      }
+    }
 
     // 1. Immediately apply locally for 0ms visual latency
     if (field === 'logoUrl') {
@@ -1186,7 +1201,11 @@ export function ProfileEditor({
             {/* Clickable Banner / Background Box */}
             <div
               onClick={() => bannerFileRef.current?.click()}
-              className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-blue-500 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner transition-all"
+              className={`relative w-full rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-blue-500 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner transition-all ${
+                (business.customization?.backgroundMode || 'full') === 'full'
+                  ? 'h-64 sm:h-72 max-w-xs mx-auto aspect-[9/16]'
+                  : 'h-40 sm:h-44'
+              }`}
             >
               {business.bannerUrl ? (
                 <>
@@ -1194,7 +1213,11 @@ export function ProfileEditor({
                   <img
                     src={business.bannerUrl}
                     alt="Vista previa de foto de fondo"
-                    className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                    className={`w-full h-full object-cover transition-transform group-hover:scale-105 duration-200 ${
+                      (business.customization?.backgroundMode || 'full') === 'full'
+                        ? 'object-top'
+                        : 'object-[center_28%]'
+                    }`}
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
                     <Camera className="w-6 h-6 mb-1" />
@@ -1207,10 +1230,14 @@ export function ProfileEditor({
                     <Camera className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
-                    Subir foto de fondo
+                    {(business.customization?.backgroundMode || 'full') === 'full'
+                      ? 'Subir foto de fondo'
+                      : 'Subir foto de portada'}
                   </span>
-                  <span className="text-[10px] text-slate-400 mt-0.5">
-                    JPG, PNG o WEBP (Recomendado 1080x1920 o panorámica)
+                  <span className="text-[10px] text-slate-400 mt-0.5 max-w-[220px]">
+                    {(business.customization?.backgroundMode || 'full') === 'full'
+                      ? 'Recomendado formato vertical (9:16) para toda la pantalla'
+                      : 'Recomendado formato horizontal (16:9) para banner superior'}
                   </span>
                 </div>
               )}
@@ -1259,6 +1286,11 @@ export function ProfileEditor({
                   Banner Superior
                 </button>
               </div>
+              <p className="text-[11px] text-slate-500 dark:text-zinc-400 pt-0.5">
+                {(business.customization?.backgroundMode || 'full') === 'full'
+                  ? '📱 Fondo Completo: la imagen vertical cubrirá toda la pantalla de la tarjeta móvil sin recortes.'
+                  : '🖼️ Banner Superior: se mostrará como encabezado panorámico con avatar superpuesto.'}
+              </p>
             </div>
 
             <div className="flex items-center justify-end text-[11px] text-slate-400 pt-0.5">
@@ -1633,7 +1665,13 @@ export function ProfileEditor({
         isOpen={cropperOpen}
         imageSrc={cropperImageSrc}
         cropType={cropperType}
-        title={cropperField === 'logoUrl' ? 'Ajustar Foto de Perfil / Logo' : 'Ajustar Foto de Portada (Banner)'}
+        title={
+          cropperField === 'logoUrl'
+            ? 'Ajustar Foto de Perfil / Logo'
+            : (business.customization?.backgroundMode === 'banner'
+                ? 'Ajustar Portada (Banner 16:9)'
+                : 'Ajustar Foto de Fondo (Vertical 9:16)')
+        }
         onConfirm={handleCropperConfirm}
         onClose={() => {
           setCropperOpen(false);

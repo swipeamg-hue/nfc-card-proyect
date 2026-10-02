@@ -11,16 +11,18 @@ import {
   Crop,
   Move,
   RotateCcw,
+  Smartphone,
+  CreditCard,
 } from 'lucide-react';
 
-export type CropType = 'circle' | 'banner';
+export type CropType = 'circle' | 'banner' | 'vertical';
 
 interface ImageCropperModalProps {
   isOpen: boolean;
   imageSrc: string;
   cropType: CropType;
   title?: string;
-  onConfirm: (croppedDataUrl: string, croppedFile: File) => void;
+  onConfirm: (croppedDataUrl: string, croppedFile: File, chosenCropType?: CropType) => void;
   onClose: () => void;
 }
 
@@ -33,6 +35,15 @@ export function ImageCropperModal({
   onClose,
 }: ImageCropperModalProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const maskRef = useRef<HTMLDivElement>(null);
+
+  // Active crop mode (user can toggle between vertical 9:16 and banner 16:9 inside the modal)
+  const [activeCropType, setActiveCropType] = useState<CropType>(cropType);
+  const [prevCropTypeProp, setPrevCropTypeProp] = useState<CropType>(cropType);
+  if (prevCropTypeProp !== cropType) {
+    setPrevCropTypeProp(cropType);
+    setActiveCropType(cropType);
+  }
 
   // Transformations
   const [zoom, setZoom] = useState<number>(1);
@@ -134,10 +145,13 @@ export function ImageCropperModal({
       let maskW = 0;
       let maskH = 0;
 
-      if (cropType === 'circle') {
+      if (activeCropType === 'circle') {
         const size = Math.min(containerW, containerH) * 0.72;
         maskW = size;
         maskH = size;
+      } else if (activeCropType === 'vertical') {
+        maskH = containerH * 0.82;
+        maskW = maskH * (9 / 16);
       } else {
         // Banner (16:9 or 3:1)
         maskW = containerW * 0.88;
@@ -148,9 +162,29 @@ export function ImageCropperModal({
         }
       }
 
+      // If mask element exists in DOM, use its exact real rendered pixel dimensions
+      if (maskRef.current) {
+        const mRect = maskRef.current.getBoundingClientRect();
+        if (mRect.width > 0 && mRect.height > 0) {
+          maskW = mRect.width;
+          maskH = mRect.height;
+        }
+      }
+
       // Output canvas dimension
-      const outputWidth = cropType === 'circle' ? 512 : 1200;
-      const outputHeight = cropType === 'circle' ? 512 : Math.round((1200 * maskH) / maskW);
+      let outputWidth = 1200;
+      let outputHeight = 675;
+
+      if (activeCropType === 'circle') {
+        outputWidth = 512;
+        outputHeight = 512;
+      } else if (activeCropType === 'vertical') {
+        outputWidth = 1080;
+        outputHeight = 1920;
+      } else {
+        outputWidth = 1200;
+        outputHeight = Math.round((1200 * maskH) / maskW);
+      }
 
       const canvas = document.createElement('canvas');
       canvas.width = outputWidth;
@@ -162,7 +196,7 @@ export function ImageCropperModal({
       ctx.imageSmoothingQuality = 'high';
 
       // Fill with subtle background for transparent PNGs
-      if (cropType === 'circle') {
+      if (activeCropType === 'circle') {
         ctx.fillStyle = '#0f172a';
       } else {
         ctx.fillStyle = '#020617';
@@ -198,10 +232,10 @@ export function ImageCropperModal({
 
       if (!blob) throw new Error('Could not create image blob');
 
-      const fileName = `${cropType}-${Date.now()}.jpg`;
+      const fileName = `${activeCropType}-${Date.now()}.jpg`;
       const file = new File([blob], fileName, { type: 'image/jpeg' });
 
-      onConfirm(dataUrl, file);
+      onConfirm(dataUrl, file, activeCropType);
       onClose();
     } catch (err) {
       console.error('Error cropping image:', err);
@@ -209,7 +243,7 @@ export function ImageCropperModal({
     } finally {
       setIsProcessing(false);
     }
-  }, [cropType, imageSrc, onClose, onConfirm, position.x, position.y, rotation, zoom]);
+  }, [activeCropType, imageSrc, onClose, onConfirm, position.x, position.y, rotation, zoom]);
 
   if (!isOpen) return null;
 
@@ -218,26 +252,63 @@ export function ImageCropperModal({
       <div className="relative w-full max-w-lg bg-zinc-900 border border-zinc-800 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         
         {/* Modal Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-800">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
-              <Crop className="w-4 h-4" />
+        <div className="px-5 py-3.5 border-b border-zinc-800 space-y-2.5">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center">
+                <Crop className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-white">
+                  {title ||
+                    (activeCropType === 'circle'
+                      ? 'Ajustar Foto de Perfil'
+                      : activeCropType === 'vertical'
+                      ? 'Ajustar Foto de Fondo (Vertical 9:16)'
+                      : 'Ajustar Portada (Banner 16:9)')}
+                </h3>
+                <p className="text-[11px] text-zinc-400">
+                  Arrastra y ajusta el zoom para encuadrar la foto a tu gusto
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-sm font-bold text-white">
-                {title || (cropType === 'circle' ? 'Ajustar Foto de Perfil' : 'Ajustar Portada / Banner')}
-              </h3>
-              <p className="text-[11px] text-zinc-400">
-                Arrastra y ajusta el zoom para encuadrar la foto a tu gusto
-              </p>
-            </div>
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+
+          {/* Format Selector (only when cropping background, not circle avatar) */}
+          {activeCropType !== 'circle' && (
+            <div className="flex items-center gap-1.5 bg-zinc-950 p-1 rounded-xl border border-zinc-800/80">
+              <button
+                type="button"
+                onClick={() => setActiveCropType('vertical')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  activeCropType === 'vertical'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <Smartphone className="w-3.5 h-3.5" />
+                <span>Fondo Vertical (9:16)</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setActiveCropType('banner')}
+                className={`flex-1 flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-lg text-xs font-semibold transition-all ${
+                  activeCropType === 'banner'
+                    ? 'bg-blue-600 text-white shadow-xs'
+                    : 'text-zinc-400 hover:text-zinc-200'
+                }`}
+              >
+                <CreditCard className="w-3.5 h-3.5" />
+                <span>Banner Horizontal (16:9)</span>
+              </button>
+            </div>
+          )}
         </div>
 
         {/* Viewport / Crop Area */}
@@ -276,11 +347,36 @@ export function ImageCropperModal({
           )}
 
           {/* Visual Mask Guide */}
-          <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center">
-            {cropType === 'circle' ? (
-              <div className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] ring-1 ring-white/20" />
-            ) : (
-              <div className="relative w-[85%] h-36 sm:h-44 rounded-2xl border-2 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.65)] ring-1 ring-white/20" />
+          <div className="absolute inset-0 pointer-events-none z-20 flex items-center justify-center p-3">
+            {activeCropType === 'circle' && (
+              <div
+                ref={maskRef}
+                className="relative w-48 h-48 sm:w-56 sm:h-56 rounded-full border-2 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.68)] ring-1 ring-white/20"
+              />
+            )}
+            {activeCropType === 'vertical' && (
+              <div
+                ref={maskRef}
+                className="relative h-60 sm:h-64 aspect-[9/16] rounded-3xl border-2 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.68)] ring-1 ring-white/20 flex flex-col items-center justify-between p-2.5"
+              >
+                <div className="w-8 h-1 bg-white/40 rounded-full" />
+                <span className="text-[9px] font-bold text-white/70 bg-black/60 px-2 py-0.5 rounded-full border border-white/10">
+                  9:16 Fondo Móvil
+                </span>
+                <div className="w-7 h-7 rounded-full border border-dashed border-white/40 flex items-center justify-center text-[8px] text-white/50">
+                  Avatar
+                </div>
+              </div>
+            )}
+            {activeCropType === 'banner' && (
+              <div
+                ref={maskRef}
+                className="relative w-[85%] h-36 sm:h-44 rounded-2xl border-2 border-blue-500 shadow-[0_0_0_9999px_rgba(0,0,0,0.68)] ring-1 ring-white/20 flex items-end justify-center pb-2.5"
+              >
+                <span className="text-[9px] font-bold text-white/70 bg-black/60 px-2 py-0.5 rounded-full border border-white/10">
+                  16:9 Banner
+                </span>
+              </div>
             )}
           </div>
         </div>

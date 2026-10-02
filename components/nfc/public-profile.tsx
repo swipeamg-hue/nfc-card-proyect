@@ -253,7 +253,7 @@ export function PublicProfile({
               priority
               unoptimized
               sizes="(max-width: 768px) 100vw, 450px"
-              className="object-cover object-center scale-105"
+              className="object-cover object-top sm:object-center"
             />
             {/* Gradient overlay for contrast and legibility */}
             <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-slate-950/80 to-slate-950/95" />
