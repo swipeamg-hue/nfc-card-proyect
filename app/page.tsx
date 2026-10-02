@@ -481,26 +481,6 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Registration Limitation Callout */}
-            <div className="mt-12 p-6 rounded-3xl bg-gradient-to-r from-blue-950/60 via-slate-900 to-indigo-950/60 border border-blue-900/50 max-w-3xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
-              <div className="flex items-center gap-3 text-left">
-                <div className="w-10 h-10 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-                  <Lock className="w-5 h-5" />
-                </div>
-                <div>
-                  <h4 className="text-sm font-bold text-white">Privacidad & Acceso Restringido</h4>
-                  <p className="text-xs text-slate-400">
-                    El panel de edición y las métricas requieren una cuenta registrada para garantizar que solo tú puedas modificar tu negocio.
-                  </p>
-                </div>
-              </div>
-              <Link
-                href="/login?tab=register&plan=pro"
-                className="px-5 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md whitespace-nowrap active:scale-95 transition-all"
-              >
-                Registrarme Gratis
-              </Link>
-            </div>
           </div>
         </section>
 
