@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import {
@@ -17,6 +17,11 @@ import {
   X,
   Phone,
   Check,
+  KeyRound,
+  MailCheck,
+  RefreshCw,
+  ArrowLeft,
+  CheckCircle2,
 } from 'lucide-react';
 import { loginAsync, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
 import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
@@ -119,6 +124,148 @@ export default function LoginPage() {
       try {
         localStorage.setItem('tapcard_selected_plan', plan);
       } catch {}
+    }
+  };
+
+  // OTP Verification state for Email registration
+  const [registerStep, setRegisterStep] = useState<'FORM' | 'OTP'>('FORM');
+  const [otp, setOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [resendTimer, setResendTimer] = useState(60);
+  const [successMsg, setSuccessMsg] = useState<string | null>(null);
+  const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // OTP Countdown timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (registerStep === 'OTP' && resendTimer > 0) {
+      timer = setInterval(() => {
+        setResendTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [registerStep, resendTimer]);
+
+  const handleOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, '').slice(0, 6).split('');
+      if (digits.length > 0) {
+        const nextOtp = [...otp];
+        digits.forEach((d, i) => {
+          if (index + i < 6) {
+            nextOtp[index + i] = d;
+          }
+        });
+        setOtp(nextOtp);
+        const focusIdx = Math.min(index + digits.length, 5);
+        inputRefs.current[focusIdx]?.focus();
+      }
+      return;
+    }
+
+    const cleanDigit = value.replace(/\D/g, '');
+    const nextOtp = [...otp];
+    nextOtp[index] = cleanDigit;
+    setOtp(nextOtp);
+
+    if (cleanDigit && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !otp[index] && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      inputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      inputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleVerifyOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const token = otp.join('').trim();
+    if (token.length !== 6) {
+      setErrorMsg('Por favor introduce el código de 6 dígitos completo.');
+      return;
+    }
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsVerifying(true);
+
+    try {
+      const cleanEmail = regEmail.toLowerCase().trim();
+
+      // 1. Verify token with Supabase Auth
+      const { error } = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token,
+        type: 'signup',
+      });
+
+      if (error) {
+        setIsVerifying(false);
+        setErrorMsg(
+          error.message?.toLowerCase().includes('expired') || error.message?.toLowerCase().includes('invalid')
+            ? 'El código OTP es incorrecto o ha expirado. Por favor revísalo o solicita uno nuevo.'
+            : error.message || 'Código OTP inválido.'
+        );
+        return;
+      }
+
+      // 2. Complete provisioning in app_users and businesses
+      const res = await registerClientAsync({
+        userName: regName.trim(),
+        email: cleanEmail,
+        pass: regPassword.trim(),
+        businessName: regBusinessName.trim(),
+        category: regCategory,
+        plan: selectedPlan,
+      });
+
+      setIsVerifying(false);
+      if (res.success && res.user) {
+        router.push('/dashboard');
+      } else {
+        setErrorMsg(res.error || 'Error al completar el registro.');
+      }
+    } catch (err: unknown) {
+      setIsVerifying(false);
+      const msg = err instanceof Error ? err.message : 'Error al verificar el código OTP';
+      setErrorMsg(msg);
+    }
+  };
+
+  const handleResendOtp = async () => {
+    if (resendTimer > 0 || isResending) return;
+    setIsResending(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const { error } = await supabase.auth.resend({
+        type: 'signup',
+        email: regEmail.toLowerCase().trim(),
+      });
+
+      setIsResending(false);
+      if (error) {
+        setErrorMsg(error.message || 'Error al reenviar el código');
+      } else {
+        setSuccessMsg('¡Código OTP reenviado con éxito a tu correo!');
+        setResendTimer(60);
+        setOtp(['', '', '', '', '', '']);
+        inputRefs.current[0]?.focus();
+      }
+    } catch (err: unknown) {
+      setIsResending(false);
+      const msg = err instanceof Error ? err.message : 'Error al reenviar el código';
+      setErrorMsg(msg);
     }
   };
 
@@ -448,26 +595,68 @@ export default function LoginPage() {
   const handleRegisterSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const cleanEmail = regEmail.toLowerCase().trim();
+    if (!cleanEmail || !regPassword.trim() || !regName.trim() || !regBusinessName.trim() || !regCategory.trim()) {
+      setErrorMsg('Por favor completa todos los campos requeridos.');
+      return;
+    }
+
+    if (regPassword.length < 6) {
+      setErrorMsg('La contraseña debe tener al menos 6 caracteres.');
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const res = await registerClientAsync({
-        userName: regName,
-        email: regEmail,
-        pass: regPassword,
-        businessName: regBusinessName,
-        category: regCategory,
-        plan: selectedPlan,
-      });
-      setIsLoading(false);
-      if (res.success && res.user) {
-        router.push('/dashboard');
-      } else {
-        setErrorMsg(res.error || 'Error al crear la cuenta');
+      // 1. Check if user already exists in Supabase app_users table
+      const { data: existingAppUser } = await supabase
+        .from('app_users')
+        .select('id, email')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (existingAppUser) {
+        setIsLoading(false);
+        setErrorMsg('Ya existe una cuenta activa con este correo electrónico. Por favor inicia sesión.');
+        return;
       }
+
+      // 2. Trigger Supabase Auth signUp to send the 6-digit confirmation token via email
+      const { error: signUpError } = await supabase.auth.signUp({
+        email: cleanEmail,
+        password: regPassword,
+        options: {
+          data: {
+            name: regName.trim(),
+            business_name: regBusinessName.trim(),
+          },
+        },
+      });
+
+      if (signUpError) {
+        setIsLoading(false);
+        if (signUpError.message?.toLowerCase().includes('already registered')) {
+          setErrorMsg('Este correo ya está registrado. Por favor inicia sesión con tu contraseña.');
+        } else {
+          setErrorMsg(signUpError.message || 'Error al iniciar el registro con correo.');
+        }
+        return;
+      }
+
+      setIsLoading(false);
+      setRegisterStep('OTP');
+      setResendTimer(60);
+      setOtp(['', '', '', '', '', '']);
+      setSuccessMsg(`Hemos enviado un código OTP de 6 dígitos a ${cleanEmail}`);
+      setTimeout(() => {
+        inputRefs.current[0]?.focus();
+      }, 150);
     } catch (err: unknown) {
       setIsLoading(false);
-      const msg = err instanceof Error ? err.message : 'Error al crear la cuenta';
+      const msg = err instanceof Error ? err.message : 'Error al enviar código de verificación';
       setErrorMsg(msg);
     }
   };
@@ -502,7 +691,129 @@ export default function LoginPage() {
       {/* Main Auth Container */}
       <main className="relative z-10 max-w-md w-full mx-auto px-4 py-8">
         <div className="bg-slate-900/90 rounded-3xl border border-slate-800 p-6 sm:p-8 shadow-2xl backdrop-blur-md">
-          {/* Header Title */}
+          {registerStep === 'OTP' ? (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+              {/* Back to form button */}
+              <button
+                type="button"
+                onClick={() => {
+                  setRegisterStep('FORM');
+                  setErrorMsg(null);
+                  setSuccessMsg(null);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                <span>Volver y corregir datos</span>
+              </button>
+
+              {/* Header Title */}
+              <div className="text-center">
+                <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-3 shadow-lg shadow-blue-500/10">
+                  <MailCheck className="w-7 h-7" />
+                </div>
+                <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                  Verifica tu Correo
+                </h1>
+                <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                  Ingresa el código OTP de 6 dígitos que enviamos a:
+                  <br />
+                  <span className="text-white font-bold">{regEmail}</span>
+                </p>
+              </div>
+
+              {/* Error Message */}
+              {errorMsg && (
+                <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300 flex items-center gap-2 animate-in fade-in duration-200">
+                  <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                  <span>{errorMsg}</span>
+                </div>
+              )}
+
+              {/* Success Message */}
+              {successMsg && (
+                <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 flex items-center gap-2 animate-in fade-in duration-200">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                  <span>{successMsg}</span>
+                </div>
+              )}
+
+              {/* OTP Form */}
+              <form onSubmit={handleVerifyOtp} className="space-y-6">
+                <div>
+                  <label className="block text-center text-xs font-semibold text-slate-300 mb-3">
+                    Código de Confirmación (OTP)
+                  </label>
+
+                  {/* 6 Digit Inputs */}
+                  <div className="flex justify-center items-center gap-2 sm:gap-2.5">
+                    {otp.map((digit, idx) => (
+                      <input
+                        key={idx}
+                        ref={(el) => {
+                          inputRefs.current[idx] = el;
+                        }}
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
+                        maxLength={1}
+                        value={digit}
+                        onChange={(e) => handleOtpChange(idx, e.target.value)}
+                        onKeyDown={(e) => handleOtpKeyDown(idx, e)}
+                        className={`w-11 h-14 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-black rounded-xl border transition-all focus:outline-none ${
+                          digit
+                            ? 'bg-blue-600/20 border-blue-500 text-white ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/10'
+                            : 'bg-slate-800/90 border-slate-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40'
+                        }`}
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                {/* Submit button */}
+                <button
+                  type="submit"
+                  disabled={isVerifying || otp.join('').trim().length !== 6}
+                  className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isVerifying ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <span>Verificando y activando tu cuenta...</span>
+                    </>
+                  ) : (
+                    <>
+                      <KeyRound className="w-4 h-4" />
+                      <span>Verificar y Activar Cuenta</span>
+                    </>
+                  )}
+                </button>
+
+                {/* Resend OTP Timer & Button */}
+                <div className="text-center pt-3 border-t border-slate-800">
+                  <p className="text-xs text-slate-400 mb-2">¿No recibiste el código o ya expiró?</p>
+                  {resendTimer > 0 ? (
+                    <span className="text-xs font-medium text-slate-500">
+                      Podrás reenviar un nuevo código en{' '}
+                      <span className="text-blue-400 font-bold">{resendTimer}s</span>
+                    </span>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={handleResendOtp}
+                      disabled={isResending}
+                      className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                    >
+                      <RefreshCw className={`w-3.5 h-3.5 ${isResending ? 'animate-spin' : ''}`} />
+                      <span>{isResending ? 'Reenviando código...' : 'Reenviar código OTP'}</span>
+                    </button>
+                  )}
+                </div>
+              </form>
+            </div>
+          ) : (
+            <>
+              {/* Header Title */}
           <div className="text-center mb-6">
             <div className="inline-flex items-center justify-center w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 mb-3 shadow-inner">
               <Lock className="w-6 h-6" />
@@ -880,6 +1191,8 @@ export default function LoginPage() {
               </p>
             )}
           </div>
+            </>
+          )}
         </div>
       </main>
 
