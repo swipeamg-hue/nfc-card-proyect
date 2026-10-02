@@ -575,15 +575,7 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Micro-landing móvil personalizada 24/7</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Descarga directa vCard 3.0 en agenda de clientes</span>
-                    </li>
-                    <li className="flex items-start gap-2">
-                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Botón directo de WhatsApp con mensaje automático</span>
+                      <span>Micro-landing móvil personalizada 24/7 (visitas ilimitadas)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
@@ -591,7 +583,23 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Código QR dinámico para compartir digitalmente</span>
+                      <span>Descarga directa vCard 3.0 en agenda de clientes</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Botón directo de WhatsApp, llamadas y redes sociales</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Código QR dinámico para imprimir y compartir</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Métricas en vivo: toques NFC vs escaneos QR</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Soporte técnico y actualizaciones continuas</span>
                     </li>
                   </ul>
                 </div>
@@ -647,19 +655,31 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Micro-landing corporativa sin límite de visitas</span>
+                      <span>Micro-landing móvil personalizada 24/7 (visitas ilimitadas)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Botón de Catálogo de productos / menú PDF y Google Maps</span>
+                      <span>Panel autoadministrable con simulador en tiempo real</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Métricas en vivo: Toques NFC vs escaneos QR</span>
+                      <span>Descarga directa vCard 3.0 en agenda de clientes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Soporte técnico preferencial</span>
+                      <span>Botón directo de WhatsApp, llamadas y redes sociales</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Código QR dinámico para imprimir y compartir</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Métricas en vivo: toques NFC vs escaneos QR</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Soporte técnico y actualizaciones continuas</span>
                     </li>
                   </ul>
                 </div>
@@ -710,19 +730,31 @@ export default function HomePage() {
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Directorio corporativo y control de usuarios</span>
+                      <span>Micro-landing móvil personalizada 24/7 (visitas ilimitadas)</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Personalización completa de manual de marca y colores</span>
+                      <span>Panel autoadministrable con simulador en tiempo real</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Métricas de rendimiento por cada miembro del equipo</span>
+                      <span>Descarga directa vCard 3.0 en agenda de clientes</span>
                     </li>
                     <li className="flex items-start gap-2">
                       <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                      <span>Soporte VIP prioritario 24/7 y asesoría de onboarding</span>
+                      <span>Botón directo de WhatsApp, llamadas y redes sociales</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Código QR dinámico para imprimir y compartir</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Métricas en vivo: toques NFC vs escaneos QR</span>
+                    </li>
+                    <li className="flex items-start gap-2">
+                      <Check className="w-4 h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                      <span>Soporte técnico y actualizaciones continuas</span>
                     </li>
                   </ul>
                 </div>
