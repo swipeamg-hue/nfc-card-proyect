@@ -204,6 +204,21 @@ export async function registerClientAsync(params: {
 }): Promise<{ success: boolean; user?: AuthUser; error?: string }> {
   const cleanEmail = params.email.toLowerCase().trim();
 
+  // Validate password strength for standard email/password accounts
+  if (!params.pass.startsWith('google-oauth-')) {
+    const hasMinLength = params.pass.length >= 8;
+    const hasUpper = /[A-Z]/.test(params.pass);
+    const hasNumber = /[0-9]/.test(params.pass);
+    const hasSpecial = /[^A-Za-z0-9]/.test(params.pass);
+
+    if (!hasMinLength || !hasUpper || !hasNumber || !hasSpecial) {
+      return {
+        success: false,
+        error: 'La contraseña debe contener al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial.',
+      };
+    }
+  }
+
   // 1. Check if user already exists in Supabase app_users
   try {
     const { data: existingCloudUser } = await supabase

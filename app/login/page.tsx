@@ -22,6 +22,8 @@ import {
   RefreshCw,
   ArrowLeft,
   CheckCircle2,
+  Eye,
+  EyeOff,
 } from 'lucide-react';
 import { loginAsync, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
 import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
@@ -90,11 +92,13 @@ export default function LoginPage() {
   // Login form state
   const [loginEmail, setLoginEmail] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
 
   // Register form state
   const [regName, setRegName] = useState('');
   const [regEmail, setRegEmail] = useState('');
   const [regPassword, setRegPassword] = useState('');
+  const [showRegPassword, setShowRegPassword] = useState(false);
   const [regBusinessName, setRegBusinessName] = useState('');
   const [regCategory, setRegCategory] = useState('');
 
@@ -603,8 +607,19 @@ export default function LoginPage() {
       return;
     }
 
-    if (regPassword.length < 6) {
-      setErrorMsg('La contraseña debe tener al menos 6 caracteres.');
+    const hasMinLength = regPassword.length >= 8;
+    const hasUpper = /[A-Z]/.test(regPassword);
+    const hasNumber = /[0-9]/.test(regPassword);
+    const hasSpecial = /[^A-Za-z0-9]/.test(regPassword);
+
+    if (!hasMinLength || !hasUpper || !hasNumber || !hasSpecial) {
+      const missing: string[] = [];
+      if (!hasMinLength) missing.push('mínimo 8 caracteres');
+      if (!hasUpper) missing.push('1 mayúscula');
+      if (!hasNumber) missing.push('1 número');
+      if (!hasSpecial) missing.push('1 carácter especial (!@#$%...)');
+
+      setErrorMsg(`La contraseña debe cumplir los requisitos de seguridad: falta ${missing.join(', ')}.`);
       return;
     }
 
@@ -923,13 +938,21 @@ export default function LoginPage() {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showLoginPassword ? 'text' : 'password'}
                     required
                     value={loginPassword}
                     onChange={(e) => setLoginPassword(e.target.value)}
                     placeholder="••••••••"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowLoginPassword(!showLoginPassword)}
+                    tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    {showLoginPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
                 </div>
               </div>
 
@@ -1136,14 +1159,119 @@ export default function LoginPage() {
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
-                    type="password"
+                    type={showRegPassword ? 'text' : 'password'}
                     required
-                    minLength={6}
+                    minLength={8}
                     value={regPassword}
                     onChange={(e) => setRegPassword(e.target.value)}
-                    placeholder="Mínimo 6 caracteres"
-                    className="w-full pl-10 pr-4 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Mínimo 8 caracteres (Mayús, núm, símbolo)"
+                    className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
                   />
+                  <button
+                    type="button"
+                    onClick={() => setShowRegPassword(!showRegPassword)}
+                    tabIndex={-1}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                  >
+                    {showRegPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
+
+                {/* Indicadores en tiempo real de seguridad de contraseña */}
+                <div className="mt-2 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Requisitos de contraseña
+                    </span>
+                    <span
+                      className={`text-[9px] font-bold ${
+                        regPassword.length >= 8 &&
+                        /[A-Z]/.test(regPassword) &&
+                        /[0-9]/.test(regPassword) &&
+                        /[^A-Za-z0-9]/.test(regPassword)
+                          ? 'text-emerald-400'
+                          : 'text-amber-400'
+                      }`}
+                    >
+                      {regPassword.length >= 8 &&
+                      /[A-Z]/.test(regPassword) &&
+                      /[0-9]/.test(regPassword) &&
+                      /[^A-Za-z0-9]/.test(regPassword)
+                        ? 'Segura ✓'
+                        : 'Requerida'}
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                    <div
+                      className={`flex items-center gap-1.5 transition-colors ${
+                        regPassword.length >= 8 ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                      }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                          regPassword.length >= 8
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-500'
+                        }`}
+                      >
+                        {regPassword.length >= 8 ? '✓' : '•'}
+                      </div>
+                      <span>8+ caracteres</span>
+                    </div>
+
+                    <div
+                      className={`flex items-center gap-1.5 transition-colors ${
+                        /[A-Z]/.test(regPassword) ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                      }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                          /[A-Z]/.test(regPassword)
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-500'
+                        }`}
+                      >
+                        {/[A-Z]/.test(regPassword) ? '✓' : '•'}
+                      </div>
+                      <span>1 mayúscula (A-Z)</span>
+                    </div>
+
+                    <div
+                      className={`flex items-center gap-1.5 transition-colors ${
+                        /[0-9]/.test(regPassword) ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                      }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                          /[0-9]/.test(regPassword)
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-500'
+                        }`}
+                      >
+                        {/[0-9]/.test(regPassword) ? '✓' : '•'}
+                      </div>
+                      <span>1 número (0-9)</span>
+                    </div>
+
+                    <div
+                      className={`flex items-center gap-1.5 transition-colors ${
+                        /[^A-Za-z0-9]/.test(regPassword)
+                          ? 'text-emerald-400 font-semibold'
+                          : 'text-slate-500'
+                      }`}
+                    >
+                      <div
+                        className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                          /[^A-Za-z0-9]/.test(regPassword)
+                            ? 'bg-emerald-500/20 text-emerald-400'
+                            : 'bg-slate-800 text-slate-500'
+                        }`}
+                      >
+                        {/[^A-Za-z0-9]/.test(regPassword) ? '✓' : '•'}
+                      </div>
+                      <span>1 símbolo (!@#$...)</span>
+                    </div>
+                  </div>
                 </div>
               </div>
 
