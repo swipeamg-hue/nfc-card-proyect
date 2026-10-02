@@ -256,15 +256,6 @@ export default function DashboardPage() {
               </>
             )}
 
-            {/* CLIENT ONLY: Badge showing their store ownership */}
-            {session?.role === 'CLIENT' && (
-              <div className="flex items-center gap-1.5 bg-slate-100 dark:bg-zinc-800/80 px-2.5 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs">
-                <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                <span className="font-medium text-slate-700 dark:text-zinc-300 truncate max-w-[130px]">
-                  {session.name}
-                </span>
-              </div>
-            )}
 
             {/* View Switcher (Desktop) */}
             <div className="hidden md:flex bg-slate-100 dark:bg-zinc-800 p-1 rounded-xl">
