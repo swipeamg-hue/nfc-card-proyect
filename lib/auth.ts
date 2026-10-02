@@ -480,3 +480,55 @@ export async function logout(): Promise<void> {
     console.warn('Error during Supabase sign out:', err);
   }
 }
+
+// Update password for an existing user across Supabase and local cache
+export async function updateUserPasswordAsync(
+  email: string,
+  newPass: string
+): Promise<{ success: boolean; error?: string }> {
+  const cleanEmail = email.toLowerCase().trim();
+  const cleanPass = newPass.trim();
+
+  // Validate password strength
+  const hasMinLength = cleanPass.length >= 8;
+  const hasUpper = /[A-Z]/.test(cleanPass);
+  const hasNumber = /[0-9]/.test(cleanPass);
+  const hasSpecial = /[^A-Za-z0-9]/.test(cleanPass);
+
+  if (!hasMinLength || !hasUpper || !hasNumber || !hasSpecial) {
+    return {
+      success: false,
+      error: 'La nueva contraseña debe tener al menos 8 caracteres, 1 mayúscula, 1 número y 1 carácter especial.',
+    };
+  }
+
+  // 1. Update in Supabase app_users table
+  try {
+    const { error: updateError } = await supabase
+      .from('app_users')
+      .update({ password_hash: cleanPass })
+      .eq('email', cleanEmail);
+
+    if (updateError) {
+      console.warn('Supabase app_users password update error:', updateError);
+    }
+  } catch (err) {
+    console.warn('Error updating app_users password_hash:', err);
+  }
+
+  // 2. Update in local storage
+  try {
+    const users = getStoredUsers();
+    const updated = users.map((u) => {
+      if (u.email.toLowerCase() === cleanEmail) {
+        return { ...u, passwordHash: cleanPass };
+      }
+      return u;
+    });
+    localStorage.setItem(REGISTERED_USERS_KEY, JSON.stringify(updated));
+  } catch (err) {
+    console.warn('Error updating local registered users password:', err);
+  }
+
+  return { success: true };
+}

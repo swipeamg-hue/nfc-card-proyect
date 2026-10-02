@@ -25,7 +25,14 @@ import {
   Eye,
   EyeOff,
 } from 'lucide-react';
-import { loginAsync, registerClientAsync, getActiveSession, setActiveSession, logout } from '@/lib/auth';
+import {
+  loginAsync,
+  registerClientAsync,
+  getActiveSession,
+  setActiveSession,
+  logout,
+  updateUserPasswordAsync,
+} from '@/lib/auth';
 import { supabase, SUPABASE_URL, getAppBaseUrl, saveBusinessToSupabase } from '@/lib/supabase';
 import { AuthUser } from '@/types/auth';
 import { Business } from '@/types/business';
@@ -269,6 +276,244 @@ export default function LoginPage() {
     } catch (err: unknown) {
       setIsResending(false);
       const msg = err instanceof Error ? err.message : 'Error al reenviar el código';
+      setErrorMsg(msg);
+    }
+  };
+
+  // Password Recovery (Forgot Password) state
+  const [forgotStep, setForgotStep] = useState<'IDLE' | 'EMAIL' | 'OTP' | 'NEW_PASSWORD' | 'SUCCESS'>('IDLE');
+  const [recoveryEmail, setRecoveryEmail] = useState('');
+  const [recoveryOtp, setRecoveryOtp] = useState<string[]>(['', '', '', '', '', '']);
+  const [recoveryTimer, setRecoveryTimer] = useState(60);
+  const [isRecoverySending, setIsRecoverySending] = useState(false);
+  const [isRecoveryVerifying, setIsRecoveryVerifying] = useState(false);
+  const [newPassword, setNewPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const recoveryInputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  // Recovery countdown timer
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (forgotStep === 'OTP' && recoveryTimer > 0) {
+      timer = setInterval(() => {
+        setRecoveryTimer((prev) => (prev > 0 ? prev - 1 : 0));
+      }, 1000);
+    }
+    return () => {
+      if (timer) clearInterval(timer);
+    };
+  }, [forgotStep, recoveryTimer]);
+
+  const handleRecoveryOtpChange = (index: number, value: string) => {
+    if (value.length > 1) {
+      const digits = value.replace(/\D/g, '').slice(0, 6).split('');
+      if (digits.length > 0) {
+        const nextOtp = [...recoveryOtp];
+        digits.forEach((d, i) => {
+          if (index + i < 6) {
+            nextOtp[index + i] = d;
+          }
+        });
+        setRecoveryOtp(nextOtp);
+        const focusIdx = Math.min(index + digits.length, 5);
+        recoveryInputRefs.current[focusIdx]?.focus();
+      }
+      return;
+    }
+
+    const cleanDigit = value.replace(/\D/g, '');
+    const nextOtp = [...recoveryOtp];
+    nextOtp[index] = cleanDigit;
+    setRecoveryOtp(nextOtp);
+
+    if (cleanDigit && index < 5) {
+      recoveryInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleRecoveryOtpKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Backspace' && !recoveryOtp[index] && index > 0) {
+      recoveryInputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowLeft' && index > 0) {
+      recoveryInputRefs.current[index - 1]?.focus();
+    } else if (e.key === 'ArrowRight' && index < 5) {
+      recoveryInputRefs.current[index + 1]?.focus();
+    }
+  };
+
+  const handleSendRecoveryEmail = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const cleanEmail = recoveryEmail.toLowerCase().trim();
+    if (!cleanEmail) {
+      setErrorMsg('Por favor ingresa tu correo electrónico.');
+      return;
+    }
+
+    setIsRecoverySending(true);
+
+    try {
+      // 1. Check if user exists in app_users
+      const { data: dbUser } = await supabase
+        .from('app_users')
+        .select('id, email, password_hash')
+        .eq('email', cleanEmail)
+        .maybeSingle();
+
+      if (!dbUser) {
+        setIsRecoverySending(false);
+        setErrorMsg('No encontramos ninguna cuenta registrada con este correo electrónico.');
+        return;
+      }
+
+      if (dbUser.password_hash === 'google-oauth-linked') {
+        setIsRecoverySending(false);
+        setErrorMsg('Esta cuenta fue registrada con Google. Puedes acceder de forma directa con el botón "Continuar con Google".');
+        return;
+      }
+
+      // 2. Send recovery OTP email via Supabase Auth
+      const { error: resetError } = await supabase.auth.resetPasswordForEmail(cleanEmail);
+
+      setIsRecoverySending(false);
+      if (resetError) {
+        setErrorMsg(resetError.message || 'Error al enviar código de recuperación.');
+        return;
+      }
+
+      setForgotStep('OTP');
+      setRecoveryTimer(60);
+      setRecoveryOtp(['', '', '', '', '', '']);
+      setSuccessMsg(`Hemos enviado un código OTP de 6 dígitos a ${cleanEmail}`);
+      setTimeout(() => {
+        recoveryInputRefs.current[0]?.focus();
+      }, 150);
+    } catch (err: unknown) {
+      setIsRecoverySending(false);
+      const msg = err instanceof Error ? err.message : 'Error al enviar código de recuperación';
+      setErrorMsg(msg);
+    }
+  };
+
+  const handleResendRecoveryOtp = async () => {
+    if (recoveryTimer > 0 || isRecoverySending) return;
+    setIsRecoverySending(true);
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    try {
+      const cleanEmail = recoveryEmail.toLowerCase().trim();
+      const { error } = await supabase.auth.resetPasswordForEmail(cleanEmail);
+
+      setIsRecoverySending(false);
+      if (error) {
+        setErrorMsg(error.message || 'Error al reenviar código.');
+      } else {
+        setSuccessMsg('¡Código de recuperación reenviado con éxito a tu correo!');
+        setRecoveryTimer(60);
+        setRecoveryOtp(['', '', '', '', '', '']);
+        recoveryInputRefs.current[0]?.focus();
+      }
+    } catch (err: unknown) {
+      setIsRecoverySending(false);
+      const msg = err instanceof Error ? err.message : 'Error al reenviar código';
+      setErrorMsg(msg);
+    }
+  };
+
+  const handleVerifyRecoveryOtp = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    const token = recoveryOtp.join('').trim();
+    if (token.length !== 6) {
+      setErrorMsg('Por favor ingresa el código de 6 dígitos completo.');
+      return;
+    }
+
+    setErrorMsg(null);
+    setSuccessMsg(null);
+    setIsRecoveryVerifying(true);
+
+    try {
+      const cleanEmail = recoveryEmail.toLowerCase().trim();
+
+      // Verify OTP with type 'recovery'
+      const { error: verifyError } = await supabase.auth.verifyOtp({
+        email: cleanEmail,
+        token,
+        type: 'recovery',
+      });
+
+      setIsRecoveryVerifying(false);
+      if (verifyError) {
+        setErrorMsg(
+          verifyError.message?.toLowerCase().includes('expired') || verifyError.message?.toLowerCase().includes('invalid')
+            ? 'El código OTP es incorrecto o ha expirado. Por favor solicita uno nuevo.'
+            : verifyError.message || 'Código OTP inválido.'
+        );
+        return;
+      }
+
+      setForgotStep('NEW_PASSWORD');
+      setNewPassword('');
+      setConfirmPassword('');
+      setSuccessMsg('Código validado con éxito. Ahora ingresa tu nueva contraseña.');
+    } catch (err: unknown) {
+      setIsRecoveryVerifying(false);
+      const msg = err instanceof Error ? err.message : 'Error al validar código';
+      setErrorMsg(msg);
+    }
+  };
+
+  const handleSaveNewPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMsg(null);
+    setSuccessMsg(null);
+
+    const hasMinLength = newPassword.length >= 8;
+    const hasUpper = /[A-Z]/.test(newPassword);
+    const hasNumber = /[0-9]/.test(newPassword);
+    const hasSpecial = /[^A-Za-z0-9]/.test(newPassword);
+
+    if (!hasMinLength || !hasUpper || !hasNumber || !hasSpecial) {
+      const missing: string[] = [];
+      if (!hasMinLength) missing.push('mínimo 8 caracteres');
+      if (!hasUpper) missing.push('1 mayúscula');
+      if (!hasNumber) missing.push('1 número');
+      if (!hasSpecial) missing.push('1 carácter especial (!@#$%...)');
+
+      setErrorMsg(`La nueva contraseña debe cumplir: ${missing.join(', ')}.`);
+      return;
+    }
+
+    if (newPassword !== confirmPassword) {
+      setErrorMsg('Las contraseñas no coinciden. Por favor verifícalas.');
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const cleanEmail = recoveryEmail.toLowerCase().trim();
+
+      // 1. Update Supabase Auth user password
+      try {
+        await supabase.auth.updateUser({ password: newPassword });
+      } catch (authErr) {
+        console.warn('Notice updating Supabase Auth user password:', authErr);
+      }
+
+      // 2. Update in app_users and local storage cache
+      await updateUserPasswordAsync(cleanEmail, newPassword);
+
+      setIsLoading(false);
+      setForgotStep('SUCCESS');
+    } catch (err: unknown) {
+      setIsLoading(false);
+      const msg = err instanceof Error ? err.message : 'Error al guardar la nueva contraseña';
       setErrorMsg(msg);
     }
   };
@@ -826,6 +1071,441 @@ export default function LoginPage() {
                 </div>
               </form>
             </div>
+          ) : forgotStep !== 'IDLE' ? (
+            <div className="space-y-6 animate-in fade-in zoom-in-95 duration-200">
+              {/* STEP 1: SOLICITAR CÓDIGO POR EMAIL */}
+              {forgotStep === 'EMAIL' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotStep('IDLE');
+                      setErrorMsg(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Volver a Iniciar Sesión</span>
+                  </button>
+
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-3 shadow-lg shadow-blue-500/10">
+                      <KeyRound className="w-7 h-7" />
+                    </div>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                      Recupera tu Contraseña
+                    </h1>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                      Ingresa el correo registrado con tu cuenta. Te enviaremos un código OTP de 6 dígitos para restablecer tu acceso.
+                    </p>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300 flex items-center gap-2 animate-in fade-in duration-200">
+                      <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
+                  {successMsg && (
+                    <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 flex items-center gap-2 animate-in fade-in duration-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      <span>{successMsg}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSendRecoveryEmail} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1.5">
+                        Correo Electrónico
+                      </label>
+                      <div className="relative">
+                        <Mail className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type="email"
+                          required
+                          value={recoveryEmail}
+                          onChange={(e) => setRecoveryEmail(e.target.value)}
+                          placeholder="tu@negocio.com"
+                          className="w-full pl-10 pr-4 py-2.5 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isRecoverySending}
+                      className="w-full py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+                    >
+                      {isRecoverySending ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Enviando código OTP...</span>
+                        </>
+                      ) : (
+                        <>
+                          <span>Enviar Código OTP</span>
+                          <ArrowRight className="w-4 h-4" />
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+
+              {/* STEP 2: VERIFICAR CÓDIGO OTP */}
+              {forgotStep === 'OTP' && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotStep('EMAIL');
+                      setErrorMsg(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+                  >
+                    <ArrowLeft className="w-4 h-4" />
+                    <span>Cambiar correo</span>
+                  </button>
+
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-600/20 border border-blue-500/30 text-blue-400 mb-3 shadow-lg shadow-blue-500/10">
+                      <MailCheck className="w-7 h-7" />
+                    </div>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                      Código de Recuperación
+                    </h1>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                      Ingresa el código OTP de 6 dígitos enviado a:
+                      <br />
+                      <span className="text-white font-bold">{recoveryEmail}</span>
+                    </p>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300 flex items-center gap-2 animate-in fade-in duration-200">
+                      <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
+                  {successMsg && (
+                    <div className="p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 flex items-center gap-2 animate-in fade-in duration-200">
+                      <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+                      <span>{successMsg}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleVerifyRecoveryOtp} className="space-y-6">
+                    <div>
+                      <label className="block text-center text-xs font-semibold text-slate-300 mb-3">
+                        Código de Confirmación (OTP)
+                      </label>
+                      <div className="flex justify-center items-center gap-2 sm:gap-2.5">
+                        {recoveryOtp.map((digit, idx) => (
+                          <input
+                            key={idx}
+                            ref={(el) => {
+                              recoveryInputRefs.current[idx] = el;
+                            }}
+                            type="text"
+                            inputMode="numeric"
+                            pattern="[0-9]*"
+                            maxLength={1}
+                            value={digit}
+                            onChange={(e) => handleRecoveryOtpChange(idx, e.target.value)}
+                            onKeyDown={(e) => handleRecoveryOtpKeyDown(idx, e)}
+                            className={`w-11 h-14 sm:w-12 sm:h-14 text-center text-xl sm:text-2xl font-black rounded-xl border transition-all focus:outline-none ${
+                              digit
+                                ? 'bg-blue-600/20 border-blue-500 text-white ring-2 ring-blue-500/40 shadow-lg shadow-blue-500/10'
+                                : 'bg-slate-800/90 border-slate-700 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/40'
+                            }`}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isRecoveryVerifying || recoveryOtp.join('').trim().length !== 6}
+                      className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                    >
+                      {isRecoveryVerifying ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Validando código...</span>
+                        </>
+                      ) : (
+                        <>
+                          <KeyRound className="w-4 h-4" />
+                          <span>Verificar Código</span>
+                        </>
+                      )}
+                    </button>
+
+                    <div className="text-center pt-3 border-t border-slate-800">
+                      <p className="text-xs text-slate-400 mb-2">¿No recibiste el código o ya expiró?</p>
+                      {recoveryTimer > 0 ? (
+                        <span className="text-xs font-medium text-slate-500">
+                          Podrás reenviar un nuevo código en{' '}
+                          <span className="text-blue-400 font-bold">{recoveryTimer}s</span>
+                        </span>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={handleResendRecoveryOtp}
+                          disabled={isRecoverySending}
+                          className="inline-flex items-center gap-1.5 text-xs font-bold text-blue-400 hover:text-blue-300 transition-colors disabled:opacity-50"
+                        >
+                          <RefreshCw className={`w-3.5 h-3.5 ${isRecoverySending ? 'animate-spin' : ''}`} />
+                          <span>{isRecoverySending ? 'Reenviando...' : 'Reenviar código OTP'}</span>
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </>
+              )}
+
+              {/* STEP 3: CREAR NUEVA CONTRASEÑA */}
+              {forgotStep === 'NEW_PASSWORD' && (
+                <>
+                  <div className="text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 mb-3 shadow-lg shadow-emerald-500/10">
+                      <ShieldCheck className="w-7 h-7" />
+                    </div>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                      Crea tu Nueva Contraseña
+                    </h1>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed">
+                      Elige una nueva contraseña segura para tu cuenta:
+                      <br />
+                      <span className="text-white font-bold">{recoveryEmail}</span>
+                    </p>
+                  </div>
+
+                  {errorMsg && (
+                    <div className="p-3 rounded-xl bg-rose-950/60 border border-rose-800 text-xs text-rose-300 flex items-center gap-2 animate-in fade-in duration-200">
+                      <AlertCircle className="w-4 h-4 text-rose-400 flex-shrink-0" />
+                      <span>{errorMsg}</span>
+                    </div>
+                  )}
+
+                  <form onSubmit={handleSaveNewPassword} className="space-y-4">
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Nueva Contraseña *
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={showNewPassword ? 'text' : 'password'}
+                          required
+                          minLength={8}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Mínimo 8 caracteres"
+                          className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowNewPassword(!showNewPassword)}
+                          tabIndex={-1}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                        >
+                          {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+
+                      {/* Indicadores en tiempo real de seguridad */}
+                      <div className="mt-2 p-2.5 rounded-xl bg-slate-950/60 border border-slate-800 space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                            Requisitos de seguridad
+                          </span>
+                          <span
+                            className={`text-[9px] font-bold ${
+                              newPassword.length >= 8 &&
+                              /[A-Z]/.test(newPassword) &&
+                              /[0-9]/.test(newPassword) &&
+                              /[^A-Za-z0-9]/.test(newPassword)
+                                ? 'text-emerald-400'
+                                : 'text-amber-400'
+                            }`}
+                          >
+                            {newPassword.length >= 8 &&
+                            /[A-Z]/.test(newPassword) &&
+                            /[0-9]/.test(newPassword) &&
+                            /[^A-Za-z0-9]/.test(newPassword)
+                              ? 'Segura ✓'
+                              : 'Requerida'}
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-1.5 text-[10px]">
+                          <div
+                            className={`flex items-center gap-1.5 transition-colors ${
+                              newPassword.length >= 8 ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                            }`}
+                          >
+                            <div
+                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                                newPassword.length >= 8
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : 'bg-slate-800 text-slate-500'
+                              }`}
+                            >
+                              {newPassword.length >= 8 ? '✓' : '•'}
+                            </div>
+                            <span>8+ caracteres</span>
+                          </div>
+
+                          <div
+                            className={`flex items-center gap-1.5 transition-colors ${
+                              /[A-Z]/.test(newPassword) ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                            }`}
+                          >
+                            <div
+                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                                /[A-Z]/.test(newPassword)
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : 'bg-slate-800 text-slate-500'
+                              }`}
+                            >
+                              {/[A-Z]/.test(newPassword) ? '✓' : '•'}
+                            </div>
+                            <span>1 mayúscula (A-Z)</span>
+                          </div>
+
+                          <div
+                            className={`flex items-center gap-1.5 transition-colors ${
+                              /[0-9]/.test(newPassword) ? 'text-emerald-400 font-semibold' : 'text-slate-500'
+                            }`}
+                          >
+                            <div
+                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                                /[0-9]/.test(newPassword)
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : 'bg-slate-800 text-slate-500'
+                              }`}
+                            >
+                              {/[0-9]/.test(newPassword) ? '✓' : '•'}
+                            </div>
+                            <span>1 número (0-9)</span>
+                          </div>
+
+                          <div
+                            className={`flex items-center gap-1.5 transition-colors ${
+                              /[^A-Za-z0-9]/.test(newPassword)
+                                ? 'text-emerald-400 font-semibold'
+                                : 'text-slate-500'
+                            }`}
+                          >
+                            <div
+                              className={`w-3.5 h-3.5 rounded-full flex items-center justify-center text-[9px] ${
+                                /[^A-Za-z0-9]/.test(newPassword)
+                                  ? 'bg-emerald-500/20 text-emerald-400'
+                                  : 'bg-slate-800 text-slate-500'
+                              }`}
+                            >
+                              {/[^A-Za-z0-9]/.test(newPassword) ? '✓' : '•'}
+                            </div>
+                            <span>1 símbolo (!@#$...)</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-xs font-semibold text-slate-300 mb-1">
+                        Confirmar Nueva Contraseña *
+                      </label>
+                      <div className="relative">
+                        <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                        <input
+                          type={showConfirmPassword ? 'text' : 'password'}
+                          required
+                          minLength={8}
+                          value={confirmPassword}
+                          onChange={(e) => setConfirmPassword(e.target.value)}
+                          placeholder="Repite la nueva contraseña"
+                          className="w-full pl-10 pr-10 py-2 rounded-xl bg-slate-800/80 border border-slate-700 text-xs font-medium text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                          tabIndex={-1}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-slate-300 transition-colors"
+                        >
+                          {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                        </button>
+                      </div>
+                      {confirmPassword && (
+                        <div className="mt-1 text-[10px] flex items-center gap-1 font-semibold">
+                          {newPassword === confirmPassword ? (
+                            <span className="text-emerald-400 flex items-center gap-1">
+                              <Check className="w-3 h-3" /> Las contraseñas coinciden
+                            </span>
+                          ) : (
+                            <span className="text-rose-400">Las contraseñas no coinciden</span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2 disabled:opacity-50 mt-2"
+                    >
+                      {isLoading ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <span>Guardando nueva contraseña...</span>
+                        </>
+                      ) : (
+                        <>
+                          <ShieldCheck className="w-4 h-4" />
+                          <span>Guardar Nueva Contraseña</span>
+                        </>
+                      )}
+                    </button>
+                  </form>
+                </>
+              )}
+
+              {/* STEP 4: ÉXITO */}
+              {forgotStep === 'SUCCESS' && (
+                <div className="text-center py-4 space-y-4">
+                  <div className="inline-flex items-center justify-center w-16 h-16 rounded-3xl bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 shadow-xl shadow-emerald-500/20">
+                    <CheckCircle2 className="w-9 h-9" />
+                  </div>
+                  <div>
+                    <h1 className="text-2xl font-extrabold text-white tracking-tight">
+                      ¡Contraseña Actualizada!
+                    </h1>
+                    <p className="text-xs text-slate-400 mt-2 leading-relaxed max-w-xs mx-auto">
+                      Tu contraseña ha sido restablecida con éxito. Ya puedes iniciar sesión con tus nuevas credenciales.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotStep('IDLE');
+                      setActiveTab('login');
+                      setLoginEmail(recoveryEmail);
+                      setLoginPassword('');
+                      setErrorMsg(null);
+                      setSuccessMsg('Contraseña actualizada con éxito. Inicia sesión con tus nuevas credenciales.');
+                    }}
+                    className="w-full py-3.5 px-4 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-lg shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
+                  >
+                    <span>Iniciar Sesión Ahora</span>
+                    <ArrowRight className="w-4 h-4" />
+                  </button>
+                </div>
+              )}
+            </div>
           ) : (
             <>
               {/* Header Title */}
@@ -883,6 +1563,14 @@ export default function LoginPage() {
             </div>
           )}
 
+          {/* Success Message */}
+          {successMsg && (
+            <div className="mb-4 p-3 rounded-xl bg-emerald-950/60 border border-emerald-800 text-xs text-emerald-300 flex items-center gap-2 animate-in fade-in duration-200">
+              <CheckCircle2 className="w-4 h-4 text-emerald-400 flex-shrink-0" />
+              <span>{successMsg}</span>
+            </div>
+          )}
+
           {/* GOOGLE SIGN-IN BUTTON */}
           <div className="space-y-4">
             <button
@@ -932,9 +1620,23 @@ export default function LoginPage() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-300 mb-1.5">
-                  Contraseña
-                </label>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Contraseña
+                  </label>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setForgotStep('EMAIL');
+                      setRecoveryEmail(loginEmail || '');
+                      setErrorMsg(null);
+                      setSuccessMsg(null);
+                    }}
+                    className="text-[11px] font-semibold text-blue-400 hover:text-blue-300 transition-colors"
+                  >
+                    ¿Olvidaste tu contraseña?
+                  </button>
+                </div>
                 <div className="relative">
                   <Lock className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
                   <input
