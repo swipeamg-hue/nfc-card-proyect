@@ -677,47 +677,36 @@ export default function HomePage() {
       </main>
 
       {/* Modern Clean Footer */}
-      <footer className="relative z-10 border-t border-slate-800/80 bg-slate-950 py-8 text-center text-xs text-slate-500">
+      <footer className="relative z-10 border-t border-slate-800/80 bg-slate-950 py-8 text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-lg bg-blue-600 flex items-center justify-center text-white text-xs font-bold">
-              T
-            </div>
-            <span className="font-bold text-slate-300">TapCard SaaS</span>
-            <span>• Tecnología NFC & QR para Empresas</span>
+          <div className="text-slate-500 text-center sm:text-left">
+            TapCard © {new Date().getFullYear()} • Todos los derechos reservados.
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:gap-6 text-slate-400">
             <button
               type="button"
               onClick={() => setLegalModal('privacy')}
-              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+              className="hover:text-slate-200 transition-colors text-xs cursor-pointer"
             >
-              <ShieldCheck className="w-3.5 h-3.5 text-blue-500" />
-              <span>Política de Privacidad</span>
+              Política de Privacidad
             </button>
             <span className="text-slate-700 hidden sm:inline">•</span>
             <button
               type="button"
               onClick={() => setLegalModal('cookies')}
-              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+              className="hover:text-slate-200 transition-colors text-xs cursor-pointer"
             >
-              <Cookie className="w-3.5 h-3.5 text-amber-500" />
-              <span>Política de Cookies</span>
+              Política de Cookies
             </button>
             <span className="text-slate-700 hidden sm:inline">•</span>
             <button
               type="button"
               onClick={() => setLegalModal('terms')}
-              className="hover:text-blue-400 transition-colors text-xs cursor-pointer flex items-center gap-1"
+              className="hover:text-slate-200 transition-colors text-xs cursor-pointer"
             >
-              <FileText className="w-3.5 h-3.5 text-emerald-500" />
-              <span>Términos y Condiciones</span>
+              Términos y Condiciones
             </button>
-          </div>
-
-          <div>
-            TapCard © {new Date().getFullYear()} • Todos los derechos reservados.
           </div>
         </div>
       </footer>
