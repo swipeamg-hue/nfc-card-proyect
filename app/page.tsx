@@ -440,36 +440,42 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="grid grid-cols-3 gap-2 sm:gap-4 md:gap-8">
               {/* Paso 1 */}
-              <div className="relative p-6 rounded-3xl bg-slate-900/60 border border-slate-800 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-blue-600 text-white font-black text-lg flex items-center justify-center mx-auto mb-4 shadow-lg shadow-blue-600/30">
+              <div className="relative p-2.5 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/60 border border-slate-800 text-center flex flex-col items-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-blue-600 text-white font-black text-xs sm:text-base md:text-lg flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 shadow-md shadow-blue-600/30 flex-shrink-0">
                   1
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Crea tu Cuenta Gratis</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white mb-1 sm:mb-2 leading-tight">
+                  Crea tu Cuenta Gratis
+                </h3>
+                <p className="text-[9.5px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
                   Regístrate en menos de 1 minuto ingresando el nombre y giro de tu negocio. Se generará automáticamente tu tienda digital.
                 </p>
               </div>
 
               {/* Paso 2 */}
-              <div className="relative p-6 rounded-3xl bg-slate-900/60 border border-slate-800 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-cyan-600 text-white font-black text-lg flex items-center justify-center mx-auto mb-4 shadow-lg shadow-cyan-600/30">
+              <div className="relative p-2.5 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/60 border border-slate-800 text-center flex flex-col items-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-cyan-600 text-white font-black text-xs sm:text-base md:text-lg flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 shadow-md shadow-cyan-600/30 flex-shrink-0">
                   2
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Personaliza en Tiempo Real</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white mb-1 sm:mb-2 leading-tight">
+                  Personaliza en Tiempo Real
+                </h3>
+                <p className="text-[9.5px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
                   Ingresa a tu panel privado, añade tus números de WhatsApp, catálogos, redes sociales y verifica los cambios en el simulador móvil en vivo.
                 </p>
               </div>
 
               {/* Paso 3 */}
-              <div className="relative p-6 rounded-3xl bg-slate-900/60 border border-slate-800 text-center">
-                <div className="w-12 h-12 rounded-2xl bg-emerald-600 text-white font-black text-lg flex items-center justify-center mx-auto mb-4 shadow-lg shadow-emerald-600/30">
+              <div className="relative p-2.5 sm:p-4 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/60 border border-slate-800 text-center flex flex-col items-center">
+                <div className="w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 rounded-xl sm:rounded-2xl bg-emerald-600 text-white font-black text-xs sm:text-base md:text-lg flex items-center justify-center mx-auto mb-2 sm:mb-3 md:mb-4 shadow-md shadow-emerald-600/30 flex-shrink-0">
                   3
                 </div>
-                <h3 className="text-base font-bold text-white mb-2">Comparte y Multiplica Clientes</h3>
-                <p className="text-xs text-slate-400 leading-relaxed">
+                <h3 className="text-xs sm:text-sm md:text-base font-bold text-white mb-1 sm:mb-2 leading-tight">
+                  Comparte y Multiplica Clientes
+                </h3>
+                <p className="text-[9.5px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
                   Acerca tu tarjeta física NFC al teléfono del cliente o muéstrale tu código QR. Tus datos se guardarán de inmediato en su agenda.
                 </p>
               </div>
