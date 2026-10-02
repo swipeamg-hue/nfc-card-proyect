@@ -44,6 +44,13 @@ export interface CardCustomization {
   fontCategory?: 'sans-serif' | 'serif' | 'display' | 'handwriting' | 'monospace' | 'custom';
   customFontUrl?: string; // Data URL o URL externa de fuente personalizada (.woff2, .ttf)
   customFontName?: string;
+
+  // Colores de textos e información del perfil
+  textColor?: string; // Color del texto principal
+  nameColor?: string; // Color personalizado del nombre del negocio
+  subtitleColor?: string; // Color del giro comercial / subtítulo
+  categoryColor?: string; // Color del giro comercial / subtítulo
+  bioColor?: string; // Color de la biografía / descripción
 }
 
 export interface BusinessLink {

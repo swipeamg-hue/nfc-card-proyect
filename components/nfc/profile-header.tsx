@@ -9,6 +9,9 @@ interface ProfileHeaderProps {
   category?: string;
   bio?: string;
   fontFamily?: string;
+  nameColor?: string;
+  categoryColor?: string;
+  bioColor?: string;
 }
 
 export function ProfileHeader({
@@ -17,6 +20,9 @@ export function ProfileHeader({
   category,
   bio,
   fontFamily,
+  nameColor,
+  categoryColor,
+  bioColor,
 }: ProfileHeaderProps) {
   const fontStyle = fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : undefined;
 
@@ -25,8 +31,11 @@ export function ProfileHeader({
       {/* Name with Verified Badge */}
       <div className="inline-flex items-center gap-1.5 justify-center flex-wrap">
         <h1
-          style={fontStyle}
-          className="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
+          style={{
+            ...fontStyle,
+            color: nameColor || undefined,
+          }}
+          className={`text-xl font-bold tracking-tight ${!nameColor ? 'text-slate-900 dark:text-white' : ''}`}
         >
           {name}
         </h1>
@@ -43,8 +52,11 @@ export function ProfileHeader({
       {/* Subtitle / Category */}
       {category && (
         <p
-          style={fontStyle}
-          className="text-sm font-medium text-slate-500 dark:text-zinc-400 mt-0.5"
+          style={{
+            ...fontStyle,
+            color: categoryColor || undefined,
+          }}
+          className={`text-sm font-medium mt-0.5 ${!categoryColor ? 'text-slate-500 dark:text-zinc-400' : ''}`}
         >
           {category}
         </p>
@@ -53,8 +65,11 @@ export function ProfileHeader({
       {/* Bio / Value Proposition */}
       {bio && (
         <p
-          style={fontStyle}
-          className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed text-center px-4 mt-2.5 max-w-sm"
+          style={{
+            ...fontStyle,
+            color: bioColor || undefined,
+          }}
+          className={`text-xs leading-relaxed text-center px-4 mt-2.5 max-w-sm ${!bioColor ? 'text-slate-600 dark:text-zinc-300' : ''}`}
         >
           {bio}
         </p>

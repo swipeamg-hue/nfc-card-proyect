@@ -294,6 +294,9 @@ export function PublicProfile({
             category={business.category}
             bio={business.bio}
             fontFamily={customFont}
+            nameColor={business.customization?.nameColor || business.customization?.textColor}
+            categoryColor={business.customization?.categoryColor || business.customization?.subtitleColor}
+            bioColor={business.customization?.bioColor || business.customization?.subtitleColor}
           />
 
           {/* Action Cards List (Adaptable list vs 2-column grid for tile shape) */}

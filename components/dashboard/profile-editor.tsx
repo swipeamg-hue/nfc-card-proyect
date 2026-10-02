@@ -589,6 +589,220 @@ export function ProfileEditor({
               />
             </div>
           )}
+
+          {/* Tipografía y Colores de Información del Perfil */}
+          <div className="p-4 sm:p-5 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/70 dark:bg-zinc-800/40 space-y-4">
+            {/* Cabecera de Tipografía */}
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  <Type className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  Tipografía de la Tarjeta
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Elige entre la biblioteca completa de Google Fonts o sube la fuente oficial de tu marca (.ttf, .otf, .woff).
+                </p>
+              </div>
+              {business.customization?.fontFamily && business.customization?.fontFamily !== 'Inter' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateCustomizations({
+                      fontFamily: 'Inter',
+                      customFontUrl: '',
+                      customFontName: '',
+                    });
+                  }}
+                  className="text-[10px] text-rose-500 hover:underline font-semibold"
+                >
+                  Restablecer
+                </button>
+              )}
+            </div>
+
+            {/* Selector de Fuentes Google Fonts & Custom Font Loader */}
+            <FontPicker
+              currentFont={business.customization?.fontFamily || 'Inter'}
+              customFontUrl={business.customization?.customFontUrl}
+              customFontName={business.customization?.customFontName}
+              onFontChange={(fontName, customUrl) => {
+                if (customUrl) {
+                  updateCustomizations({
+                    customFontName: fontName,
+                    customFontUrl: customUrl,
+                    fontFamily: fontName,
+                  });
+                } else {
+                  updateCustomizations({
+                    fontFamily: fontName,
+                    customFontName: '',
+                    customFontUrl: '',
+                  });
+                }
+              }}
+            />
+
+            {/* Separador y Cabecera de Colores de Textos */}
+            <div className="border-t border-slate-200/80 dark:border-zinc-700/60 pt-3.5 space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h5 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
+                    <Palette className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                    Color de Textos e Información
+                  </h5>
+                  <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                    Elige el color del nombre, subtítulo y biografía para que contrasten perfectamente con tu foto de fondo.
+                  </p>
+                </div>
+                {(business.customization?.nameColor || business.customization?.bioColor) && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      updateCustomizations({
+                        nameColor: '',
+                        textColor: '',
+                        categoryColor: '',
+                        bioColor: '',
+                        subtitleColor: '',
+                      });
+                    }}
+                    className="text-[10px] text-rose-500 hover:underline font-semibold"
+                  >
+                    Restablecer colores
+                  </button>
+                )}
+              </div>
+
+              {/* 1. Color del Nombre Comercial / Título */}
+              <div className="space-y-2 bg-white dark:bg-zinc-900/70 p-3 rounded-xl border border-slate-200/80 dark:border-zinc-700/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300">
+                    Color del Nombre / Título:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400">
+                      {business.customization?.nameColor || 'Automático'}
+                    </span>
+                    <label
+                      title="Elegir color personalizado libre"
+                      className="w-6 h-6 rounded-lg cursor-pointer border border-slate-300 dark:border-zinc-600 flex items-center justify-center overflow-hidden shadow-xs hover:scale-105 transition-transform"
+                      style={{ backgroundColor: business.customization?.nameColor || '#FFFFFF' }}
+                    >
+                      <input
+                        type="color"
+                        value={business.customization?.nameColor || '#FFFFFF'}
+                        onChange={(e) => updateCustomization('nameColor', e.target.value)}
+                        className="opacity-0 w-0 h-0 cursor-pointer"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Swatches rápidos para Nombre */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {[
+                    { label: 'Blanco', value: '#FFFFFF', border: true },
+                    { label: 'Carbón', value: '#0F172A' },
+                    { label: 'Dorado', value: '#F59E0B' },
+                    { label: 'Azul', value: '#3B82F6' },
+                    { label: 'Esmeralda', value: '#10B981' },
+                    { label: 'Violeta', value: '#8B5CF6' },
+                    { label: 'Rojo', value: '#EF4444' },
+                  ].map((preset) => {
+                    const isSelected = business.customization?.nameColor === preset.value;
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => updateCustomization('nameColor', preset.value)}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
+                          isSelected
+                            ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/60 font-bold text-blue-700 dark:text-blue-300 shadow-xs'
+                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        <span
+                          className={`w-3 h-3 rounded-full shrink-0 ${preset.border ? 'border border-slate-300 dark:border-zinc-600' : ''}`}
+                          style={{ backgroundColor: preset.value }}
+                        />
+                        <span>{preset.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* 2. Color de Subtítulo y Biografía */}
+              <div className="space-y-2 bg-white dark:bg-zinc-900/70 p-3 rounded-xl border border-slate-200/80 dark:border-zinc-700/50">
+                <div className="flex items-center justify-between">
+                  <span className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300">
+                    Color de Subtítulo y Biografía:
+                  </span>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono text-slate-500 dark:text-zinc-400">
+                      {business.customization?.bioColor || 'Automático'}
+                    </span>
+                    <label
+                      title="Elegir color personalizado libre"
+                      className="w-6 h-6 rounded-lg cursor-pointer border border-slate-300 dark:border-zinc-600 flex items-center justify-center overflow-hidden shadow-xs hover:scale-105 transition-transform"
+                      style={{ backgroundColor: business.customization?.bioColor || '#94A3B8' }}
+                    >
+                      <input
+                        type="color"
+                        value={business.customization?.bioColor || '#94A3B8'}
+                        onChange={(e) =>
+                          updateCustomizations({
+                            bioColor: e.target.value,
+                            categoryColor: e.target.value,
+                            subtitleColor: e.target.value,
+                          })
+                        }
+                        className="opacity-0 w-0 h-0 cursor-pointer"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Swatches rápidos para Subtítulo y Biografía */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {[
+                    { label: 'Blanco Suave', value: '#F1F5F9', border: true },
+                    { label: 'Gris Plata', value: '#94A3B8' },
+                    { label: 'Dorado Claro', value: '#FDE68A' },
+                    { label: 'Azul Claro', value: '#93C5FD' },
+                    { label: 'Menta', value: '#A7F3D0' },
+                    { label: 'Carbón Medio', value: '#334155' },
+                  ].map((preset) => {
+                    const isSelected = business.customization?.bioColor === preset.value;
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() =>
+                          updateCustomizations({
+                            bioColor: preset.value,
+                            categoryColor: preset.value,
+                            subtitleColor: preset.value,
+                          })
+                        }
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all ${
+                          isSelected
+                            ? 'ring-2 ring-blue-500 bg-blue-50 dark:bg-blue-950/60 font-bold text-blue-700 dark:text-blue-300 shadow-xs'
+                            : 'bg-slate-100 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-200 dark:hover:bg-zinc-700'
+                        }`}
+                      >
+                        <span
+                          className={`w-3 h-3 rounded-full shrink-0 ${preset.border ? 'border border-slate-300 dark:border-zinc-600' : ''}`}
+                          style={{ backgroundColor: preset.value }}
+                        />
+                        <span>{preset.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
       )}
 
@@ -1437,58 +1651,6 @@ export function ProfileEditor({
               </div>
             </div>
           </div>
-
-          {/* 3. Tipografía del Perfil (Google Fonts & Custom Font Loader) */}
-          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
-                  <Type className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
-                  Tipografía de la Tarjeta
-                </h4>
-                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  Elige entre la biblioteca completa de Google Fonts o sube el archivo de fuente de tu marca (.ttf, .otf, .woff).
-                </p>
-              </div>
-              {business.customization?.fontFamily && business.customization?.fontFamily !== 'Inter' && (
-                <button
-                  type="button"
-                  onClick={() => {
-                    updateCustomizations({
-                      fontFamily: 'Inter',
-                      customFontUrl: '',
-                      customFontName: '',
-                    });
-                  }}
-                  className="text-[10px] text-rose-500 hover:underline font-semibold"
-                >
-                  Restablecer
-                </button>
-              )}
-            </div>
-
-            <FontPicker
-              currentFont={business.customization?.fontFamily || 'Inter'}
-              customFontUrl={business.customization?.customFontUrl}
-              customFontName={business.customization?.customFontName}
-              onFontChange={(fontName, customUrl) => {
-                if (customUrl) {
-                  updateCustomizations({
-                    customFontName: fontName,
-                    customFontUrl: customUrl,
-                    fontFamily: fontName,
-                  });
-                } else {
-                  updateCustomizations({
-                    fontFamily: fontName,
-                    customFontName: '',
-                    customFontUrl: '',
-                  });
-                }
-              }}
-            />
-          </div>
-
         </div>
       )}
 
