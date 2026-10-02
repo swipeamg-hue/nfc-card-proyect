@@ -44,16 +44,21 @@ export function FloatingVCardButton({
     onOpenQrModal?.();
   };
 
+  const customFont = business.customization?.customFontName || business.customization?.fontFamily;
+  const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
+
   return (
     <div
+      style={fontStyle}
       className={`${
         contained ? 'absolute bottom-3' : 'fixed bottom-4 sm:bottom-6'
       } left-0 right-0 z-40 max-w-md mx-auto px-4 pointer-events-none`}
     >
-      <div className="flex items-center gap-2 pointer-events-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-2xl">
+      <div style={fontStyle} className="flex items-center gap-2 pointer-events-auto bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md p-2 rounded-2xl border border-slate-200/80 dark:border-zinc-800 shadow-2xl">
         {/* Primary Action: Guardar Contacto */}
         <button
           onClick={handleSaveContact}
+          style={fontStyle}
           className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm shadow-md shadow-blue-500/20 active:scale-95 transition-all duration-200"
         >
           {downloaded ? (

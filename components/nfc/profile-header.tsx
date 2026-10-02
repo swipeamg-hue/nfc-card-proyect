@@ -8,6 +8,7 @@ interface ProfileHeaderProps {
   isVerified?: boolean;
   category?: string;
   bio?: string;
+  fontFamily?: string;
 }
 
 export function ProfileHeader({
@@ -15,12 +16,18 @@ export function ProfileHeader({
   isVerified = true,
   category,
   bio,
+  fontFamily,
 }: ProfileHeaderProps) {
+  const fontStyle = fontFamily ? { fontFamily: `"${fontFamily}", sans-serif` } : undefined;
+
   return (
-    <div className="flex flex-col items-center text-center mt-3 px-4">
+    <div className="flex flex-col items-center text-center mt-3 px-4" style={fontStyle}>
       {/* Name with Verified Badge */}
       <div className="inline-flex items-center gap-1.5 justify-center flex-wrap">
-        <h1 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
+        <h1
+          style={fontStyle}
+          className="text-xl font-bold tracking-tight text-slate-900 dark:text-white"
+        >
           {name}
         </h1>
         {isVerified && (
@@ -35,14 +42,20 @@ export function ProfileHeader({
 
       {/* Subtitle / Category */}
       {category && (
-        <p className="text-sm font-medium text-slate-500 dark:text-zinc-400 mt-0.5">
+        <p
+          style={fontStyle}
+          className="text-sm font-medium text-slate-500 dark:text-zinc-400 mt-0.5"
+        >
           {category}
         </p>
       )}
 
       {/* Bio / Value Proposition */}
       {bio && (
-        <p className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed text-center px-4 mt-2.5 max-w-sm">
+        <p
+          style={fontStyle}
+          className="text-xs text-slate-600 dark:text-zinc-300 leading-relaxed text-center px-4 mt-2.5 max-w-sm"
+        >
           {bio}
         </p>
       )}

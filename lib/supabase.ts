@@ -297,6 +297,7 @@ export async function saveBusinessToSupabase(business: Business): Promise<{ succ
         catalog_title: business.catalogTitle || '',
         website_url: business.websiteUrl || '',
         quick_access: business.quickAccess,
+        customization: business.customization || {},
         plan: business.plan || 'PRO',
         account_status: business.accountStatus || 'ACTIVE',
         updated_at: new Date().toISOString(),

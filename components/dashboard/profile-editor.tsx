@@ -168,6 +168,18 @@ export function ProfileEditor({
     });
   };
 
+  // Handle multiple customization updates at once
+  const updateCustomizations = (updates: Partial<CardCustomization>) => {
+    const current = business.customization || {};
+    onChange({
+      ...business,
+      customization: {
+        ...current,
+        ...updates,
+      },
+    });
+  };
+
   // Trigger file selection and open the cropper modal
   const handleFileSelected = (field: 'bannerUrl' | 'logoUrl', file?: File | null) => {
     if (!file) return;
@@ -1442,9 +1454,11 @@ export function ProfileEditor({
                 <button
                   type="button"
                   onClick={() => {
-                    updateCustomization('fontFamily', 'Inter');
-                    updateCustomization('customFontUrl', '');
-                    updateCustomization('customFontName', '');
+                    updateCustomizations({
+                      fontFamily: 'Inter',
+                      customFontUrl: '',
+                      customFontName: '',
+                    });
                   }}
                   className="text-[10px] text-rose-500 hover:underline font-semibold"
                 >
@@ -1459,13 +1473,17 @@ export function ProfileEditor({
               customFontName={business.customization?.customFontName}
               onFontChange={(fontName, customUrl) => {
                 if (customUrl) {
-                  updateCustomization('customFontName', fontName);
-                  updateCustomization('customFontUrl', customUrl);
-                  updateCustomization('fontFamily', fontName);
+                  updateCustomizations({
+                    customFontName: fontName,
+                    customFontUrl: customUrl,
+                    fontFamily: fontName,
+                  });
                 } else {
-                  updateCustomization('fontFamily', fontName);
-                  updateCustomization('customFontName', '');
-                  updateCustomization('customFontUrl', '');
+                  updateCustomizations({
+                    fontFamily: fontName,
+                    customFontName: '',
+                    customFontUrl: '',
+                  });
                 }
               }}
             />

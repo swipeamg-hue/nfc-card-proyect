@@ -29,11 +29,12 @@ interface ActionCardProps {
 export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCardProps) {
   if (!link.isActive) return null;
 
-  // Determine active shape and icon color mode (link-specific overrides global)
+  // Determine active shape, typography and icon color mode
   const shape: ButtonShape = link.shape || globalCustomization?.buttonShape || 'rounded';
   const iconMode: IconColorMode = link.iconColorMode || globalCustomization?.iconColorMode || 'official';
   const iconCustomColor = link.iconColor || globalCustomization?.iconCustomColor;
   const iconBgColor = globalCustomization?.iconBgColor;
+  const activeFont = globalCustomization?.customFontName || globalCustomization?.fontFamily;
 
   // Button background and text color styling
   const customBg = link.buttonBgColor || globalCustomization?.buttonBgColor;
@@ -200,6 +201,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
           backgroundColor: customBg,
           color: customTextColor,
           borderColor: customBorderColor,
+          fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
         }}
         className={`group relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl border ${
           customBg ? '' : 'bg-white/90 dark:bg-zinc-900/85 backdrop-blur-md'
@@ -214,14 +216,20 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
           {theme.icon}
         </div>
         <span
-          style={{ color: customTextColor }}
+          style={{
+            color: customTextColor,
+            fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+          }}
           className="text-xs font-bold text-slate-900 dark:text-zinc-100 line-clamp-1 tracking-tight"
         >
           {link.title}
         </span>
         {link.subtitle && (
           <span
-            style={{ color: customTextColor ? `${customTextColor}aa` : undefined }}
+            style={{
+              color: customTextColor ? `${customTextColor}aa` : undefined,
+              fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+            }}
             className="text-[10px] text-slate-500 dark:text-zinc-400 line-clamp-1"
           >
             {link.subtitle}
@@ -242,6 +250,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         backgroundColor: customBg,
         color: customTextColor,
         borderColor: customBorderColor,
+        fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
       }}
       className={`group relative flex items-center justify-between ${shapeClasses} border ${
         customBg ? '' : 'bg-white/90 dark:bg-zinc-900/85 backdrop-blur-md'
@@ -268,7 +277,10 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         <div className="flex flex-col text-left truncate">
           <div className="flex items-center gap-1.5 truncate">
             <span
-              style={{ color: customTextColor }}
+              style={{
+                color: customTextColor,
+                fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+              }}
               className="text-sm font-semibold text-slate-900 dark:text-zinc-100 truncate tracking-tight"
             >
               {link.title}
@@ -281,7 +293,10 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
           </div>
           {link.subtitle && (
             <span
-              style={{ color: customTextColor ? `${customTextColor}b3` : undefined }}
+              style={{
+                color: customTextColor ? `${customTextColor}b3` : undefined,
+                fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+              }}
               className="text-xs text-slate-500 dark:text-zinc-400 truncate mt-0.5"
             >
               {link.subtitle}

@@ -218,7 +218,31 @@ export function PublicProfile({
       )}
 
       {/* Mobile Container */}
-      <main className="w-full max-w-md min-h-screen sm:min-h-[920px] bg-slate-50 dark:bg-zinc-950 shadow-2xl overflow-hidden relative flex flex-col justify-between sm:rounded-[36px] sm:border-[6px] sm:border-slate-800">
+      <main
+        style={{ fontFamily: customFont ? `"${customFont}", sans-serif` : undefined }}
+        className="tapcard-card-scope w-full max-w-md min-h-screen sm:min-h-[920px] bg-slate-50 dark:bg-zinc-950 shadow-2xl overflow-hidden relative flex flex-col justify-between sm:rounded-[36px] sm:border-[6px] sm:border-slate-800"
+      >
+        {/* Dynamic Typography Scoped Style - Enforces font on ALL text in card */}
+        {customFont && (
+          <style
+            dangerouslySetInnerHTML={{
+              __html: `
+                .tapcard-card-scope,
+                .tapcard-card-scope h1,
+                .tapcard-card-scope h2,
+                .tapcard-card-scope h3,
+                .tapcard-card-scope h4,
+                .tapcard-card-scope p,
+                .tapcard-card-scope span,
+                .tapcard-card-scope a,
+                .tapcard-card-scope button,
+                .tapcard-card-scope div {
+                  font-family: "${customFont}", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+                }
+              `,
+            }}
+          />
+        )}
         
         {/* Full Card Background Image (Foto de Fondo) */}
         {isFullBg && backgroundSrc && (
@@ -281,6 +305,7 @@ export function PublicProfile({
             isVerified={business.isVerified}
             category={business.category}
             bio={business.bio}
+            fontFamily={customFont}
           />
 
           {/* Action Cards List (Adaptable list vs 2-column grid for tile shape) */}
