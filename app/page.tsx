@@ -175,14 +175,6 @@ export default function HomePage() {
                   <span className="hidden xs:inline">Iniciar Sesión</span>
                   <span className="xs:hidden">Entrar</span>
                 </Link>
-
-                <Link
-                  href="/login?tab=register&plan=pro"
-                  className="text-xs font-bold px-3.5 sm:px-4 py-2 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white transition-all shadow-lg shadow-blue-600/30 active:scale-95 flex items-center gap-1.5"
-                >
-                  <Sparkles className="w-3.5 h-3.5 text-amber-300" />
-                  <span>Prueba Gratis</span>
-                </Link>
               </>
             )}
           </div>
