@@ -131,14 +131,6 @@ export default function HomePage() {
             <a href="#planes" className="hover:text-white transition-colors">
               Planes
             </a>
-            <Link
-              href="/nexosoluciones"
-              target="_blank"
-              className="text-cyan-400 hover:text-cyan-300 flex items-center gap-1 transition-colors"
-            >
-              <span>Ver Demo en Vivo</span>
-              <ExternalLink className="w-3 h-3" />
-            </Link>
           </nav>
 
           {/* Right Action Buttons */}
