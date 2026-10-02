@@ -321,9 +321,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Fabricadas en PVC mate o metal de lujo con microchip NTAG. </span>Resistentes al agua, sin batería y listas para durar años.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-blue-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Logo y QR de respaldo</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-blue-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight"><span className="hidden sm:inline">Impresión con </span>logo y QR de respaldo</span>
                 </div>
               </div>
 
@@ -340,9 +340,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Tu perfil carga en menos de 400ms. Muestra portada, biografía, </span>Carga veloz con WhatsApp, redes, catálogo y Google Maps.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-cyan-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Sin instalar apps</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-cyan-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight"><span className="hidden sm:inline">Cero fricción: </span>Sin instalar apps</span>
                 </div>
               </div>
 
@@ -359,9 +359,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Con un clic en «Guardar Contacto», tu información completa </span>Se transfiere directo a la agenda del cliente sin errores.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-emerald-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Nativo iOS y Android</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight"><span className="hidden sm:inline">Compatible </span>nativo iOS y Android</span>
                 </div>
               </div>
 
@@ -378,9 +378,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Actualiza tu teléfono, promociones, catálogo o redes. </span>Tus tarjetas se actualizan al instante sin reimprimir.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-purple-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Simulador móvil en vivo</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-purple-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight"><span className="hidden sm:inline">Con </span>simulador móvil en vivo</span>
                 </div>
               </div>
 
@@ -397,9 +397,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Conoce el impacto real de tus interacciones: </span>Mide toques NFC vs QR y descarga códigos en alta resolución.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-amber-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">QR listos para imprimir</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-amber-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight">QR listos para imprimir</span>
                 </div>
               </div>
 
@@ -416,9 +416,9 @@ export default function HomePage() {
                     <span className="hidden sm:inline">Solución para inmobiliarias, consultorios y empresas. </span>Tarjetas vinculadas para cada colaborador de tu equipo.
                   </p>
                 </div>
-                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-indigo-400">
-                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
-                  <span className="truncate">Control multi-usuario</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-indigo-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
+                  <span className="leading-tight">Control multi-usuario</span>
                 </div>
               </div>
             </div>
