@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { Business, BusinessLink, NfcCard, QuickAccessConfig } from '@/types/business';
+import { Business, BusinessLink, NfcCard, QuickAccessConfig, CardCustomization } from '@/types/business';
 import { mockBusinessesDatabase } from './mock-data';
 
 export const SUPABASE_URL =
@@ -47,6 +47,7 @@ interface DbBusinessRow {
   quick_access_email?: boolean;
   quick_access_maps?: boolean;
   quick_access_catalog?: boolean;
+  customization?: CardCustomization;
   plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
   account_status?: 'ACTIVE' | 'TRIAL' | 'PAUSED';
   created_at?: string;
@@ -104,6 +105,7 @@ export function mapDbToBusiness(row: DbBusinessRow, links: BusinessLink[] = [], 
       showMaps: true,
       showCatalog: false,
     },
+    customization: row.customization || undefined,
     plan: row.plan || 'PRO',
     accountStatus: row.account_status || 'ACTIVE',
     createdAt: row.created_at,

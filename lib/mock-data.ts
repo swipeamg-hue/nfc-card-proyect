@@ -107,6 +107,13 @@ export const mockNexoBusiness: Business = {
       isActive: true,
     },
   ],
+  customization: {
+    backgroundMode: 'full',
+    backgroundOverlay: 'dark',
+    buttonShape: 'rounded',
+    iconColorMode: 'official',
+    fontFamily: 'Inter',
+  },
   plan: 'ENTERPRISE',
   accountStatus: 'ACTIVE',
   createdAt: '2026-01-10T08:00:00Z',
@@ -209,6 +216,13 @@ export const mockRestaurantBusiness: Business = {
       isActive: true,
     },
   ],
+  customization: {
+    backgroundMode: 'full',
+    backgroundOverlay: 'dark',
+    buttonShape: 'pill',
+    iconColorMode: 'official',
+    fontFamily: 'Playfair Display',
+  },
 };
 
 export const mockSalonBusiness: Business = {
@@ -299,6 +313,14 @@ export const mockSalonBusiness: Business = {
       isActive: true,
     },
   ],
+  customization: {
+    backgroundMode: 'full',
+    backgroundOverlay: 'light',
+    buttonShape: 'tile',
+    iconColorMode: 'monochrome',
+    iconCustomColor: '#db2777',
+    fontFamily: 'Great Vibes',
+  },
 };
 
 // Map of businesses by slug for mock backend

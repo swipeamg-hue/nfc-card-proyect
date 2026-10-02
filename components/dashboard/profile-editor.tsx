@@ -7,6 +7,9 @@ import {
   BusinessLink,
   LinkType,
   NfcCard,
+  ButtonShape,
+  BackgroundOverlay,
+  CardCustomization,
 } from '@/types/business';
 import {
   Building2,
@@ -34,6 +37,8 @@ import {
   FileText,
   Image as ImageIcon,
   Link as LinkIcon,
+  Type,
+  Sliders,
 } from 'lucide-react';
 import { uploadBusinessAsset, getAppBaseUrl } from '@/lib/supabase';
 import { ImageCropperModal, CropType } from '@/components/dashboard/image-cropper-modal';
@@ -49,6 +54,7 @@ import {
 } from '@/components/ui/svg-icons';
 import { IconPickerModal } from '@/components/dashboard/icon-picker-modal';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
+import { FontPicker } from '@/components/ui/font-picker';
 
 const COLOR_OPTIONS = [
   { id: 'amber', label: 'Naranja / Ámbar', bg: 'bg-amber-500' },
@@ -144,6 +150,21 @@ export function ProfileEditor({
     onChange({
       ...business,
       [key]: value,
+    });
+  };
+
+  // Handle customization property updates
+  const updateCustomization = <K extends keyof CardCustomization>(
+    key: K,
+    value: CardCustomization[K]
+  ) => {
+    const current = business.customization || {};
+    onChange({
+      ...business,
+      customization: {
+        ...current,
+        [key]: value,
+      },
     });
   };
 
@@ -642,6 +663,176 @@ export function ProfileEditor({
             </div>
           </div>
 
+          {/* Panel de Personalización de Botones de Enlace (Forma, Colores, Iconos) */}
+          <div className="p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100/70 dark:from-zinc-900/80 dark:to-zinc-800/50 border border-slate-200 dark:border-zinc-800 space-y-4 shadow-2xs">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Sliders className="w-4 h-4 text-blue-600 dark:text-blue-400" />
+                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100">
+                  Estilo de Botones e Iconos SVG
+                </h4>
+              </div>
+              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
+                100% Personalizable
+              </span>
+            </div>
+
+            {/* 1. Forma de los Botones */}
+            <div className="space-y-1.5">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-zinc-300">
+                Forma de los Botones:
+              </label>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { id: 'rounded', label: 'Redondeado', sub: 'Estándar', shapeClass: 'rounded-xl' },
+                  { id: 'pill', label: 'Píldora', sub: 'Estilo Coach / Café', shapeClass: 'rounded-full' },
+                  { id: 'square', label: 'Cuadrado', sub: 'Moderno recto', shapeClass: 'rounded-md' },
+                  { id: 'tile', label: 'Azulejos Grid', sub: 'Estilo Bodas / Menú', shapeClass: 'rounded-xl' },
+                ].map((opt) => {
+                  const isSelected = (business.customization?.buttonShape || 'rounded') === opt.id;
+                  return (
+                    <button
+                      key={opt.id}
+                      type="button"
+                      onClick={() => updateCustomization('buttonShape', opt.id as ButtonShape)}
+                      className={`p-2.5 rounded-xl border text-center transition-all flex flex-col items-center justify-center gap-1 ${
+                        isSelected
+                          ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/40'
+                          : 'border-slate-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
+                      }`}
+                    >
+                      <div className={`w-8 h-4 border-2 ${isSelected ? 'border-blue-600 bg-blue-500/30' : 'border-slate-400 dark:border-zinc-500'} ${opt.shapeClass}`} />
+                      <span className="text-xs">{opt.label}</span>
+                      <span className="text-[10px] text-slate-400 dark:text-zinc-500">{opt.sub}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* 2. Modo de Color de Iconos SVG */}
+            <div className="space-y-1.5 pt-1">
+              <label className="block text-[11px] font-semibold text-slate-700 dark:text-zinc-300">
+                Colores de los Iconos SVG:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateCustomization('iconColorMode', 'official')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    (business.customization?.iconColorMode || 'official') === 'official'
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/40'
+                      : 'border-slate-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300'
+                  }`}
+                >
+                  <span className="text-xs block font-bold">Colores Oficiales SVG</span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-normal">
+                    WhatsApp verde, Instagram degradado, Google multicolor, etc.
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => updateCustomization('iconColorMode', 'monochrome')}
+                  className={`p-2.5 rounded-xl border text-left transition-all ${
+                    business.customization?.iconColorMode === 'monochrome'
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/40'
+                      : 'border-slate-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300'
+                  }`}
+                >
+                  <span className="text-xs block font-bold">Personalizado / Monocromático</span>
+                  <span className="text-[10px] text-slate-500 dark:text-zinc-400 font-normal">
+                    Aplica un color uniforme (dorado, verde neón, terracota, blanco)
+                  </span>
+                </button>
+              </div>
+
+              {/* Si eligió modo personalizado/monocromático para los iconos, mostrar selector de color */}
+              {business.customization?.iconColorMode === 'monochrome' && (
+                <div className="p-3 rounded-xl bg-white dark:bg-zinc-800 border border-slate-200 dark:border-zinc-700 flex items-center justify-between gap-3 animate-in fade-in duration-150">
+                  <div>
+                    <span className="text-xs font-semibold text-slate-800 dark:text-zinc-200 block">
+                      Color de Iconos SVG
+                    </span>
+                    <span className="text-[10px] text-slate-500 dark:text-zinc-400">
+                      Tinta unificada para todos los logotipos e iconos
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="color"
+                      value={business.customization?.iconCustomColor || '#ffffff'}
+                      onChange={(e) => updateCustomization('iconCustomColor', e.target.value)}
+                      className="w-9 h-9 rounded-lg cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5"
+                    />
+                    <span className="text-xs font-mono font-bold text-slate-700 dark:text-zinc-300">
+                      {business.customization?.iconCustomColor || '#ffffff'}
+                    </span>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* 3. Colores de Fondo y Texto del Botón */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+              <div className="p-3 rounded-xl bg-white dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                    Fondo de Botones
+                  </label>
+                  {business.customization?.buttonBgColor && (
+                    <button
+                      type="button"
+                      onClick={() => updateCustomization('buttonBgColor', '')}
+                      className="text-[10px] text-rose-500 hover:underline"
+                    >
+                      Restablecer
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="color"
+                    value={business.customization?.buttonBgColor || '#ffffff'}
+                    onChange={(e) => updateCustomization('buttonBgColor', e.target.value)}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5"
+                  />
+                  <span className="text-xs font-mono text-slate-600 dark:text-zinc-400">
+                    {business.customization?.buttonBgColor || 'Por defecto'}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-white dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                    Texto de Botones
+                  </label>
+                  {business.customization?.buttonTextColor && (
+                    <button
+                      type="button"
+                      onClick={() => updateCustomization('buttonTextColor', '')}
+                      className="text-[10px] text-rose-500 hover:underline"
+                    >
+                      Restablecer
+                    </button>
+                  )}
+                </div>
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="color"
+                    value={business.customization?.buttonTextColor || '#0f172a'}
+                    onChange={(e) => updateCustomization('buttonTextColor', e.target.value)}
+                    className="w-8 h-8 rounded-lg cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5"
+                  />
+                  <span className="text-xs font-mono text-slate-600 dark:text-zinc-400">
+                    {business.customization?.buttonTextColor || 'Por defecto'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          </div>
+
           {/* Links list */}
           <div className="space-y-3">
             {business.links.map((link, idx) => {
@@ -946,21 +1137,24 @@ export function ProfileEditor({
       {/* TAB 3: Design & Media */}
       {activeTab === 'design' && (
         <div className="space-y-6 animate-in fade-in duration-150">
-          {/* 1. Foto de Portada (Banner) */}
+          {/* 1. Foto de Fondo (Antes Portada) */}
           <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
                   <Camera className="w-4 h-4 text-blue-600" />
-                  Foto de Portada
+                  Foto de Fondo
                 </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Imagen principal que envuelve el fondo de tu tarjeta (estilo Coach, Café, Bodas o Minimalista).
+                </p>
               </div>
               {business.bannerUrl && (
                 <div className="flex items-center gap-1.5">
                   <button
                     type="button"
                     onClick={() => handleOpenExistingCropper('bannerUrl')}
-                    title="Ajustar encuadre y zoom de portada"
+                    title="Ajustar encuadre y zoom de foto de fondo"
                     className="flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-blue-50 hover:bg-blue-100 text-blue-600 dark:bg-blue-950/40 dark:text-blue-400 dark:hover:bg-blue-900/50 transition-colors"
                   >
                     <Crop className="w-3.5 h-3.5" />
@@ -969,7 +1163,7 @@ export function ProfileEditor({
                   <button
                     type="button"
                     onClick={() => updateField('bannerUrl', '')}
-                    title="Eliminar foto de portada"
+                    title="Eliminar foto de fondo"
                     className="p-1.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/40 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -978,22 +1172,22 @@ export function ProfileEditor({
               )}
             </div>
 
-            {/* Clickable Banner Box with internal text */}
+            {/* Clickable Banner / Background Box */}
             <div
               onClick={() => bannerFileRef.current?.click()}
-              className="relative w-full h-40 rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-blue-500 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner transition-all"
+              className="relative w-full h-44 rounded-2xl overflow-hidden border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-blue-500 bg-slate-100 dark:bg-zinc-900 flex items-center justify-center group cursor-pointer shadow-inner transition-all"
             >
               {business.bannerUrl ? (
                 <>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={business.bannerUrl}
-                    alt="Vista previa del banner"
+                    alt="Vista previa de foto de fondo"
                     className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
                   />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white">
                     <Camera className="w-6 h-6 mb-1" />
-                    <span className="text-xs font-bold drop-shadow">Cambiar foto de portada</span>
+                    <span className="text-xs font-bold drop-shadow">Cambiar foto de fondo</span>
                   </div>
                 </>
               ) : (
@@ -1002,7 +1196,10 @@ export function ProfileEditor({
                     <Camera className="w-5 h-5" />
                   </div>
                   <span className="text-xs font-bold text-slate-800 dark:text-zinc-200">
-                    Subir foto de portada
+                    Subir foto de fondo
+                  </span>
+                  <span className="text-[10px] text-slate-400 mt-0.5">
+                    JPG, PNG o WEBP (Recomendado 1080x1920 o panorámica)
                   </span>
                 </div>
               )}
@@ -1022,6 +1219,68 @@ export function ProfileEditor({
               }}
             />
 
+            {/* Configuración de Modo de Fondo y Superposición */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
+                  Modo de Presentación:
+                </label>
+                <div className="grid grid-cols-2 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => updateCustomization('backgroundMode', 'full')}
+                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
+                      (business.customization?.backgroundMode || 'full') === 'full'
+                        ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
+                        : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
+                    }`}
+                  >
+                    Fondo Completo
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => updateCustomization('backgroundMode', 'banner')}
+                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
+                      business.customization?.backgroundMode === 'banner'
+                        ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
+                        : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
+                    }`}
+                  >
+                    Banner Superior
+                  </button>
+                </div>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
+                  Filtro de Superposición (Legibilidad):
+                </label>
+                <div className="grid grid-cols-3 gap-1">
+                  {[
+                    { id: 'dark', label: 'Oscuro' },
+                    { id: 'light', label: 'Cálido' },
+                    { id: 'soft-gradient', label: 'Suave' },
+                  ].map((flt) => {
+                    const isSelected = (business.customization?.backgroundOverlay || 'dark') === flt.id;
+                    return (
+                      <button
+                        key={flt.id}
+                        type="button"
+                        onClick={() => updateCustomization('backgroundOverlay', flt.id as BackgroundOverlay)}
+                        className={`py-2 px-1.5 rounded-xl border text-[11px] font-semibold text-center transition-all ${
+                          isSelected
+                            ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs'
+                            : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
+                        }`}
+                      >
+                        {flt.label}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
             <div className="flex items-center justify-end text-[11px] text-slate-400 pt-0.5">
               <button
                 type="button"
@@ -1039,7 +1298,7 @@ export function ProfileEditor({
                   type="text"
                   value={business.bannerUrl}
                   onChange={(e) => updateField('bannerUrl', e.target.value)}
-                  placeholder="https://ejemplo.com/portada.jpg"
+                  placeholder="https://ejemplo.com/fondo.jpg"
                   className="w-full px-3 py-1.5 rounded-xl border border-slate-200 dark:border-zinc-700 text-xs font-mono bg-white dark:bg-zinc-900"
                 />
               </div>
@@ -1136,7 +1395,7 @@ export function ProfileEditor({
                         Fondo Inteligente Automático
                       </span>
                       <span className="text-slate-500 dark:text-zinc-400 block text-[10px]">
-                        Al subir tu foto de perfil, se adaptará como portada panorámica automáticamente.
+                        Al subir tu foto de perfil, se adaptará como fondo de tarjeta automáticamente.
                       </span>
                     </div>
                   </label>
@@ -1165,6 +1424,51 @@ export function ProfileEditor({
                 )}
               </div>
             </div>
+          </div>
+
+          {/* 3. Tipografía del Perfil (Google Fonts & Custom Font Loader) */}
+          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h4 className="text-xs font-bold text-slate-900 dark:text-zinc-100 flex items-center gap-1.5">
+                  <Type className="w-4 h-4 text-indigo-600 dark:text-indigo-400" />
+                  Tipografía de la Tarjeta
+                </h4>
+                <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                  Elige entre la biblioteca completa de Google Fonts o sube el archivo de fuente de tu marca (.ttf, .otf, .woff).
+                </p>
+              </div>
+              {business.customization?.fontFamily && business.customization?.fontFamily !== 'Inter' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    updateCustomization('fontFamily', 'Inter');
+                    updateCustomization('customFontUrl', '');
+                    updateCustomization('customFontName', '');
+                  }}
+                  className="text-[10px] text-rose-500 hover:underline font-semibold"
+                >
+                  Restablecer
+                </button>
+              )}
+            </div>
+
+            <FontPicker
+              currentFont={business.customization?.fontFamily || 'Inter'}
+              customFontUrl={business.customization?.customFontUrl}
+              customFontName={business.customization?.customFontName}
+              onFontChange={(fontName, customUrl) => {
+                if (customUrl) {
+                  updateCustomization('customFontName', fontName);
+                  updateCustomization('customFontUrl', customUrl);
+                  updateCustomization('fontFamily', fontName);
+                } else {
+                  updateCustomization('fontFamily', fontName);
+                  updateCustomization('customFontName', '');
+                  updateCustomization('customFontUrl', '');
+                }
+              }}
+            />
           </div>
 
         </div>

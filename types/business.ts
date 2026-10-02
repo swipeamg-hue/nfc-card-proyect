@@ -17,6 +17,35 @@ export type LinkType =
   | 'reviews'
   | 'custom';
 
+export type ButtonShape = 'rounded' | 'pill' | 'square' | 'tile' | 'circle';
+export type IconColorMode = 'official' | 'monochrome' | 'custom';
+export type BackgroundStyle = 'full' | 'top-fade' | 'banner';
+export type BackgroundOverlay = 'dark' | 'light' | 'soft-gradient' | 'none';
+
+export interface CardCustomization {
+  // Fondo de la tarjeta (Foto de Fondo)
+  backgroundMode?: BackgroundStyle; // 'full', 'top-fade', 'banner'
+  backgroundOverlay?: BackgroundOverlay; // 'dark', 'light', 'soft-gradient', 'none'
+  backgroundOpacity?: number; // 0 a 100
+
+  // Estilo global de botones de enlace
+  buttonShape?: ButtonShape;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  buttonBorderColor?: string;
+
+  // Iconos SVG
+  iconColorMode?: IconColorMode; // 'official' (colores de marca oficiales) o 'monochrome' / 'custom'
+  iconCustomColor?: string; // Color personalizado del icono (ej. dorado, verde neón, terracota)
+  iconBgColor?: string; // Color del recuadro del icono
+
+  // Tipografía
+  fontFamily?: string; // Ej: 'Inter', 'Playfair Display', 'Great Vibes', 'Montserrat', 'Outfit'
+  fontCategory?: 'sans-serif' | 'serif' | 'display' | 'handwriting' | 'monospace' | 'custom';
+  customFontUrl?: string; // Data URL o URL externa de fuente personalizada (.woff2, .ttf)
+  customFontName?: string;
+}
+
 export interface BusinessLink {
   id: string;
   businessId: string;
@@ -29,6 +58,11 @@ export interface BusinessLink {
   isActive: boolean;
   highlighted?: boolean;
   customColor?: string;
+  shape?: ButtonShape;
+  buttonBgColor?: string;
+  buttonTextColor?: string;
+  iconColor?: string;
+  iconColorMode?: IconColorMode;
 }
 
 export interface NfcCard {
@@ -66,6 +100,7 @@ export interface Business {
   category: string;
   bio: string;
   bannerUrl: string;
+  backgroundUrl?: string;
   logoUrl: string;
   themeColor: string; // e.g. "#0f172a"
   phone: string;
@@ -79,6 +114,7 @@ export interface Business {
   quickAccess?: QuickAccessConfig;
   cards?: NfcCard[];
   links: BusinessLink[];
+  customization?: CardCustomization;
   plan?: 'STARTER' | 'PRO' | 'ENTERPRISE';
   accountStatus?: 'ACTIVE' | 'TRIAL' | 'PAUSED';
   createdAt?: string;

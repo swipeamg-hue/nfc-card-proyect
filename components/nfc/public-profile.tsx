@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { Business } from '@/types/business';
 import { HeroBanner } from './hero-banner';
 import { ProfileHeader } from './profile-header';
@@ -9,8 +10,8 @@ import { FloatingVCardButton } from './floating-vcard-button';
 import { QrModal } from './qr-modal';
 import { Smartphone, Sparkles, PauseCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
-
 import { supabase, getBusinessBySlug, trackTapEvent } from '@/lib/supabase';
+import { dynamicallyLoadFont } from '@/lib/fonts';
 
 interface PublicProfileProps {
   business: Business;
@@ -29,6 +30,19 @@ export function PublicProfile({
   const business = isMockup ? initialBusiness : internalBusiness;
   const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  // Dynamic Font Loading
+  useEffect(() => {
+    if (business.customization?.customFontUrl && business.customization?.customFontName) {
+      dynamicallyLoadFont(
+        business.customization.customFontName,
+        business.customization.customFontUrl,
+        business.customization.customFontName
+      );
+    } else if (business.customization?.fontFamily) {
+      dynamicallyLoadFont(business.customization.fontFamily);
+    }
+  }, [business.customization]);
 
   const showToast = (msg: string) => {
     setTimeout(() => {
@@ -181,9 +195,20 @@ export function PublicProfile({
   }
 
   const brandColor = business.themeColor || '#2563eb';
+  const customFont = business.customization?.customFontName || business.customization?.fontFamily;
+
+  // Background Image & Mode (Full bleed vs Banner)
+  const backgroundSrc = business.backgroundUrl || business.bannerUrl;
+  const backgroundMode = business.customization?.backgroundMode || 'full';
+  const overlayMode = business.customization?.backgroundOverlay || 'dark';
+  const isFullBg = backgroundMode === 'full' && Boolean(backgroundSrc);
+  const buttonShape = business.customization?.buttonShape || 'rounded';
 
   return (
-    <div className="min-h-screen bg-slate-200 dark:bg-zinc-900 flex justify-center py-0 sm:py-6 selection:bg-blue-500 selection:text-white relative overflow-hidden">
+    <div
+      style={{ fontFamily: customFont ? `"${customFont}", sans-serif` : undefined }}
+      className="min-h-screen bg-slate-200 dark:bg-zinc-900 flex justify-center py-0 sm:py-6 selection:bg-blue-500 selection:text-white relative overflow-hidden"
+    >
       {/* Desktop outer background ambient glow */}
       {!isMockup && (
         <div
@@ -195,24 +220,33 @@ export function PublicProfile({
       {/* Mobile Container */}
       <main className="w-full max-w-md min-h-screen sm:min-h-[920px] bg-slate-50 dark:bg-zinc-950 shadow-2xl overflow-hidden relative flex flex-col justify-between sm:rounded-[36px] sm:border-[6px] sm:border-slate-800">
         
-        {/* Ambient Brand Glow inside Card (Resplandor de Fondo) */}
-        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0">
-          {/* Top orb behind banner/avatar */}
-          <div
-            className="absolute -top-24 left-1/2 -translate-x-1/2 w-80 h-80 rounded-full blur-3xl opacity-35 dark:opacity-30 transition-all duration-700"
-            style={{ backgroundColor: brandColor }}
-          />
-          {/* Mid orb behind action links */}
-          <div
-            className="absolute top-1/3 -right-20 w-64 h-64 rounded-full blur-3xl opacity-25 dark:opacity-20 transition-all duration-700"
-            style={{ backgroundColor: brandColor }}
-          />
-          {/* Bottom orb */}
-          <div
-            className="absolute bottom-28 -left-20 w-72 h-72 rounded-full blur-3xl opacity-25 dark:opacity-20 transition-all duration-700"
-            style={{ backgroundColor: brandColor }}
-          />
-        </div>
+        {/* Full Card Background Image (Foto de Fondo) */}
+        {isFullBg && backgroundSrc && (
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            <Image
+              src={backgroundSrc}
+              alt=""
+              fill
+              priority
+              unoptimized
+              sizes="(max-width: 768px) 100vw, 450px"
+              className="object-cover object-center scale-105"
+            />
+            {/* Custom Overlay Gradients for Perfect Legibility */}
+            {overlayMode === 'dark' && (
+              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-slate-950/85 to-slate-950/95" />
+            )}
+            {overlayMode === 'light' && (
+              <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white/95 backdrop-blur-[2px]" />
+            )}
+            {overlayMode === 'soft-gradient' && (
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-black/35" />
+            )}
+            {overlayMode === 'none' && (
+              <div className="absolute inset-0 bg-black/25" />
+            )}
+          </div>
+        )}
 
         {/* Mockup Suspended Warning Banner */}
         {business.accountStatus === 'PAUSED' && isMockup && (
@@ -235,9 +269,10 @@ export function PublicProfile({
         <div className="relative z-10">
           {/* Hero Banner with Avatar */}
           <HeroBanner
-            bannerUrl={business.bannerUrl}
+            bannerUrl={backgroundSrc}
             logoUrl={business.logoUrl}
             businessName={business.name}
+            isFullBackground={isFullBg}
           />
 
           {/* Profile Header Details */}
@@ -248,12 +283,19 @@ export function PublicProfile({
             bio={business.bio}
           />
 
-          {/* Action Cards List */}
-          <div className="px-4 mt-6 space-y-3">
+          {/* Action Cards List (Adaptable list vs 2-column grid for tile shape) */}
+          <div
+            className={`px-4 mt-6 ${
+              buttonShape === 'tile'
+                ? 'grid grid-cols-2 gap-3'
+                : 'space-y-3'
+            }`}
+          >
             {activeLinks.map((link) => (
               <ActionCard
                 key={link.id}
                 link={link}
+                globalCustomization={business.customization}
                 onTrackClick={handleTrackClick}
               />
             ))}
