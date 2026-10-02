@@ -193,11 +193,6 @@ export default function HomePage() {
       <main className="relative z-10 flex-1">
         {/* HERO SECTION */}
         <section className="max-w-5xl mx-auto px-4 sm:px-6 pt-12 sm:pt-20 pb-16 sm:pb-24 text-center">
-          <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-blue-950/80 border border-blue-800/60 text-xs font-semibold text-blue-300 mb-6 shadow-sm">
-            <Zap className="w-3.5 h-3.5 text-amber-400 fill-amber-400 flex-shrink-0" />
-            <span>Tarjetas Inteligentes NFC & QR Corporativas de Próxima Generación</span>
-          </div>
-
           <h1 className="text-3xl sm:text-5xl md:text-6xl font-extrabold tracking-tight max-w-4xl mx-auto leading-tight">
             Transforma Cada Saludo en Clientes con{' '}
             <span className="bg-gradient-to-r from-blue-400 via-cyan-300 to-indigo-400 bg-clip-text text-transparent">
@@ -497,29 +492,6 @@ export default function HomePage() {
               <p className="text-sm text-slate-400 mt-2">
                 Equipa a tu negocio con tarjetas inteligentes y acrílicos para tu mostrador o caja. Todos los planes incluyen 30 días de prueba gratis sin registro de tarjeta.
               </p>
-            </div>
-
-            {/* Free Trial Banner Notice */}
-            <div className="mb-10 p-4 rounded-2xl bg-gradient-to-r from-blue-950/70 via-slate-900 to-indigo-950/70 border border-blue-800/60 max-w-3xl mx-auto flex items-center justify-between gap-4 text-left">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center flex-shrink-0">
-                  <Sparkles className="w-5 h-5 text-amber-300" />
-                </div>
-                <div>
-                  <span className="block text-xs font-bold text-white">
-                    ¡Todos los planes incluyen 30 Días de Prueba Gratuita!
-                  </span>
-                  <span className="text-[11px] text-slate-400">
-                    Comienza hoy sin ingresar ningún tipo de tarjeta. Explora tu panel y micro-landing inmediatamente.
-                  </span>
-                </div>
-              </div>
-              <Link
-                href="/login?tab=register&plan=pro"
-                className="hidden sm:inline-flex px-4 py-2 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs shadow-md whitespace-nowrap active:scale-95 transition-all"
-              >
-                Probar Gratis
-              </Link>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-6xl mx-auto">
