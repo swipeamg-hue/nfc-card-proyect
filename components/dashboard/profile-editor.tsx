@@ -45,6 +45,7 @@ import {
   YouTubeOfficialIcon,
   GlobeSvg,
   PhoneSvg,
+  GoogleOfficialIcon,
 } from '@/components/ui/svg-icons';
 import { IconPickerModal } from '@/components/dashboard/icon-picker-modal';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
@@ -341,6 +342,11 @@ export function ProfileEditor({
       subtitle = 'Visita nuestra tienda o portal';
       url = 'https://tunegocio.com';
       iconName = 'globe';
+    } else if (type === 'reviews') {
+      title = 'Reseñas';
+      subtitle = 'Califícanos en Google';
+      url = 'https://g.page/r/.../review';
+      iconName = 'google';
     }
 
     const newLink: BusinessLink = {
@@ -623,6 +629,15 @@ export function ProfileEditor({
               >
                 <GlobeSvg className="w-3.5 h-3.5" />
                 <span>+ Sitio Web</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => addLink('reviews')}
+                className="px-2.5 py-1.5 rounded-xl bg-white/10 dark:bg-zinc-800/90 text-slate-700 dark:text-zinc-200 hover:bg-white/20 dark:hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-200/80 dark:border-zinc-700/80 shadow-2xs"
+              >
+                <GoogleOfficialIcon className="w-3.5 h-3.5" />
+                <span>+ Reseñas</span>
               </button>
             </div>
           </div>

@@ -14,6 +14,7 @@ export type LinkType =
   | 'maps'
   | 'menu'
   | 'booking'
+  | 'reviews'
   | 'custom';
 
 export interface BusinessLink {

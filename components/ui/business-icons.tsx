@@ -62,6 +62,7 @@ import {
   PhoneSvg,
   MapPinSvg,
   MailSvg,
+  GoogleOfficialIcon,
 } from './svg-icons';
 
 export interface BusinessIconItem {
@@ -129,6 +130,7 @@ export const BUSINESS_ICON_CATEGORIES: { name: string; items: BusinessIconItem[]
       { id: 'globe', name: 'Sitio Web Oficial', category: 'Contacto', icon: GlobeSvg },
       { id: 'message-circle', name: 'Mensaje Directo', category: 'Contacto', icon: MessageCircle },
       { id: 'send', name: 'Enviar Mensaje', category: 'Contacto', icon: Send },
+      { id: 'google', name: 'Google Reseñas (Oficial)', category: 'Contacto', icon: GoogleOfficialIcon },
       { id: 'star', name: 'Reseñas en Google', category: 'Contacto', icon: StarSvg },
     ],
   },
@@ -173,6 +175,7 @@ export function getBusinessIconComponent(iconId?: string): React.ComponentType<{
   if (iconId === 'youtube') return YouTubeOfficialIcon;
   if (iconId === 'x') return XOfficialIcon;
   if (iconId === 'telegram') return TelegramOfficialIcon;
+  if (iconId === 'google' || iconId === 'reviews' || iconId === 'google-review') return GoogleOfficialIcon;
 
   const found = ALL_BUSINESS_ICONS.find((item) => item.id === iconId);
   return found ? found.icon : GlobeSvg;

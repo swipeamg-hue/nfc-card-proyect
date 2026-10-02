@@ -16,6 +16,7 @@ import {
   GlobeSvg,
   PhoneSvg,
   MapPinSvg,
+  GoogleOfficialIcon,
 } from '@/components/ui/svg-icons';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
 
@@ -84,6 +85,13 @@ export function ActionCard({ link, onTrackClick }: ActionCardProps) {
         icon: <TelegramOfficialIcon className="w-5 h-5 text-white" />,
         bgClass: 'bg-[#229ED9]',
         borderHover: 'hover:border-sky-300',
+      };
+    }
+    if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
+      return {
+        icon: <GoogleOfficialIcon className="w-5 h-5" />,
+        bgClass: 'bg-white shadow-xs border border-slate-200 dark:border-zinc-700',
+        borderHover: 'hover:border-blue-400',
       };
     }
 
