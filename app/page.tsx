@@ -307,124 +307,118 @@ export default function HomePage() {
               </p>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid grid-cols-3 gap-2.5 sm:gap-4 lg:gap-6">
               {/* Servicio 1: Tarjetas Físicas NFC */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-blue-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <CreditCard className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <CreditCard className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Tarjetas Físicas Inteligentes NFC
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Tarjetas Inteligentes NFC
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Fabricadas en PVC mate de alto gramaje o metal de lujo con microchip NTAG integrado.
-                    Resistentes al agua, sin necesidad de batería y diseñadas para durar años.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Fabricadas en PVC mate o metal de lujo con microchip NTAG. </span>Resistentes al agua, sin batería y listas para durar años.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-blue-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Impresión con tu logo y código QR de respaldo</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-blue-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Logo y QR de respaldo</span>
                 </div>
               </div>
 
               {/* Servicio 2: Micro-Landing Móvil */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-cyan-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-cyan-600/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Smartphone className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-cyan-600/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <Smartphone className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Micro-Landing Móvil Interactiva
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Micro-Landing Interactiva
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Tu perfil corporativo carga en menos de 400ms. Muestra foto de portada, logo, biografía profesional,
-                    botones táctiles con respuesta táctil, redes sociales y ubicación en Google Maps.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Tu perfil carga en menos de 400ms. Muestra portada, biografía, </span>Carga veloz con WhatsApp, redes, catálogo y Google Maps.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-cyan-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Cero fricción: No requiere instalar apps</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-cyan-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Sin instalar apps</span>
                 </div>
               </div>
 
               {/* Servicio 3: Descarga vCard en 1 Toque */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Download className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <Download className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Guardado en Agenda en 1 Toque (.vcf)
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Guardar Contacto vCard
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Con un solo clic en «Guardar Contacto», tu información completa se transfiere directamente
-                    a los contactos del smartphone de tu cliente sin errores tipográficos.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Con un clic en «Guardar Contacto», tu información completa </span>Se transfiere directo a la agenda del cliente sin errores.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-emerald-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Compatible nativo con iOS y Android</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-emerald-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Nativo iOS y Android</span>
                 </div>
               </div>
 
               {/* Servicio 4: Panel Autoadministrable */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-purple-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <SlidersHorizontal className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-purple-600/10 border border-purple-500/20 text-purple-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <SlidersHorizontal className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Panel Autoadministrable en Tiempo Real
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Panel en Tiempo Real
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Actualiza tu teléfono, agrega promociones, cambia tu catálogo o enlaces a redes cuando quieras.
-                    Tus tarjetas físicas se actualizarán automáticamente sin necesidad de reimprimirlas.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Actualiza tu teléfono, promociones, catálogo o redes. </span>Tus tarjetas se actualizan al instante sin reimprimir.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-purple-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Con simulador móvil interactivo en vivo</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-purple-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Simulador móvil en vivo</span>
                 </div>
               </div>
 
               {/* Servicio 5: Métricas & Analíticas */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-amber-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-amber-600/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <BarChart3 className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-amber-600/10 border border-amber-500/20 text-amber-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <BarChart3 className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Métricas & Códigos QR Dinámicos
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Métricas & QR Dinámicos
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Conoce el impacto real de tus interacciones: cuántos tocaron el chip NFC vs cuántos escanearon tu QR,
-                    cuántos abrieron tu WhatsApp y descarga códigos QR en alta resolución para folletos y mantas.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Conoce el impacto real de tus interacciones: </span>Mide toques NFC vs QR y descarga códigos en alta resolución.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-amber-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Generador de códigos QR listos para imprenta</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-amber-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">QR listos para imprimir</span>
                 </div>
               </div>
 
               {/* Servicio 6: Flotillas y Equipos */}
-              <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-between group">
+              <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-indigo-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <Users className="w-6 h-6" />
+                  <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-indigo-600/10 border border-indigo-500/20 text-indigo-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
+                    <Users className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
-                  <h3 className="text-lg font-bold text-white mb-2">
-                    Flotillas & Equipos de Ventas
+                  <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
+                    Flotillas & Equipos
                   </h3>
-                  <p className="text-xs text-slate-400 leading-relaxed">
-                    Solución corporativa para inmobiliarias, consultorios, firmas legales y equipos comerciales.
-                    Mantén la identidad de marca unificada con tarjetas personalizadas para cada colaborador.
+                  <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
+                    <span className="hidden sm:inline">Solución para inmobiliarias, consultorios y empresas. </span>Tarjetas vinculadas para cada colaborador de tu equipo.
                   </p>
                 </div>
-                <div className="mt-6 pt-4 border-t border-slate-800/60 flex items-center gap-1.5 text-xs font-semibold text-indigo-400">
-                  <CheckCircle2 className="w-4 h-4 text-emerald-400" />
-                  <span>Control de usuarios y administración SaaS</span>
+                <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-center gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-indigo-400">
+                  <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0" />
+                  <span className="truncate">Control multi-usuario</span>
                 </div>
               </div>
             </div>
