@@ -24,6 +24,7 @@ import {
   X,
   Crown,
   Star,
+  ChevronDown,
 } from 'lucide-react';
 import { AuthUser } from '@/types/auth';
 import { getActiveSession, setActiveSession, logout } from '@/lib/auth';
@@ -37,6 +38,18 @@ export default function HomePage() {
     return null;
   });
   const [legalModal, setLegalModal] = useState<'privacy' | 'cookies' | 'terms' | null>(null);
+  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({
+    starter: false,
+    pro: false,
+    enterprise: false,
+  });
+
+  const togglePlanFeatures = (planId: string) => {
+    setExpandedPlans((prev) => ({
+      ...prev,
+      [planId]: !prev[planId],
+    }));
+  };
 
   useEffect(() => {
     try {
@@ -471,7 +484,23 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <ul className="space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300">
+                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  <div className="flex sm:hidden justify-center my-1.5">
+                    <button
+                      type="button"
+                      onClick={() => togglePlanFeatures('starter')}
+                      title={expandedPlans.starter ? 'Ocultar características' : 'Ver características'}
+                      className="p-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 shadow-sm transition-all active:scale-90 cursor-pointer"
+                    >
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                          expandedPlans.starter ? 'rotate-180 text-emerald-400' : 'text-slate-400'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <ul className={`${expandedPlans.starter ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300`}>
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 1 a 3 Tarjetas Inteligentes NFC</strong> con microchip NTAG</span>
@@ -545,7 +574,23 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <ul className="space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-200">
+                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  <div className="flex sm:hidden justify-center my-1.5">
+                    <button
+                      type="button"
+                      onClick={() => togglePlanFeatures('pro')}
+                      title={expandedPlans.pro ? 'Ocultar características' : 'Ver características'}
+                      className="p-1 rounded-full bg-blue-900/60 hover:bg-blue-800/80 text-cyan-200 border border-blue-700/50 shadow-sm transition-all active:scale-90 cursor-pointer"
+                    >
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                          expandedPlans.pro ? 'rotate-180 text-cyan-400' : 'text-cyan-300'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <ul className={`${expandedPlans.pro ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-200`}>
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 4 a 8 Tarjetas Inteligentes NFC</strong> para tu equipo</span>
@@ -620,7 +665,23 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  <ul className="space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300">
+                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  <div className="flex sm:hidden justify-center my-1.5">
+                    <button
+                      type="button"
+                      onClick={() => togglePlanFeatures('enterprise')}
+                      title={expandedPlans.enterprise ? 'Ocultar características' : 'Ver características'}
+                      className="p-1 rounded-full bg-purple-950/60 hover:bg-purple-900/80 text-purple-200 border border-purple-800/50 shadow-sm transition-all active:scale-90 cursor-pointer"
+                    >
+                      <ChevronDown
+                        className={`w-3.5 h-3.5 transition-transform duration-300 ${
+                          expandedPlans.enterprise ? 'rotate-180 text-purple-400' : 'text-purple-300'
+                        }`}
+                      />
+                    </button>
+                  </div>
+
+                  <ul className={`${expandedPlans.enterprise ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300`}>
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 8 a 12 Tarjetas Inteligentes NFC</strong> para tu flotilla</span>
