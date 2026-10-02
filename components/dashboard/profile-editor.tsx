@@ -1167,31 +1167,6 @@ export function ProfileEditor({
             </div>
           </div>
 
-          {/* 3. Color de Acento (Resplandor de Fondo) */}
-          <div className="p-4 rounded-2xl border border-slate-200 dark:border-zinc-800 bg-slate-50/50 dark:bg-zinc-800/40 space-y-2">
-            <div className="flex items-center justify-between">
-              <label className="block text-xs font-bold text-slate-900 dark:text-zinc-100">
-                Resplandor de Fondo (Color de Marca)
-              </label>
-              <span className="text-[11px] text-blue-600 dark:text-blue-400 font-medium">
-                Efecto visual ambiental
-              </span>
-            </div>
-            <p className="text-[11px] text-slate-500 dark:text-zinc-400">
-              Personaliza el color del resplandor luminoso que envuelve el fondo de tu tarjeta digital interactiva.
-            </p>
-            <div className="flex items-center gap-3 pt-1">
-              <input
-                type="color"
-                value={business.themeColor || '#2563eb'}
-                onChange={(e) => updateField('themeColor', e.target.value)}
-                className="w-10 h-10 rounded-xl cursor-pointer border border-slate-200 dark:border-zinc-700 p-0.5 bg-white dark:bg-zinc-900 shadow-sm"
-              />
-              <span className="text-xs font-mono font-semibold text-slate-700 dark:text-zinc-300">
-                {business.themeColor || '#2563eb'}
-              </span>
-            </div>
-          </div>
         </div>
       )}
 
