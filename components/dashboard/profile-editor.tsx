@@ -8,7 +8,6 @@ import {
   LinkType,
   NfcCard,
   ButtonShape,
-  BackgroundOverlay,
   CardCustomization,
 } from '@/types/business';
 import {
@@ -1231,65 +1230,34 @@ export function ProfileEditor({
               }}
             />
 
-            {/* Configuración de Modo de Fondo y Superposición */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-2">
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
-                  Modo de Presentación:
-                </label>
-                <div className="grid grid-cols-2 gap-1.5">
-                  <button
-                    type="button"
-                    onClick={() => updateCustomization('backgroundMode', 'full')}
-                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
-                      (business.customization?.backgroundMode || 'full') === 'full'
-                        ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
-                        : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    Fondo Completo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => updateCustomization('backgroundMode', 'banner')}
-                    className={`py-2 px-2.5 rounded-xl border text-xs font-semibold text-center transition-all ${
-                      business.customization?.backgroundMode === 'banner'
-                        ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
-                        : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
-                    }`}
-                  >
-                    Banner Superior
-                  </button>
-                </div>
-              </div>
-
-              <div className="space-y-1">
-                <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
-                  Filtro de Superposición (Legibilidad):
-                </label>
-                <div className="grid grid-cols-3 gap-1">
-                  {[
-                    { id: 'dark', label: 'Oscuro' },
-                    { id: 'light', label: 'Cálido' },
-                    { id: 'soft-gradient', label: 'Suave' },
-                  ].map((flt) => {
-                    const isSelected = (business.customization?.backgroundOverlay || 'dark') === flt.id;
-                    return (
-                      <button
-                        key={flt.id}
-                        type="button"
-                        onClick={() => updateCustomization('backgroundOverlay', flt.id as BackgroundOverlay)}
-                        className={`py-2 px-1.5 rounded-xl border text-[11px] font-semibold text-center transition-all ${
-                          isSelected
-                            ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs'
-                            : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300'
-                        }`}
-                      >
-                        {flt.label}
-                      </button>
-                    );
-                  })}
-                </div>
+            {/* Configuración de Modo de Presentación */}
+            <div className="space-y-1.5 pt-2">
+              <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
+                Modo de Presentación:
+              </label>
+              <div className="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  onClick={() => updateCustomization('backgroundMode', 'full')}
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition-all ${
+                    (business.customization?.backgroundMode || 'full') === 'full'
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
+                  }`}
+                >
+                  Fondo Completo
+                </button>
+                <button
+                  type="button"
+                  onClick={() => updateCustomization('backgroundMode', 'banner')}
+                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition-all ${
+                    business.customization?.backgroundMode === 'banner'
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
+                  }`}
+                >
+                  Banner Superior
+                </button>
               </div>
             </div>
 

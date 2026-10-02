@@ -200,7 +200,6 @@ export function PublicProfile({
   // Background Image & Mode (Full bleed vs Banner)
   const backgroundSrc = business.backgroundUrl || business.bannerUrl;
   const backgroundMode = business.customization?.backgroundMode || 'full';
-  const overlayMode = business.customization?.backgroundOverlay || 'dark';
   const isFullBg = backgroundMode === 'full' && Boolean(backgroundSrc);
   const buttonShape = business.customization?.buttonShape || 'rounded';
 
@@ -256,19 +255,8 @@ export function PublicProfile({
               sizes="(max-width: 768px) 100vw, 450px"
               className="object-cover object-center scale-105"
             />
-            {/* Custom Overlay Gradients for Perfect Legibility */}
-            {overlayMode === 'dark' && (
-              <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-slate-950/85 to-slate-950/95" />
-            )}
-            {overlayMode === 'light' && (
-              <div className="absolute inset-0 bg-gradient-to-b from-white/70 via-white/85 to-white/95 backdrop-blur-[2px]" />
-            )}
-            {overlayMode === 'soft-gradient' && (
-              <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/65 to-black/35" />
-            )}
-            {overlayMode === 'none' && (
-              <div className="absolute inset-0 bg-black/25" />
-            )}
+            {/* Gradient overlay for contrast and legibility */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-slate-950/80 to-slate-950/95" />
           </div>
         )}
 
