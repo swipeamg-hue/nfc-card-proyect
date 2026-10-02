@@ -38,17 +38,10 @@ export default function HomePage() {
     return null;
   });
   const [legalModal, setLegalModal] = useState<'privacy' | 'cookies' | 'terms' | null>(null);
-  const [expandedPlans, setExpandedPlans] = useState<Record<string, boolean>>({
-    starter: false,
-    pro: false,
-    enterprise: false,
-  });
+  const [activeMobilePlan, setActiveMobilePlan] = useState<'starter' | 'pro' | 'enterprise' | null>(null);
 
-  const togglePlanFeatures = (planId: string) => {
-    setExpandedPlans((prev) => ({
-      ...prev,
-      [planId]: !prev[planId],
-    }));
+  const toggleMobilePlan = (planId: 'starter' | 'pro' | 'enterprise') => {
+    setActiveMobilePlan((prev) => (prev === planId ? null : planId));
   };
 
   useEffect(() => {
@@ -460,7 +453,9 @@ export default function HomePage() {
 
             <div className="grid grid-cols-3 gap-1.5 sm:gap-4 md:gap-6 max-w-6xl mx-auto">
               {/* Plan 1: Starter */}
-              <div className="p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all">
+              <div className={`p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border flex flex-col justify-between hover:border-slate-700 transition-all ${
+                activeMobilePlan === 'starter' ? 'border-emerald-500/80 ring-1 ring-emerald-500/40 shadow-lg shadow-emerald-500/10' : 'border-slate-800'
+              }`}>
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[7.5px] sm:text-[10px] font-bold uppercase tracking-wider text-blue-400 bg-blue-950/80 px-1.5 sm:px-2.5 py-0.5 rounded-full border border-blue-800/50">
@@ -484,23 +479,28 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  {/* Flechita SVG central inteligente (solo celular) */}
                   <div className="flex sm:hidden justify-center my-1.5">
                     <button
                       type="button"
-                      onClick={() => togglePlanFeatures('starter')}
-                      title={expandedPlans.starter ? 'Ocultar características' : 'Ver características'}
-                      className="p-1 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700/60 shadow-sm transition-all active:scale-90 cursor-pointer"
+                      onClick={() => toggleMobilePlan('starter')}
+                      title={activeMobilePlan === 'starter' ? 'Cerrar detalles' : 'Ver características'}
+                      className={`p-1 rounded-full border shadow-sm transition-all active:scale-90 cursor-pointer ${
+                        activeMobilePlan === 'starter'
+                          ? 'bg-emerald-950 border-emerald-500 text-emerald-400 ring-2 ring-emerald-500/30'
+                          : 'bg-slate-800 hover:bg-slate-700 text-slate-400 border-slate-700/60'
+                      }`}
                     >
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                          expandedPlans.starter ? 'rotate-180 text-emerald-400' : 'text-slate-400'
+                          activeMobilePlan === 'starter' ? 'rotate-180 text-emerald-400' : 'text-slate-400'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <ul className={`${expandedPlans.starter ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300`}>
+                  {/* Lista de características (visible en desktop) */}
+                  <ul className="hidden sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300">
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 1 a 3 Tarjetas Inteligentes NFC</strong> con microchip NTAG</span>
@@ -545,7 +545,9 @@ export default function HomePage() {
               </div>
 
               {/* Plan 2: PRO (Destacado) */}
-              <div className="p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-950/70 via-slate-900 to-slate-900 border-2 border-blue-500 shadow-2xl shadow-blue-500/15 flex flex-col justify-between relative">
+              <div className={`p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-gradient-to-b from-blue-950/70 via-slate-900 to-slate-900 border-2 shadow-2xl shadow-blue-500/15 flex flex-col justify-between relative transition-all ${
+                activeMobilePlan === 'pro' ? 'border-cyan-400 ring-2 ring-cyan-400/40 shadow-cyan-500/25' : 'border-blue-500'
+              }`}>
                 <div className="absolute -top-2.5 sm:-top-3 left-1/2 -translate-x-1/2 px-1.5 sm:px-3 py-0.5 rounded-full bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-[7.5px] sm:text-[10px] font-black uppercase tracking-wider shadow flex items-center gap-0.5 sm:gap-1 whitespace-nowrap z-10">
                   <Star className="w-2.5 h-2.5 sm:w-3 sm:h-3 fill-amber-300 text-amber-300" />
                   <span>Más Popular • Recomendado</span>
@@ -574,23 +576,28 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  {/* Flechita SVG central inteligente (solo celular) */}
                   <div className="flex sm:hidden justify-center my-1.5">
                     <button
                       type="button"
-                      onClick={() => togglePlanFeatures('pro')}
-                      title={expandedPlans.pro ? 'Ocultar características' : 'Ver características'}
-                      className="p-1 rounded-full bg-blue-900/60 hover:bg-blue-800/80 text-cyan-200 border border-blue-700/50 shadow-sm transition-all active:scale-90 cursor-pointer"
+                      onClick={() => toggleMobilePlan('pro')}
+                      title={activeMobilePlan === 'pro' ? 'Cerrar detalles' : 'Ver características'}
+                      className={`p-1 rounded-full border shadow-sm transition-all active:scale-90 cursor-pointer ${
+                        activeMobilePlan === 'pro'
+                          ? 'bg-cyan-950 border-cyan-400 text-cyan-300 ring-2 ring-cyan-500/40'
+                          : 'bg-blue-900/60 hover:bg-blue-800/80 text-cyan-300 border-blue-700/50'
+                      }`}
                     >
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                          expandedPlans.pro ? 'rotate-180 text-cyan-400' : 'text-cyan-300'
+                          activeMobilePlan === 'pro' ? 'rotate-180 text-cyan-300' : 'text-cyan-400'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <ul className={`${expandedPlans.pro ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-200`}>
+                  {/* Lista de características (visible en desktop) */}
+                  <ul className="hidden sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-200">
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 4 a 8 Tarjetas Inteligentes NFC</strong> para tu equipo</span>
@@ -641,7 +648,9 @@ export default function HomePage() {
               </div>
 
               {/* Plan 3: Enterprise */}
-              <div className="p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 flex flex-col justify-between hover:border-slate-700 transition-all">
+              <div className={`p-2 sm:p-5 md:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border flex flex-col justify-between hover:border-slate-700 transition-all ${
+                activeMobilePlan === 'enterprise' ? 'border-purple-500/80 ring-1 ring-purple-500/40 shadow-lg shadow-purple-500/10' : 'border-slate-800'
+              }`}>
                 <div>
                   <div className="flex items-center justify-between">
                     <span className="text-[7.5px] sm:text-[10px] font-bold uppercase tracking-wider text-purple-400 bg-purple-950/80 px-1.5 sm:px-2.5 py-0.5 rounded-full border border-purple-800/50">
@@ -665,23 +674,28 @@ export default function HomePage() {
                     </span>
                   </div>
 
-                  {/* Flechita SVG central para desplegar/ocultar en celular */}
+                  {/* Flechita SVG central inteligente (solo celular) */}
                   <div className="flex sm:hidden justify-center my-1.5">
                     <button
                       type="button"
-                      onClick={() => togglePlanFeatures('enterprise')}
-                      title={expandedPlans.enterprise ? 'Ocultar características' : 'Ver características'}
-                      className="p-1 rounded-full bg-purple-950/60 hover:bg-purple-900/80 text-purple-200 border border-purple-800/50 shadow-sm transition-all active:scale-90 cursor-pointer"
+                      onClick={() => toggleMobilePlan('enterprise')}
+                      title={activeMobilePlan === 'enterprise' ? 'Cerrar detalles' : 'Ver características'}
+                      className={`p-1 rounded-full border shadow-sm transition-all active:scale-90 cursor-pointer ${
+                        activeMobilePlan === 'enterprise'
+                          ? 'bg-purple-950 border-purple-400 text-purple-300 ring-2 ring-purple-500/40'
+                          : 'bg-purple-950/60 hover:bg-purple-900/80 text-purple-300 border-purple-800/50'
+                      }`}
                     >
                       <ChevronDown
                         className={`w-3.5 h-3.5 transition-transform duration-300 ${
-                          expandedPlans.enterprise ? 'rotate-180 text-purple-400' : 'text-purple-300'
+                          activeMobilePlan === 'enterprise' ? 'rotate-180 text-purple-300' : 'text-purple-400'
                         }`}
                       />
                     </button>
                   </div>
 
-                  <ul className={`${expandedPlans.enterprise ? 'block' : 'hidden'} sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300`}>
+                  {/* Lista de características (visible en desktop) */}
+                  <ul className="hidden sm:block space-y-1.5 sm:space-y-2.5 text-[8px] sm:text-xs text-slate-300">
                     <li className="flex items-start gap-1 sm:gap-2">
                       <Check className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
                       <span className="leading-tight"><strong>De 8 a 12 Tarjetas Inteligentes NFC</strong> para tu flotilla</span>
@@ -731,6 +745,116 @@ export default function HomePage() {
                 </Link>
               </div>
             </div>
+
+            {/* Drawer Inteligente de Características para Celular (solo se despliega el plan seleccionado) */}
+            {activeMobilePlan && (
+              <div className="sm:hidden mt-3 p-4 rounded-2xl bg-slate-900/95 border border-blue-500/40 shadow-2xl shadow-blue-500/10 animate-in fade-in slide-in-from-top-3 duration-300">
+                <div className="flex items-center justify-between pb-2.5 border-b border-slate-800">
+                  <div className="flex items-center gap-2">
+                    <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                      activeMobilePlan === 'starter'
+                        ? 'text-emerald-400 bg-emerald-950/80 border-emerald-800/50'
+                        : activeMobilePlan === 'pro'
+                        ? 'text-cyan-300 bg-cyan-950/80 border-cyan-800/50'
+                        : 'text-purple-300 bg-purple-950/80 border-purple-800/50'
+                    }`}>
+                      {activeMobilePlan === 'starter' ? 'Plan Starter' : activeMobilePlan === 'pro' ? 'Plan PRO (Recomendado)' : 'Plan Enterprise'}
+                    </span>
+                    <span className="text-xs font-black text-white">
+                      {activeMobilePlan === 'starter' ? '$49 MXN/mes' : activeMobilePlan === 'pro' ? '$69 MXN/mes' : '$99 MXN/mes'}
+                    </span>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setActiveMobilePlan(null)}
+                    className="p-1 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+                    title="Cerrar detalles"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+
+                {/* Desglose de Hardware del Plan */}
+                <div className="my-2.5 p-2 rounded-xl bg-slate-950/70 border border-slate-800 text-[11px]">
+                  {activeMobilePlan === 'starter' && (
+                    <span className="text-emerald-300 font-semibold flex items-center gap-1.5">
+                      <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0" />
+                      Incluye de 1 a 3 Tarjetas Físicas Inteligentes NFC
+                    </span>
+                  )}
+                  {activeMobilePlan === 'pro' && (
+                    <div className="space-y-1">
+                      <div className="text-cyan-300 font-semibold flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-cyan-400 flex-shrink-0" />
+                        De 4 a 8 Tarjetas Inteligentes NFC
+                      </div>
+                      <div className="text-amber-300 font-bold flex items-center gap-1.5 p-1 rounded-lg bg-blue-950/60 border border-blue-800/50">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+                        1 Display Acrílico Inteligente NFC para Mostrador
+                      </div>
+                    </div>
+                  )}
+                  {activeMobilePlan === 'enterprise' && (
+                    <div className="space-y-1">
+                      <div className="text-purple-300 font-semibold flex items-center gap-1.5">
+                        <Check className="w-3.5 h-3.5 text-purple-400 flex-shrink-0" />
+                        De 8 a 12 Tarjetas Inteligentes NFC para flotillas
+                      </div>
+                      <div className="text-amber-300 font-bold flex items-center gap-1.5 p-1 rounded-lg bg-purple-950/60 border border-purple-800/50">
+                        <Sparkles className="w-3.5 h-3.5 text-amber-300 flex-shrink-0" />
+                        1 Display Acrílico Inteligente NFC para Showroom
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Lista completa de características */}
+                <ul className="space-y-1.5 text-xs text-slate-300">
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Micro-landing móvil personalizada 24/7 (visitas ilimitadas)</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Panel autoadministrable con simulador en tiempo real</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Descarga directa vCard 3.0 en agenda de clientes</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Botón directo de WhatsApp, llamadas y redes sociales</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Código QR dinámico para imprimir y compartir</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Métricas en vivo: toques NFC vs escaneos QR</span>
+                  </li>
+                  <li className="flex items-start gap-1.5">
+                    <Check className="w-3.5 h-3.5 text-emerald-400 flex-shrink-0 mt-0.5" />
+                    <span>Soporte técnico y actualizaciones continuas</span>
+                  </li>
+                </ul>
+
+                {/* Botón CTA directo para el plan seleccionado */}
+                <Link
+                  href={`/login?tab=register&plan=${activeMobilePlan}`}
+                  className={`mt-3 w-full py-2.5 rounded-xl font-bold text-xs text-center shadow-lg transition-all active:scale-95 block ${
+                    activeMobilePlan === 'pro'
+                      ? 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white shadow-blue-600/30'
+                      : activeMobilePlan === 'enterprise'
+                      ? 'bg-purple-600 hover:bg-purple-500 text-white shadow-purple-600/30'
+                      : 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
+                  }`}
+                >
+                  Comenzar Prueba Gratis (30 Días) • Plan {activeMobilePlan.toUpperCase()}
+                </Link>
+              </div>
+            )}
           </div>
         </section>
 
