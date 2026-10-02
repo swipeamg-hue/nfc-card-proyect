@@ -47,10 +47,6 @@ export function PhoneMockup({ business }: PhoneMockupProps) {
         </div>
       </div>
 
-      <div className="mt-3 flex items-center gap-2 text-xs font-medium text-slate-500">
-        <span className="inline-block w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
-        <span>Simulador en Tiempo Real (iPhone 16 Pro)</span>
-      </div>
     </div>
   );
 }
