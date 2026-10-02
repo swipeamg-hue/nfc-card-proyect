@@ -1013,7 +1013,55 @@ export function ProfileEditor({
               )}
             </div>
 
-            {/* 3. Colores de Fondo y Texto del Botón */}
+            {/* 3. Nivel de Glasmorfismo de los Contenedores SVG */}
+            <div className="p-3.5 rounded-xl bg-white dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5">
+                  <Sliders className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                  <label className="text-xs font-semibold text-slate-800 dark:text-zinc-200">
+                    Nivel de Glasmorfismo (Efecto Vidrio):
+                  </label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-mono font-bold text-blue-600 dark:text-blue-400 px-2 py-0.5 rounded-lg bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900/60">
+                    {business.customization?.glassmorphism ?? 70}%
+                  </span>
+                  {business.customization?.glassmorphism !== undefined && business.customization?.glassmorphism !== 70 && (
+                    <button
+                      type="button"
+                      onClick={() => updateCustomization('glassmorphism', 70)}
+                      className="text-[10px] text-slate-400 hover:text-slate-600 dark:hover:text-zinc-300 underline"
+                    >
+                      Restablecer
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              <div className="flex items-center gap-3">
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 w-14 text-left">
+                  0% Sólido
+                </span>
+                <input
+                  type="range"
+                  min="0"
+                  max="100"
+                  step="1"
+                  value={business.customization?.glassmorphism ?? 70}
+                  onChange={(e) => updateCustomization('glassmorphism', parseInt(e.target.value, 10))}
+                  className="flex-1 accent-blue-600 h-2 bg-slate-200 dark:bg-zinc-700 rounded-lg cursor-pointer"
+                />
+                <span className="text-[10px] font-semibold text-slate-400 dark:text-zinc-500 w-16 text-right">
+                  100% Cristal
+                </span>
+              </div>
+
+              <p className="text-[10px] text-slate-500 dark:text-zinc-400">
+                Ajusta la transparencia, el desenfoque traslúcido y el reflejo de cristal de los contenedores de los botones e iconos sobre tu fondo.
+              </p>
+            </div>
+
+            {/* 4. Colores de Fondo y Texto del Botón */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
               <div className="p-3 rounded-xl bg-white dark:bg-zinc-800/80 border border-slate-200 dark:border-zinc-700/80 space-y-1.5">
                 <div className="flex items-center justify-between">

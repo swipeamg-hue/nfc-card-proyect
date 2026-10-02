@@ -41,6 +41,37 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
   const customTextColor = link.buttonTextColor || globalCustomization?.buttonTextColor;
   const customBorderColor = globalCustomization?.buttonBorderColor;
 
+  // Glassmorphism calculation (0 = 100% solid flat, 100 = crystal frosted glass)
+  const glassLevel = typeof globalCustomization?.glassmorphism === 'number' ? globalCustomization.glassmorphism : 70;
+  const t = Math.max(0, Math.min(100, glassLevel)) / 100; // 0 to 1
+
+  // Dynamic blur and background styling
+  const blurPx = Math.round(t * 22); // 0px to 22px blur
+  const bgOpacity = (0.95 - t * 0.70).toFixed(2); // 0.95 down to 0.25
+  const borderOpacity = (0.08 + t * 0.28).toFixed(2); // 0.08 up to 0.36
+
+  let containerBg = customBg;
+  if (!containerBg) {
+    containerBg = `rgba(15, 23, 42, ${bgOpacity})`;
+  } else if (containerBg.startsWith('#') && containerBg.length === 7) {
+    const r = parseInt(containerBg.slice(1, 3), 16);
+    const g = parseInt(containerBg.slice(3, 5), 16);
+    const b = parseInt(containerBg.slice(5, 7), 16);
+    containerBg = `rgba(${r}, ${g}, ${b}, ${bgOpacity})`;
+  }
+
+  const containerStyle: React.CSSProperties = {
+    backgroundColor: containerBg,
+    color: customTextColor,
+    borderColor: customBorderColor || (t > 0.05 ? `rgba(255, 255, 255, ${borderOpacity})` : undefined),
+    backdropFilter: blurPx > 0 ? `blur(${blurPx}px) saturate(${100 + Math.round(t * 60)}%)` : 'none',
+    WebkitBackdropFilter: blurPx > 0 ? `blur(${blurPx}px) saturate(${100 + Math.round(t * 60)}%)` : 'none',
+    boxShadow: t > 0.1
+      ? `0 6px 24px 0 rgba(0, 0, 0, ${(0.06 + t * 0.20).toFixed(2)}), inset 0 1px 1px 0 rgba(255, 255, 255, ${(t * 0.32).toFixed(2)})`
+      : undefined,
+    fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+  };
+
   // Visual configuration for each channel type or custom icon
   const getTheme = () => {
     // Si el usuario eligió modo monocromático o personalizado para los iconos
@@ -65,7 +96,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       return {
         icon: <div style={{ color: iconCustomColor || '#ffffff' }}>{rawIcon}</div>,
         bgClass: iconBgColor ? '' : 'bg-slate-900/60 dark:bg-white/10',
-        customBgColor: iconBgColor,
+        customBgColor: iconBgColor || `rgba(255, 255, 255, ${(0.06 + t * 0.12).toFixed(2)})`,
         borderHover: 'hover:border-slate-300 dark:hover:border-zinc-500',
       };
     }
@@ -189,6 +220,13 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     circle: 'rounded-2xl p-3.5',
   }[shape];
 
+  const iconBoxStyle: React.CSSProperties = {
+    backgroundColor: (theme as { customBgColor?: string }).customBgColor || undefined,
+    backdropFilter: blurPx > 0 ? `blur(${Math.round(blurPx * 0.5)}px)` : undefined,
+    WebkitBackdropFilter: blurPx > 0 ? `blur(${Math.round(blurPx * 0.5)}px)` : undefined,
+    border: t > 0.15 ? `1px solid rgba(255, 255, 255, ${(0.05 + t * 0.20).toFixed(2)})` : undefined,
+  };
+
   // Specific layout for TILE shape (Cuadrícula tipo Invitación de Bodas o Menú Iconográfico)
   if (shape === 'tile') {
     return (
@@ -197,20 +235,13 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? '_self' : '_blank'}
         rel="noopener noreferrer"
         onClick={handleClick}
-        style={{
-          backgroundColor: customBg,
-          color: customTextColor,
-          borderColor: customBorderColor,
-          fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
-        }}
+        style={containerStyle}
         className={`group relative flex flex-col items-center justify-center p-3 sm:p-4 rounded-2xl border ${
-          customBg ? '' : 'bg-white/90 dark:bg-zinc-900/85 backdrop-blur-md'
-        } ${customBorderColor ? '' : 'border-slate-100 dark:border-zinc-800'} ${
           link.highlighted ? 'ring-2 ring-amber-400 shadow-md' : 'shadow-xs'
         } transition-all duration-200 hover:shadow-md hover:scale-[1.02] active:scale-95 cursor-pointer text-center min-h-[96px]`}
       >
         <div
-          style={{ backgroundColor: (theme as { customBgColor?: string }).customBgColor }}
+          style={iconBoxStyle}
           className={`w-11 h-11 rounded-xl ${theme.bgClass} flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-110 mb-1`}
         >
           {theme.icon}
@@ -246,26 +277,17 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? '_self' : '_blank'}
       rel="noopener noreferrer"
       onClick={handleClick}
-      style={{
-        backgroundColor: customBg,
-        color: customTextColor,
-        borderColor: customBorderColor,
-        fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
-      }}
+      style={containerStyle}
       className={`group relative flex items-center justify-between ${shapeClasses} border ${
-        customBg ? '' : 'bg-white/90 dark:bg-zinc-900/85 backdrop-blur-md'
-      } ${
         link.highlighted
           ? 'border-amber-400/60 dark:border-amber-500/40 shadow-sm ring-1 ring-amber-400/20'
-          : customBorderColor
-          ? ''
-          : 'border-slate-100 dark:border-zinc-800 shadow-sm'
+          : ''
       } transition-all duration-200 hover:shadow-md ${theme.borderHover} active:scale-98 cursor-pointer`}
     >
       <div className="flex items-center gap-3.5 overflow-hidden">
         {/* Themed Icon Box */}
         <div
-          style={{ backgroundColor: (theme as { customBgColor?: string }).customBgColor }}
+          style={iconBoxStyle}
           className={`w-11 h-11 ${shape === 'pill' ? 'rounded-full' : 'rounded-xl'} ${
             theme.bgClass
           } flex items-center justify-center flex-shrink-0 shadow-sm transition-transform duration-200 group-hover:scale-105`}

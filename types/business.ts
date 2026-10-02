@@ -33,6 +33,7 @@ export interface CardCustomization {
   buttonBgColor?: string;
   buttonTextColor?: string;
   buttonBorderColor?: string;
+  glassmorphism?: number; // 0 a 100: nivel de efecto vidrio traslúcido y desenfoque de los contenedores
 
   // Iconos SVG
   iconColorMode?: IconColorMode; // 'official' (colores de marca oficiales) o 'monochrome' / 'custom'
