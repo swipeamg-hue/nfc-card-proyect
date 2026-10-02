@@ -722,37 +722,7 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* FINAL CTA BANNER */}
-        <section className="py-16 sm:py-20 max-w-5xl mx-auto px-4 sm:px-6 text-center">
-          <div className="p-8 sm:p-12 rounded-[36px] bg-gradient-to-r from-blue-900/40 via-indigo-900/30 to-cyan-900/40 border border-blue-500/30 shadow-2xl relative overflow-hidden">
-            <div className="relative z-10">
-              <h2 className="text-2xl sm:text-4xl font-extrabold text-white tracking-tight">
-                ¿Listo para Digitalizar tus Tarjetas de Presentación?
-              </h2>
-              <p className="text-sm text-slate-300 max-w-xl mx-auto mt-3">
-                Únete a miles de profesionales y negocios que ya causan una primera impresión inolvidable.
-                Comienza tu prueba gratuita de 30 días sin registrar ninguna tarjeta.
-              </p>
 
-              <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
-                <Link
-                  href="/login?tab=register&plan=pro"
-                  className="w-full sm:w-auto px-8 py-4 rounded-2xl bg-blue-600 hover:bg-blue-500 text-white font-bold text-sm shadow-xl shadow-blue-600/30 transition-all active:scale-95 flex items-center justify-center gap-2"
-                >
-                  <Sparkles className="w-4 h-4 text-amber-300" />
-                  <span>Crear Mi Cuenta Gratis Ahora</span>
-                </Link>
-                <Link
-                  href="/nexosoluciones"
-                  target="_blank"
-                  className="w-full sm:w-auto px-6 py-4 rounded-2xl bg-slate-900/80 hover:bg-slate-800 text-slate-300 border border-slate-700 font-semibold text-sm transition-all"
-                >
-                  Ver Demostración
-                </Link>
-              </div>
-            </div>
-          </div>
-        </section>
       </main>
 
       {/* Modern Clean Footer */}
