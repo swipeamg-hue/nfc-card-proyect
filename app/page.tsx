@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import {
   Smartphone,
-  Zap,
   ShieldCheck,
   BarChart3,
   SlidersHorizontal,
@@ -18,7 +17,6 @@ import {
   Users,
   CreditCard,
   Check,
-  Lock,
   Cookie,
   FileText,
   X,

@@ -94,7 +94,24 @@ export default function LoginPage() {
   const [regCategory, setRegCategory] = useState('');
 
   // Selected plan state (Starter, PRO, Enterprise)
-  const [selectedPlan, setSelectedPlan] = useState<'STARTER' | 'PRO' | 'ENTERPRISE'>('PRO');
+  const [selectedPlan, setSelectedPlan] = useState<'STARTER' | 'PRO' | 'ENTERPRISE'>(() => {
+    if (typeof window !== 'undefined') {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const planParam = params.get('plan')?.toUpperCase();
+        if (planParam === 'STARTER' || planParam === 'PRO' || planParam === 'ENTERPRISE') {
+          localStorage.setItem('tapcard_selected_plan', planParam);
+          return planParam;
+        }
+        const cachedPlan = localStorage.getItem('tapcard_selected_plan')?.toUpperCase();
+        if (cachedPlan === 'STARTER' || cachedPlan === 'PRO' || cachedPlan === 'ENTERPRISE') {
+          return cachedPlan;
+        }
+        localStorage.setItem('tapcard_selected_plan', 'PRO');
+      } catch {}
+    }
+    return 'PRO';
+  });
 
   const handleSelectPlan = (plan: 'STARTER' | 'PRO' | 'ENTERPRISE') => {
     setSelectedPlan(plan);
@@ -107,22 +124,6 @@ export default function LoginPage() {
 
   // Check active session, plan parameter, and Google OAuth callback on mount
   useEffect(() => {
-    // 1. Sync plan from URL or cache
-    if (typeof window !== 'undefined') {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const planParam = params.get('plan')?.toUpperCase();
-        if (planParam === 'STARTER' || planParam === 'PRO' || planParam === 'ENTERPRISE') {
-          setSelectedPlan(planParam);
-          localStorage.setItem('tapcard_selected_plan', planParam);
-        } else {
-          const cachedPlan = localStorage.getItem('tapcard_selected_plan')?.toUpperCase();
-          if (cachedPlan === 'STARTER' || cachedPlan === 'PRO' || cachedPlan === 'ENTERPRISE') {
-            setSelectedPlan(cachedPlan);
-          }
-        }
-      } catch {}
-    }
 
     const session = getActiveSession();
     if (session) {
