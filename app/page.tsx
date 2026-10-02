@@ -236,11 +236,11 @@ export default function HomePage() {
           <div className="mt-4 flex flex-wrap items-center justify-center gap-4 text-[11px] text-slate-400">
             <span className="flex items-center gap-1">
               <Check className="w-3.5 h-3.5 text-emerald-400" />
-              Prueba gratis por 14 días
+              Prueba gratis por 30 días
             </span>
             <span className="flex items-center gap-1">
               <Check className="w-3.5 h-3.5 text-emerald-400" />
-              Sin tarjeta de crédito requerida
+              Sin registro de ningún tipo de tarjeta
             </span>
             <span className="flex items-center gap-1">
               <Check className="w-3.5 h-3.5 text-emerald-400" />
@@ -515,7 +515,7 @@ export default function HomePage() {
                 Tarjetas NFC, Displays Acrílicos y Plataforma Digital
               </h2>
               <p className="text-sm text-slate-400 mt-2">
-                Equipa a tu negocio con tarjetas inteligentes y acrílicos para tu mostrador o caja. Todos los planes incluyen 14 días de prueba gratis sin tarjeta.
+                Equipa a tu negocio con tarjetas inteligentes y acrílicos para tu mostrador o caja. Todos los planes incluyen 30 días de prueba gratis sin registro de tarjeta.
               </p>
             </div>
 
@@ -527,10 +527,10 @@ export default function HomePage() {
                 </div>
                 <div>
                   <span className="block text-xs font-bold text-white">
-                    ¡Todos los planes incluyen 14 Días de Prueba Gratuita!
+                    ¡Todos los planes incluyen 30 Días de Prueba Gratuita!
                   </span>
                   <span className="text-[11px] text-slate-400">
-                    Comienza hoy sin ingresar tarjeta de crédito. Explora tu panel y micro-landing inmediatamente.
+                    Comienza hoy sin ingresar ningún tipo de tarjeta. Explora tu panel y micro-landing inmediatamente.
                   </span>
                 </div>
               </div>
@@ -779,7 +779,7 @@ export default function HomePage() {
               </h2>
               <p className="text-sm text-slate-300 max-w-xl mx-auto mt-3">
                 Únete a miles de profesionales y negocios que ya causan una primera impresión inolvidable.
-                Comienza tu prueba sin tarjeta de crédito.
+                Comienza tu prueba gratuita de 30 días sin registrar ninguna tarjeta.
               </p>
 
               <div className="mt-8 flex flex-col sm:flex-row items-center justify-center gap-3">
@@ -939,8 +939,8 @@ export default function HomePage() {
                   </div>
 
                   <div>
-                    <h4 className="font-bold text-white mb-1">2. Prueba Gratuita de 14 Días</h4>
-                    <p>El registro otorga acceso completo a una prueba sin costo durante 14 días sin necesidad de ingresar tarjetas bancarias ni compromisos de permanencia forzosa.</p>
+                    <h4 className="font-bold text-white mb-1">2. Prueba Gratuita de 30 Días</h4>
+                    <p>El registro otorga acceso completo a una prueba sin costo durante 30 días sin necesidad de ingresar tarjetas bancarias ni compromisos de permanencia forzosa.</p>
                   </div>
 
                   <div>

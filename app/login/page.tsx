@@ -472,7 +472,7 @@ export default function LoginPage() {
             <p className="text-xs text-slate-400 mt-1">
               {activeTab === 'login'
                 ? 'Accede a tu panel para personalizar tus tarjetas y enlaces'
-                : 'Registra tu empresa y obtén tu perfil móvil interactivo en 1 minuto'}
+                : 'Registra tu negocio y obtén 30 días de prueba gratis sin tarjeta'}
             </p>
           </div>
 
@@ -686,9 +686,9 @@ export default function LoginPage() {
               </button>
 
               <div className="pt-2 text-center">
-                <span className="text-[11px] text-slate-500 flex items-center justify-center gap-1">
+                <span className="text-[11px] text-slate-400 flex items-center justify-center gap-1">
                   <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-                  <span>Sin tarjeta de crédito requerida • Acceso inmediato</span>
+                  <span>30 días de prueba gratis • Sin registrar tarjeta</span>
                 </span>
               </div>
             </form>
