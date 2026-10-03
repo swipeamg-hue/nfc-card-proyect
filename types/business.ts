@@ -20,6 +20,12 @@ export type LinkType =
   | 'twitch'
   | 'snapchat'
   | 'wechat'
+  | 'ubereats'
+  | 'didifood'
+  | 'rappi'
+  | 'mercadolibre'
+  | 'amazon'
+  | 'shopify'
   | 'custom';
 
 export type ButtonShape = 'rounded' | 'pill' | 'square' | 'tile' | 'circle' | 'none';

@@ -22,6 +22,12 @@ import {
   PhoneSvg,
   MapPinSvg,
   GoogleOfficialIcon,
+  UberEatsOfficialIcon,
+  DidiFoodOfficialIcon,
+  RappiOfficialIcon,
+  MercadoLibreOfficialIcon,
+  AmazonOfficialIcon,
+  ShopifyOfficialIcon,
 } from '@/components/ui/svg-icons';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
 
@@ -203,6 +209,48 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         borderHover: 'hover:border-emerald-300',
       };
     }
+    if (link.type === 'ubereats' || link.iconName === 'ubereats') {
+      return {
+        icon: <UberEatsOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#06C167]',
+        borderHover: 'hover:border-emerald-300',
+      };
+    }
+    if (link.type === 'didifood' || link.iconName === 'didifood') {
+      return {
+        icon: <DidiFoodOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#FF7D41]',
+        borderHover: 'hover:border-orange-300',
+      };
+    }
+    if (link.type === 'rappi' || link.iconName === 'rappi') {
+      return {
+        icon: <RappiOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#FF441F]',
+        borderHover: 'hover:border-orange-300',
+      };
+    }
+    if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') {
+      return {
+        icon: <MercadoLibreOfficialIcon className="w-5 h-5 text-[#2D3277]" />,
+        bgClass: 'bg-[#FFE600] text-[#2D3277]',
+        borderHover: 'hover:border-yellow-300',
+      };
+    }
+    if (link.type === 'amazon' || link.iconName === 'amazon') {
+      return {
+        icon: <AmazonOfficialIcon className="w-5 h-5 text-[#FF9900]" />,
+        bgClass: 'bg-[#232F3E] text-white',
+        borderHover: 'hover:border-amber-300',
+      };
+    }
+    if (link.type === 'shopify' || link.iconName === 'shopify') {
+      return {
+        icon: <ShopifyOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#95BF47]',
+        borderHover: 'hover:border-lime-300',
+      };
+    }
     if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
       return {
         icon: <GoogleOfficialIcon className="w-5 h-5" />,
@@ -295,6 +343,12 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       else if (link.type === 'twitch' || link.iconName === 'twitch') rawIcon = <TwitchOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'snapchat' || link.iconName === 'snapchat') rawIcon = <SnapchatOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'wechat' || link.iconName === 'wechat') rawIcon = <WeChatOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'ubereats' || link.iconName === 'ubereats') rawIcon = <UberEatsOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'didifood' || link.iconName === 'didifood') rawIcon = <DidiFoodOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'rappi' || link.iconName === 'rappi') rawIcon = <RappiOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') rawIcon = <MercadoLibreOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'amazon' || link.iconName === 'amazon') rawIcon = <AmazonOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'shopify' || link.iconName === 'shopify') rawIcon = <ShopifyOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') rawIcon = <GoogleOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-10 h-10" />;
       else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-10 h-10" />;
@@ -330,6 +384,18 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         standaloneSvg = <SnapchatOfficialIcon className="w-10 h-10" standalone />;
       } else if (link.type === 'wechat' || link.iconName === 'wechat') {
         standaloneSvg = <WeChatOfficialIcon className="w-10 h-10 text-[#07C160]" />;
+      } else if (link.type === 'ubereats' || link.iconName === 'ubereats') {
+        standaloneSvg = <UberEatsOfficialIcon className="w-10 h-10 text-[#06C167]" />;
+      } else if (link.type === 'didifood' || link.iconName === 'didifood') {
+        standaloneSvg = <DidiFoodOfficialIcon className="w-10 h-10 text-[#FF7D41]" />;
+      } else if (link.type === 'rappi' || link.iconName === 'rappi') {
+        standaloneSvg = <RappiOfficialIcon className="w-10 h-10 text-[#FF441F]" />;
+      } else if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') {
+        standaloneSvg = <MercadoLibreOfficialIcon className="w-10 h-10 text-[#2D3277] dark:text-[#FFE600]" />;
+      } else if (link.type === 'amazon' || link.iconName === 'amazon') {
+        standaloneSvg = <AmazonOfficialIcon className="w-10 h-10 text-[#FF9900]" />;
+      } else if (link.type === 'shopify' || link.iconName === 'shopify') {
+        standaloneSvg = <ShopifyOfficialIcon className="w-10 h-10 text-[#95BF47]" />;
       } else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
         standaloneSvg = <GoogleOfficialIcon className="w-10 h-10" />;
       } else if (link.type === 'phone' || link.iconName === 'phone') {

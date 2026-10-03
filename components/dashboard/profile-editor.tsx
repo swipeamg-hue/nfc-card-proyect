@@ -58,6 +58,12 @@ import {
   GlobeSvg,
   PhoneSvg,
   GoogleOfficialIcon,
+  UberEatsOfficialIcon,
+  DidiFoodOfficialIcon,
+  RappiOfficialIcon,
+  MercadoLibreOfficialIcon,
+  AmazonOfficialIcon,
+  ShopifyOfficialIcon,
 } from '@/components/ui/svg-icons';
 import { IconPickerModal } from '@/components/dashboard/icon-picker-modal';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
@@ -445,6 +451,36 @@ export function ProfileEditor({
       subtitle = 'Contáctanos en WeChat';
       url = 'https://weixin.qq.com/...';
       iconName = 'wechat';
+    } else if (type === 'ubereats') {
+      title = 'Uber Eats';
+      subtitle = 'Pide a domicilio';
+      url = 'https://ubereats.com/store/...';
+      iconName = 'ubereats';
+    } else if (type === 'didifood') {
+      title = 'DiDi Food';
+      subtitle = 'Ordena tu comida favorita';
+      url = 'https://www.didi-food.com/...';
+      iconName = 'didifood';
+    } else if (type === 'rappi') {
+      title = 'Rappi';
+      subtitle = 'Pide por Rappi ahora';
+      url = 'https://rappi.com.mx/...';
+      iconName = 'rappi';
+    } else if (type === 'mercadolibre') {
+      title = 'Mercado Libre';
+      subtitle = 'Nuestra tienda oficial';
+      url = 'https://listado.mercadolibre.com.mx/...';
+      iconName = 'mercadolibre';
+    } else if (type === 'amazon') {
+      title = 'Amazon Store';
+      subtitle = 'Compra en nuestra tienda de Amazon';
+      url = 'https://amazon.com.mx/shops/...';
+      iconName = 'amazon';
+    } else if (type === 'shopify') {
+      title = 'Tienda Online (Shopify)';
+      subtitle = 'Compra directamente en nuestra tienda';
+      url = 'https://tutienda.myshopify.com';
+      iconName = 'shopify';
     }
 
     const newLink: BusinessLink = {
@@ -968,7 +1004,7 @@ export function ProfileEditor({
                   onClick={() => setIsAddLinksExpanded(true)}
                   className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition-all flex items-center gap-1.5 border border-blue-200/80 dark:border-blue-800/80 cursor-pointer shadow-2xs group"
                 >
-                  <span>+ Más redes (LinkedIn, X, Threads, Twitch...)</span>
+                  <span>+ Más opciones (Delivery, Tiendas, Redes...)</span>
                   <svg
                     className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform"
                     viewBox="0 0 24 24"
@@ -1056,6 +1092,61 @@ export function ProfileEditor({
                   >
                     <WeChatOfficialIcon className="w-3.5 h-3.5 text-[#07C160]" />
                     <span>+ WeChat</span>
+                  </button>
+
+                  {/* Delivery & E-commerce oficiales */}
+                  <button
+                    type="button"
+                    onClick={() => addLink('ubereats')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#06C167]/10 text-[#048848] dark:text-[#06C167] hover:bg-[#06C167]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#06C167]/30 active:scale-95 cursor-pointer"
+                  >
+                    <UberEatsOfficialIcon className="w-3.5 h-3.5 text-[#06C167]" />
+                    <span>+ Uber Eats</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('didifood')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FF7D41]/10 text-[#e05616] dark:text-[#FF7D41] hover:bg-[#FF7D41]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF7D41]/30 active:scale-95 cursor-pointer"
+                  >
+                    <DidiFoodOfficialIcon className="w-3.5 h-3.5 text-[#FF7D41]" />
+                    <span>+ DiDi Food</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('rappi')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FF441F]/10 text-[#d83210] dark:text-[#FF441F] hover:bg-[#FF441F]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF441F]/30 active:scale-95 cursor-pointer"
+                  >
+                    <RappiOfficialIcon className="w-3.5 h-3.5 text-[#FF441F]" />
+                    <span>+ Rappi</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('mercadolibre')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FFE600]/25 text-[#1e2354] dark:text-[#FFE600] hover:bg-[#FFE600]/40 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FFE600]/40 active:scale-95 cursor-pointer"
+                  >
+                    <MercadoLibreOfficialIcon className="w-3.5 h-3.5 text-[#2D3277] dark:text-[#FFE600]" />
+                    <span>+ Mercado Libre</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('amazon')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FF9900]/15 text-[#c47100] dark:text-[#FF9900] hover:bg-[#FF9900]/25 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF9900]/30 active:scale-95 cursor-pointer"
+                  >
+                    <AmazonOfficialIcon className="w-3.5 h-3.5 text-[#FF9900]" />
+                    <span>+ Amazon</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('shopify')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#95BF47]/15 text-[#5e851d] dark:text-[#95BF47] hover:bg-[#95BF47]/25 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#95BF47]/30 active:scale-95 cursor-pointer"
+                  >
+                    <ShopifyOfficialIcon className="w-3.5 h-3.5 text-[#95BF47]" />
+                    <span>+ Shopify</span>
                   </button>
 
                   <button

@@ -68,6 +68,12 @@ import {
   MapPinSvg,
   MailSvg,
   GoogleOfficialIcon,
+  UberEatsOfficialIcon,
+  DidiFoodOfficialIcon,
+  RappiOfficialIcon,
+  MercadoLibreOfficialIcon,
+  AmazonOfficialIcon,
+  ShopifyOfficialIcon,
 } from './svg-icons';
 
 export interface BusinessIconItem {
@@ -105,6 +111,12 @@ export const BUSINESS_ICON_CATEGORIES: { name: string; items: BusinessIconItem[]
     name: 'Tiendas, Comercio & Catálogos',
     items: [
       { id: 'shopping-bag', name: 'Catálogo / Tienda', category: 'Comercio', icon: ShoppingBagSvg },
+      { id: 'ubereats', name: 'Uber Eats', category: 'Delivery', icon: UberEatsOfficialIcon },
+      { id: 'didifood', name: 'DiDi Food', category: 'Delivery', icon: DidiFoodOfficialIcon },
+      { id: 'rappi', name: 'Rappi', category: 'Delivery', icon: RappiOfficialIcon },
+      { id: 'mercadolibre', name: 'Mercado Libre', category: 'Comercio', icon: MercadoLibreOfficialIcon },
+      { id: 'amazon', name: 'Amazon', category: 'Comercio', icon: AmazonOfficialIcon },
+      { id: 'shopify', name: 'Shopify', category: 'Comercio', icon: ShopifyOfficialIcon },
       { id: 'shopping-cart', name: 'Carrito de Compras', category: 'Comercio', icon: ShoppingCart },
       { id: 'store', name: 'Sucursal / Local', category: 'Comercio', icon: Store },
       { id: 'tag', name: 'Promociones / Descuentos', category: 'Comercio', icon: Tag },
@@ -203,6 +215,12 @@ export function getBusinessIconComponent(iconId?: string): React.ComponentType<{
   if (iconId === 'twitch') return TwitchOfficialIcon;
   if (iconId === 'snapchat') return SnapchatOfficialIcon;
   if (iconId === 'wechat') return WeChatOfficialIcon;
+  if (iconId === 'ubereats') return UberEatsOfficialIcon;
+  if (iconId === 'didifood') return DidiFoodOfficialIcon;
+  if (iconId === 'rappi') return RappiOfficialIcon;
+  if (iconId === 'mercadolibre') return MercadoLibreOfficialIcon;
+  if (iconId === 'amazon') return AmazonOfficialIcon;
+  if (iconId === 'shopify') return ShopifyOfficialIcon;
   if (iconId === 'google' || iconId === 'reviews' || iconId === 'google-review') return GoogleOfficialIcon;
 
   const found = ALL_BUSINESS_ICONS.find((item) => item.id === iconId);
