@@ -926,7 +926,7 @@ export function ProfileEditor({
                 {[
                   { id: 'rounded', label: 'Redondeado', sub: 'Estándar', shapeClass: 'rounded-xl' },
                   { id: 'pill', label: 'Píldora', sub: 'Estilo Coach / Café', shapeClass: 'rounded-full' },
-                  { id: 'square', label: 'Cuadrado', sub: 'Moderno recto', shapeClass: 'rounded-md' },
+                  { id: 'none', label: 'Sin Contenedor', sub: 'Solo Iconos SVG', shapeClass: '' },
                   { id: 'tile', label: 'Azulejos Grid', sub: 'Estilo Bodas / Menú', shapeClass: 'rounded-xl' },
                 ].map((opt) => {
                   const isSelected = (business.customization?.buttonShape || 'rounded') === opt.id;
@@ -941,7 +941,15 @@ export function ProfileEditor({
                           : 'border-slate-200 dark:border-zinc-700/80 bg-white dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
                       }`}
                     >
-                      <div className={`w-8 h-4 border-2 ${isSelected ? 'border-blue-600 bg-blue-500/30' : 'border-slate-400 dark:border-zinc-500'} ${opt.shapeClass}`} />
+                      {opt.id === 'none' ? (
+                        <div className="w-8 h-4 flex items-center justify-center gap-1">
+                          <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-400 dark:bg-zinc-500'}`} />
+                          <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-400 dark:bg-zinc-500'}`} />
+                          <div className={`w-2 h-2 rounded-full ${isSelected ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-400 dark:bg-zinc-500'}`} />
+                        </div>
+                      ) : (
+                        <div className={`w-8 h-4 border-2 ${isSelected ? 'border-blue-600 bg-blue-500/30' : 'border-slate-400 dark:border-zinc-500'} ${opt.shapeClass}`} />
+                      )}
                       <span className="text-xs">{opt.label}</span>
                       <span className="text-[10px] text-slate-400 dark:text-zinc-500">{opt.sub}</span>
                     </button>

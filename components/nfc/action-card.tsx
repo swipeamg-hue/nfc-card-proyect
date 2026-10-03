@@ -218,6 +218,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     square: 'rounded-lg p-3.5',
     tile: 'rounded-2xl p-3.5 flex flex-col items-center justify-center text-center aspect-square gap-2',
     circle: 'rounded-2xl p-3.5',
+    none: 'p-0',
   }[shape];
 
   const iconBoxStyle: React.CSSProperties = {
@@ -226,6 +227,93 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     WebkitBackdropFilter: blurPx > 0 ? `blur(${Math.round(blurPx * 0.5)}px)` : undefined,
     border: t > 0.15 ? `1px solid rgba(255, 255, 255, ${(0.05 + t * 0.20).toFixed(2)})` : undefined,
   };
+
+  // Specific layout for NONE shape (Sin Contenedor - Solo Iconos Oficiales o SVGs Flotantes)
+  if (shape === 'none') {
+    const isCustom = iconMode === 'monochrome' || iconMode === 'custom';
+    const customColor = iconCustomColor || '#ffffff';
+
+    let standaloneSvg: React.ReactNode = null;
+
+    if (isCustom) {
+      let rawIcon = React.createElement(getBusinessIconComponent(link.iconName), { className: 'w-10 h-10' });
+      if (link.type === 'whatsapp' || link.iconName === 'whatsapp') rawIcon = <WhatsAppOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'instagram' || link.iconName === 'instagram') rawIcon = <InstagramOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'facebook' || link.iconName === 'facebook') rawIcon = <FacebookOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'linkedin' || link.iconName === 'linkedin') rawIcon = <LinkedinOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'tiktok' || link.iconName === 'tiktok') rawIcon = <TikTokOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'youtube' || link.iconName === 'youtube') rawIcon = <YouTubeOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'x' || link.iconName === 'x') rawIcon = <XOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'telegram' || link.iconName === 'telegram') rawIcon = <TelegramOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') rawIcon = <GoogleOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-10 h-10" />;
+      else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-10 h-10" />;
+      else if (link.type === 'catalog' || link.type === 'menu' || link.iconName === 'file-text') rawIcon = <FileTextSvg className="w-10 h-10" />;
+      else if (link.type === 'website' || link.iconName === 'globe') rawIcon = <GlobeSvg className="w-10 h-10" />;
+
+      standaloneSvg = <div style={{ color: customColor }}>{rawIcon}</div>;
+    } else {
+      // Colores Oficiales Vectoriales SVG
+      if (link.type === 'whatsapp' || link.iconName === 'whatsapp') {
+        standaloneSvg = <WhatsAppOfficialIcon className="w-10 h-10 text-[#25D366]" />;
+      } else if (link.type === 'instagram' || link.iconName === 'instagram') {
+        standaloneSvg = <InstagramOfficialIcon className="w-10 h-10" withGradient />;
+      } else if (link.type === 'facebook' || link.iconName === 'facebook') {
+        standaloneSvg = <FacebookOfficialIcon className="w-10 h-10 text-[#1877F2]" />;
+      } else if (link.type === 'linkedin' || link.iconName === 'linkedin') {
+        standaloneSvg = <LinkedinOfficialIcon className="w-10 h-10 text-[#0A66C2]" />;
+      } else if (link.type === 'tiktok' || link.iconName === 'tiktok') {
+        standaloneSvg = <TikTokOfficialIcon className="w-10 h-10" standalone />;
+      } else if (link.type === 'youtube' || link.iconName === 'youtube') {
+        standaloneSvg = <YouTubeOfficialIcon className="w-10 h-10 text-[#FF0000]" />;
+      } else if (link.type === 'x' || link.iconName === 'x') {
+        standaloneSvg = <XOfficialIcon className="w-10 h-10 text-slate-900 dark:text-white" />;
+      } else if (link.type === 'telegram' || link.iconName === 'telegram') {
+        standaloneSvg = <TelegramOfficialIcon className="w-10 h-10 text-[#229ED9]" />;
+      } else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
+        standaloneSvg = <GoogleOfficialIcon className="w-10 h-10" />;
+      } else if (link.type === 'phone' || link.iconName === 'phone') {
+        standaloneSvg = <PhoneSvg className="w-10 h-10 text-blue-600" />;
+      } else if (link.type === 'maps' || link.iconName === 'map-pin') {
+        standaloneSvg = <MapPinSvg className="w-10 h-10 text-rose-500" />;
+      } else if (link.type === 'catalog' || link.type === 'menu' || link.iconName === 'file-text') {
+        standaloneSvg = <FileTextSvg className="w-10 h-10 text-amber-600" />;
+      } else if (link.type === 'website' || link.iconName === 'globe') {
+        standaloneSvg = <GlobeSvg className="w-10 h-10 text-cyan-600" />;
+      } else {
+        standaloneSvg = React.createElement(getBusinessIconComponent(link.iconName), {
+          className: 'w-10 h-10 text-slate-800 dark:text-zinc-200',
+        });
+      }
+    }
+
+    return (
+      <a
+        href={link.url}
+        target={link.url.startsWith('tel:') || link.url.startsWith('mailto:') ? '_self' : '_blank'}
+        rel="noopener noreferrer"
+        onClick={handleClick}
+        title={link.title ? `${link.title}${link.subtitle ? ` - ${link.subtitle}` : ''}` : undefined}
+        aria-label={link.title || link.type}
+        className="group relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-300 hover:scale-115 active:scale-95 cursor-pointer"
+      >
+        <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 drop-shadow-md">
+          {standaloneSvg}
+        </div>
+        {link.title && (
+          <span
+            style={{
+              color: customTextColor || undefined,
+              fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
+            }}
+            className="text-[11px] font-semibold text-center mt-1 max-w-[76px] truncate text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors drop-shadow-xs"
+          >
+            {link.title}
+          </span>
+        )}
+      </a>
+    );
+  }
 
   // Specific layout for TILE shape (Cuadrícula tipo Invitación de Bodas o Menú Iconográfico)
   if (shape === 'tile') {

@@ -299,11 +299,13 @@ export function PublicProfile({
             bioColor={business.customization?.bioColor || business.customization?.subtitleColor}
           />
 
-          {/* Action Cards List (Adaptable list vs 2-column grid for tile shape) */}
+          {/* Action Cards List (Adaptable list vs 2-column grid for tile shape vs floating icon cluster for none) */}
           <div
             className={`px-4 mt-6 ${
               buttonShape === 'tile'
                 ? 'grid grid-cols-2 gap-3'
+                : buttonShape === 'none'
+                ? 'flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-2'
                 : 'space-y-3'
             }`}
           >

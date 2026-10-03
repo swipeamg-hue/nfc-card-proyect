@@ -17,7 +17,7 @@ export type LinkType =
   | 'reviews'
   | 'custom';
 
-export type ButtonShape = 'rounded' | 'pill' | 'square' | 'tile' | 'circle';
+export type ButtonShape = 'rounded' | 'pill' | 'square' | 'tile' | 'circle' | 'none';
 export type IconColorMode = 'official' | 'monochrome' | 'custom';
 export type BackgroundStyle = 'full' | 'top-fade' | 'banner';
 export type BackgroundOverlay = 'dark' | 'light' | 'soft-gradient' | 'none';
