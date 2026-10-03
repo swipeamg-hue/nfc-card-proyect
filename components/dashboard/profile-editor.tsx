@@ -18,8 +18,6 @@ import {
   Trash2,
   ArrowUp,
   ArrowDown,
-  Eye,
-  EyeOff,
   CheckCircle2,
   Sparkles,
   Smartphone,
@@ -57,6 +55,8 @@ import {
   WeChatOfficialIcon,
   GlobeSvg,
   PhoneSvg,
+  MapPinSvg,
+  FileTextSvg,
   GoogleOfficialIcon,
   UberEatsOfficialIcon,
   DidiFoodOfficialIcon,
@@ -78,6 +78,87 @@ const COLOR_OPTIONS = [
   { id: 'rose', label: 'Rojo / Rose', bg: 'bg-rose-500' },
   { id: 'dark', label: 'Grafito', bg: 'bg-zinc-800' },
 ];
+
+function getLinkOfficialSvg(link: BusinessLink, className = 'w-4 h-4') {
+  const t = (link.type || '').toLowerCase();
+  const icon = (link.iconName || '').toLowerCase();
+
+  if (t === 'whatsapp' || icon === 'whatsapp') {
+    return <WhatsAppOfficialIcon className={`${className} text-[#25D366]`} />;
+  }
+  if (t === 'instagram' || icon === 'instagram') {
+    return <InstagramOfficialIcon className={className} withGradient />;
+  }
+  if (t === 'facebook' || icon === 'facebook') {
+    return <FacebookOfficialIcon className={`${className} text-[#1877F2]`} />;
+  }
+  if (t === 'linkedin' || icon === 'linkedin') {
+    return <LinkedinOfficialIcon className={`${className} text-[#0A66C2]`} />;
+  }
+  if (t === 'tiktok' || icon === 'tiktok') {
+    return <TikTokOfficialIcon className={className} standalone />;
+  }
+  if (t === 'youtube' || icon === 'youtube') {
+    return <YouTubeOfficialIcon className={`${className} text-[#FF0000]`} />;
+  }
+  if (t === 'x' || icon === 'x' || icon === 'twitter') {
+    return <XOfficialIcon className={`${className} text-slate-900 dark:text-white`} />;
+  }
+  if (t === 'threads' || icon === 'threads') {
+    return <ThreadsOfficialIcon className={`${className} text-slate-900 dark:text-white`} />;
+  }
+  if (t === 'telegram' || icon === 'telegram') {
+    return <TelegramOfficialIcon className={`${className} text-[#229ED9]`} />;
+  }
+  if (t === 'onlyfans' || icon === 'onlyfans') {
+    return <OnlyFansOfficialIcon className={className} standalone />;
+  }
+  if (t === 'twitch' || icon === 'twitch') {
+    return <TwitchOfficialIcon className={`${className} text-[#9146FF]`} />;
+  }
+  if (t === 'snapchat' || icon === 'snapchat') {
+    return <SnapchatOfficialIcon className={className} standalone />;
+  }
+  if (t === 'wechat' || icon === 'wechat') {
+    return <WeChatOfficialIcon className={`${className} text-[#07C160]`} />;
+  }
+  if (t === 'ubereats' || t === 'uber eats' || icon === 'ubereats' || icon === 'uber-eats') {
+    return <UberEatsOfficialIcon className={`${className} text-slate-900 dark:text-white`} standalone />;
+  }
+  if (t === 'didifood' || t === 'didi food' || icon === 'didifood' || icon === 'didi-food') {
+    return <DidiFoodOfficialIcon className={className} standalone />;
+  }
+  if (t === 'rappi' || icon === 'rappi') {
+    return <RappiOfficialIcon className={className} standalone />;
+  }
+  if (t === 'mercadolibre' || t === 'mercado libre' || icon === 'mercadolibre' || icon === 'mercado-libre') {
+    return <MercadoLibreOfficialIcon className={className} standalone />;
+  }
+  if (t === 'amazon' || icon === 'amazon') {
+    return <AmazonOfficialIcon className={`${className} text-slate-900 dark:text-white`} standalone />;
+  }
+  if (t === 'shopify' || icon === 'shopify') {
+    return <ShopifyOfficialIcon className={className} />;
+  }
+  if (t === 'reviews' || icon === 'google' || icon === 'google-review') {
+    return <GoogleOfficialIcon className={className} />;
+  }
+  if (t === 'phone' || icon === 'phone') {
+    return <PhoneSvg className={`${className} text-emerald-500`} />;
+  }
+  if (t === 'maps' || icon === 'map-pin') {
+    return <MapPinSvg className={`${className} text-rose-500`} />;
+  }
+  if (t === 'website' || icon === 'globe') {
+    return <GlobeSvg className={`${className} text-sky-500`} />;
+  }
+  if (t === 'catalog' || t === 'menu' || icon === 'file-text') {
+    return <FileTextSvg className={`${className} text-amber-500`} />;
+  }
+
+  const FallbackIcon = getBusinessIconComponent(link.iconName);
+  return <FallbackIcon className={`${className} text-slate-600 dark:text-zinc-300`} />;
+}
 
 interface ProfileEditorProps {
   business: Business;
@@ -282,13 +363,6 @@ export function ProfileEditor({
     }
   };
 
-  // Toggle link active status
-  const toggleLinkActive = (id: string) => {
-    const updatedLinks = business.links.map((link) =>
-      link.id === id ? { ...link, isActive: !link.isActive } : link
-    );
-    updateField('links', updatedLinks);
-  };
 
   // Move link up or down in order
   const moveLink = (index: number, direction: 'up' | 'down') => {
@@ -1454,19 +1528,14 @@ export function ProfileEditor({
                 >
                   {/* Card Header with Status & Action SVGs ONLY */}
                   <div className="flex items-center justify-between gap-2">
-                    <div className="flex items-center gap-2 flex-1 min-w-0">
-                      <button
-                        type="button"
-                        onClick={() => toggleLinkActive(link.id)}
-                        title={link.isActive ? 'Desactivar botón' : 'Activar botón'}
-                        className={`p-1.5 rounded-lg text-xs font-semibold transition-colors ${
-                          link.isActive
-                            ? 'bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-300'
-                            : 'bg-slate-200 dark:bg-zinc-700 text-slate-500'
-                        }`}
+                    <div className="flex items-center gap-2.5 flex-1 min-w-0">
+                      {/* SVG Oficial que corresponde a cada botón */}
+                      <div
+                        className="w-7 h-7 rounded-lg flex items-center justify-center bg-white dark:bg-zinc-900 border border-slate-200 dark:border-zinc-700 shadow-xs flex-shrink-0"
+                        title={`Ícono oficial de ${link.type}`}
                       >
-                        {link.isActive ? <Eye className="w-3.5 h-3.5" /> : <EyeOff className="w-3.5 h-3.5" />}
-                      </button>
+                        {getLinkOfficialSvg(link, 'w-4 h-4')}
+                      </div>
 
                       <span className="text-xs font-bold uppercase tracking-wider text-slate-500 font-mono truncate">
                         #{idx + 1} {link.type}

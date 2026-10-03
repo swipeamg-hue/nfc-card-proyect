@@ -141,7 +141,7 @@ export function ThreadsOfficialIcon({ className = 'w-5 h-5 text-white' }: { clas
 }
 
 export function OnlyFansOfficialIcon({
-  className = 'w-5 h-5 text-white',
+  className = 'w-5 h-5 text-[#00AFF0]',
   standalone = false,
 }: {
   className?: string;
@@ -149,7 +149,7 @@ export function OnlyFansOfficialIcon({
 }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill={standalone ? '#00AFF0' : 'currentColor'}>
-      <path fillRule="evenodd" d={ONLYFANS_PATH} />
+      <path d={ONLYFANS_PATH} />
     </svg>
   );
 }
