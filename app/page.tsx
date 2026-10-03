@@ -288,22 +288,22 @@ export default function HomePage() {
                 </div>
               </div>
 
-              {/* Servicio 3: Descarga vCard en 1 Toque */}
+              {/* Servicio 3: Instalar como App PWA */}
               <div className="p-3 sm:p-5 lg:p-6 rounded-2xl sm:rounded-3xl bg-slate-900/80 border border-slate-800 hover:border-emerald-500/50 transition-all duration-300 flex flex-col justify-between group">
                 <div>
                   <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 rounded-xl sm:rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mb-2.5 sm:mb-4 group-hover:scale-110 transition-transform">
                     <Download className="w-4 h-4 sm:w-5 sm:h-5 lg:w-6 lg:h-6" />
                   </div>
                   <h3 className="text-xs sm:text-base lg:text-lg font-bold text-white mb-1 sm:mb-2 leading-tight">
-                    Guardar Contacto vCard
+                    Descargar como App PWA
                   </h3>
                   <p className="text-[10px] sm:text-xs text-slate-400 leading-snug sm:leading-relaxed">
-                    <span className="hidden sm:inline">Con un clic en «Guardar Contacto», tu información completa </span>Se transfiere directo a la agenda del cliente sin errores.
+                    <span className="hidden sm:inline">Con 1 clic tus clientes instalan tu tarjeta en su pantalla de inicio como una app nativa, </span>con tu propio logo oficial y sin pasar por tiendas.
                   </p>
                 </div>
                 <div className="mt-2.5 sm:mt-5 lg:mt-6 pt-2 sm:pt-3 lg:pt-4 border-t border-slate-800/60 flex items-start gap-1 sm:gap-1.5 text-[9px] sm:text-xs font-semibold text-emerald-400">
                   <CheckCircle2 className="w-3 h-3 sm:w-4 sm:h-4 text-emerald-400 flex-shrink-0 mt-0.5" />
-                  <span className="leading-tight"><span className="hidden sm:inline">Compatible </span>nativo iOS y Android</span>
+                  <span className="leading-tight"><span className="hidden sm:inline">Con icono </span>oficial en iOS y Android</span>
                 </div>
               </div>
 

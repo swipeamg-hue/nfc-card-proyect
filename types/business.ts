@@ -46,6 +46,7 @@ export interface CardCustomization {
   buttonBgColor?: string;
   buttonTextColor?: string;
   buttonBorderColor?: string;
+  primaryColor?: string; // Color primario de acento / botones
   glassmorphism?: number; // 0 a 100: nivel de efecto vidrio traslúcido y desenfoque de los contenedores
 
   // Iconos SVG

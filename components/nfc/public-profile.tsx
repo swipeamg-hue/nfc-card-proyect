@@ -6,8 +6,7 @@ import { Business } from '@/types/business';
 import { HeroBanner } from './hero-banner';
 import { ProfileHeader } from './profile-header';
 import { ActionCard } from './action-card';
-import { FloatingVCardButton } from './floating-vcard-button';
-import { QrModal } from './qr-modal';
+import { PwaInstallButton } from './pwa-install-button';
 import { Smartphone, Sparkles, PauseCircle, ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { supabase, getBusinessBySlug, trackTapEvent } from '@/lib/supabase';
@@ -28,7 +27,6 @@ export function PublicProfile({
 }: PublicProfileProps) {
   const [internalBusiness, setInternalBusiness] = useState<Business>(initialBusiness);
   const business = isMockup ? initialBusiness : internalBusiness;
-  const [isQrOpen, setIsQrOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   // Dynamic Font Loading
@@ -393,19 +391,11 @@ export function PublicProfile({
           </div>
         </div>
 
-        {/* Floating VCard & Share Bar */}
-        <FloatingVCardButton
+        {/* Floating PWA Download / Install App Button */}
+        <PwaInstallButton
           business={business}
           contained={isMockup}
-          onOpenQrModal={() => setIsQrOpen(true)}
           onTrackAction={(act) => handleTrackClick(act, act)}
-        />
-
-        {/* Dynamic QR Code Modal */}
-        <QrModal
-          business={business}
-          isOpen={isQrOpen}
-          onClose={() => setIsQrOpen(false)}
         />
       </main>
     </div>
