@@ -878,14 +878,10 @@ export function ProfileEditor({
                 <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   Agregar botón de enlace:
                 </span>
-                {createdNotice ? (
+                {createdNotice && (
                   <span className="animate-in fade-in zoom-in-95 duration-200 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-xs shadow-emerald-600/30">
                     <Check className="w-3.5 h-3.5 stroke-[3]" />
                     <span>{createdNotice}</span>
-                  </span>
-                ) : (
-                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                    {isAddLinksExpanded ? '17 opciones' : 'Toca para desplegar'}
                   </span>
                 )}
               </div>
