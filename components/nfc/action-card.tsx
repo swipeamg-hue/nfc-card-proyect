@@ -31,6 +31,87 @@ import {
 } from '@/components/ui/svg-icons';
 import { getBusinessIconComponent } from '@/components/ui/business-icons';
 
+export function getActionCardIcon(link: BusinessLink, sizeClass: string, isMonochrome: boolean) {
+  const t = link.type?.toLowerCase() || '';
+  const icon = link.iconName?.toLowerCase() || '';
+
+  if (t === 'whatsapp' || icon === 'whatsapp') {
+    return <WhatsAppOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'instagram' || icon === 'instagram') {
+    return <InstagramOfficialIcon className={sizeClass} withGradient={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'facebook' || icon === 'facebook') {
+    return <FacebookOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'linkedin' || icon === 'linkedin') {
+    return <LinkedinOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'tiktok' || icon === 'tiktok') {
+    return <TikTokOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'youtube' || icon === 'youtube') {
+    return <YouTubeOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'x' || icon === 'x') {
+    return <XOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'threads' || icon === 'threads') {
+    return <ThreadsOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'telegram' || icon === 'telegram') {
+    return <TelegramOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'onlyfans' || icon === 'onlyfans') {
+    return <OnlyFansOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'twitch' || icon === 'twitch') {
+    return <TwitchOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'snapchat' || icon === 'snapchat') {
+    return <SnapchatOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'wechat' || icon === 'wechat') {
+    return <WeChatOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'ubereats' || icon === 'ubereats') {
+    return <UberEatsOfficialIcon className={sizeClass} />;
+  }
+  if (t === 'didifood' || icon === 'didifood') {
+    return <DidiFoodOfficialIcon className={sizeClass} standalone={!isMonochrome} showBadge={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'rappi' || icon === 'rappi') {
+    return <RappiOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'mercadolibre' || icon === 'mercadolibre') {
+    return <MercadoLibreOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'amazon' || icon === 'amazon') {
+    return <AmazonOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'shopify' || icon === 'shopify') {
+    return <ShopifyOfficialIcon className={sizeClass} standalone={!isMonochrome} monochrome={isMonochrome} />;
+  }
+  if (t === 'reviews' || icon === 'google' || icon === 'google-review') {
+    return <GoogleOfficialIcon className={sizeClass} monochrome={isMonochrome} />;
+  }
+  if (t === 'phone' || icon === 'phone') {
+    return <PhoneSvg className={sizeClass} />;
+  }
+  if (t === 'maps' || icon === 'map-pin') {
+    return <MapPinSvg className={sizeClass} />;
+  }
+  if (t === 'catalog' || t === 'menu' || icon === 'file-text') {
+    return <FileTextSvg className={sizeClass} />;
+  }
+  if (t === 'website' || icon === 'globe') {
+    return <GlobeSvg className={sizeClass} />;
+  }
+
+  const Fallback = getBusinessIconComponent(link.iconName);
+  return <Fallback className={sizeClass} />;
+}
+
 interface ActionCardProps {
   link: BusinessLink;
   globalCustomization?: CardCustomization;
@@ -87,27 +168,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
   const getTheme = () => {
     // Si el usuario eligió modo monocromático o personalizado para los iconos
     if (iconMode === 'monochrome' || iconMode === 'custom') {
-      const FallbackIcon = getBusinessIconComponent(link.iconName);
-      let rawIcon = <FallbackIcon className="w-5 h-5" />;
-
-      if (link.type === 'whatsapp' || link.iconName === 'whatsapp') rawIcon = <WhatsAppOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'instagram' || link.iconName === 'instagram') rawIcon = <InstagramOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'facebook' || link.iconName === 'facebook') rawIcon = <FacebookOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'linkedin' || link.iconName === 'linkedin') rawIcon = <LinkedinOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'tiktok' || link.iconName === 'tiktok') rawIcon = <TikTokOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'youtube' || link.iconName === 'youtube') rawIcon = <YouTubeOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'x' || link.iconName === 'x') rawIcon = <XOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'telegram' || link.iconName === 'telegram') rawIcon = <TelegramOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'threads' || link.iconName === 'threads') rawIcon = <ThreadsOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') rawIcon = <OnlyFansOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'twitch' || link.iconName === 'twitch') rawIcon = <TwitchOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'snapchat' || link.iconName === 'snapchat') rawIcon = <SnapchatOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'wechat' || link.iconName === 'wechat') rawIcon = <WeChatOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'reviews' || link.iconName === 'google') rawIcon = <GoogleOfficialIcon className="w-5 h-5" />;
-      else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-5 h-5" />;
-      else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-5 h-5" />;
-      else if (link.type === 'catalog' || link.type === 'menu') rawIcon = <FileTextSvg className="w-5 h-5" />;
-      else if (link.type === 'website' || link.iconName === 'globe') rawIcon = <GlobeSvg className="w-5 h-5" />;
+      const rawIcon = getActionCardIcon(link, 'w-5 h-5', true);
 
       return {
         icon: <div style={{ color: iconCustomColor || '#ffffff' }}>{rawIcon}</div>,
@@ -232,7 +293,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     }
     if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') {
       return {
-        icon: <MercadoLibreOfficialIcon className="w-5 h-5 text-[#2D3277]" />,
+        icon: <MercadoLibreOfficialIcon className="w-5 h-5 text-[#2D3277]" monochrome />,
         bgClass: 'bg-[#FFE600] text-[#2D3277]',
         borderHover: 'hover:border-yellow-300',
       };
@@ -329,33 +390,11 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     let standaloneSvg: React.ReactNode = null;
 
     if (isCustom) {
-      let rawIcon = React.createElement(getBusinessIconComponent(link.iconName), { className: 'w-10 h-10' });
-      if (link.type === 'whatsapp' || link.iconName === 'whatsapp') rawIcon = <WhatsAppOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'instagram' || link.iconName === 'instagram') rawIcon = <InstagramOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'facebook' || link.iconName === 'facebook') rawIcon = <FacebookOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'linkedin' || link.iconName === 'linkedin') rawIcon = <LinkedinOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'tiktok' || link.iconName === 'tiktok') rawIcon = <TikTokOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'youtube' || link.iconName === 'youtube') rawIcon = <YouTubeOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'x' || link.iconName === 'x') rawIcon = <XOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'telegram' || link.iconName === 'telegram') rawIcon = <TelegramOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'threads' || link.iconName === 'threads') rawIcon = <ThreadsOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') rawIcon = <OnlyFansOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'twitch' || link.iconName === 'twitch') rawIcon = <TwitchOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'snapchat' || link.iconName === 'snapchat') rawIcon = <SnapchatOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'wechat' || link.iconName === 'wechat') rawIcon = <WeChatOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'ubereats' || link.iconName === 'ubereats') rawIcon = <UberEatsOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'didifood' || link.iconName === 'didifood') rawIcon = <DidiFoodOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'rappi' || link.iconName === 'rappi') rawIcon = <RappiOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') rawIcon = <MercadoLibreOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'amazon' || link.iconName === 'amazon') rawIcon = <AmazonOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'shopify' || link.iconName === 'shopify') rawIcon = <ShopifyOfficialIcon className="w-10 h-10" standalone={false} />;
-      else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') rawIcon = <GoogleOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-10 h-10" />;
-      else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-10 h-10" />;
-      else if (link.type === 'catalog' || link.type === 'menu' || link.iconName === 'file-text') rawIcon = <FileTextSvg className="w-10 h-10" />;
-      else if (link.type === 'website' || link.iconName === 'globe') rawIcon = <GlobeSvg className="w-10 h-10" />;
-
-      standaloneSvg = <div style={{ color: customColor }}>{rawIcon}</div>;
+      standaloneSvg = (
+        <div style={{ color: customColor }}>
+          {getActionCardIcon(link, 'w-10 h-10', true)}
+        </div>
+      );
     } else {
       // Colores Oficiales Vectoriales SVG
       if (link.type === 'whatsapp' || link.iconName === 'whatsapp') {

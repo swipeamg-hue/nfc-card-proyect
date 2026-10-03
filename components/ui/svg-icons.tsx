@@ -13,6 +13,7 @@ import {
   SHOPIFY_BAG_SIDE,
   SHOPIFY_BAG_S,
   SHOPIFY_SILHOUETTE_PATH,
+  GOOGLE_MONO_PATH,
 } from './brand-paths';
 
 // ==========================================
@@ -30,11 +31,13 @@ export function WhatsAppOfficialIcon({ className = 'w-5 h-5 text-white' }: { cla
 export function InstagramOfficialIcon({
   className = 'w-5 h-5 text-white',
   withGradient = false,
+  monochrome = false,
 }: {
   className?: string;
   withGradient?: boolean;
+  monochrome?: boolean;
 }) {
-  if (withGradient) {
+  if (!monochrome && withGradient) {
     return (
       <svg className={className} viewBox="0 0 24 24">
         <defs>
@@ -79,11 +82,13 @@ export function LinkedinOfficialIcon({ className = 'w-5 h-5 text-white' }: { cla
 export function TikTokOfficialIcon({
   className = 'w-5 h-5 text-white',
   standalone = false,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
-  if (standalone) {
+  if (!monochrome && standalone) {
     return (
       <svg className={className} viewBox="0 0 24 24">
         <g transform="translate(-0.7, -0.5)">
@@ -148,12 +153,14 @@ export function ThreadsOfficialIcon({ className = 'w-5 h-5 text-white' }: { clas
 export function OnlyFansOfficialIcon({
   className = 'w-5 h-5 text-[#00AFF0]',
   standalone = false,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill={standalone ? '#00AFF0' : 'currentColor'}>
+    <svg className={className} viewBox="0 0 24 24" fill={!monochrome && standalone ? '#00AFF0' : 'currentColor'}>
       <path d={ONLYFANS_PATH} />
     </svg>
   );
@@ -170,11 +177,13 @@ export function TwitchOfficialIcon({ className = 'w-5 h-5 text-white' }: { class
 export function SnapchatOfficialIcon({
   className = 'w-5 h-5 text-black',
   standalone = false,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
-  if (standalone) {
+  if (!monochrome && standalone) {
     return (
       <svg className={className} viewBox="0 0 24 24">
         <rect width="24" height="24" rx="6" fill="#FFFC00" />
@@ -349,7 +358,20 @@ export function MailSvg({ className = 'w-5 h-5 text-white' }: { className?: stri
   );
 }
 
-export function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: string }) {
+export function GoogleOfficialIcon({
+  className = 'w-5 h-5',
+  monochrome = false,
+}: {
+  className?: string;
+  monochrome?: boolean;
+}) {
+  if (monochrome) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d={GOOGLE_MONO_PATH} />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 24 24">
       <path
@@ -392,13 +414,15 @@ export function UberEatsOfficialIcon({
 export function DidiFoodOfficialIcon({
   className = 'w-5 h-5 text-white',
   standalone = false,
-  showBadge = true,
+  showBadge = false,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
   showBadge?: boolean;
+  monochrome?: boolean;
 }) {
-  if (standalone || showBadge) {
+  if (!monochrome && (standalone || showBadge)) {
     return (
       <svg className={className} viewBox="0 0 512 512">
         <rect width="512" height="512" rx="110" fill="#FF7537" />
@@ -419,13 +443,15 @@ export function RappiOfficialIcon({
   className = 'w-5 h-5 text-white',
   standalone = false,
   forceCoral = false,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
   forceCoral?: boolean;
+  monochrome?: boolean;
 }) {
   return (
-    <svg className={className} viewBox="0 0 512 512" fill={standalone || forceCoral ? '#FF441F' : 'currentColor'}>
+    <svg className={className} viewBox="0 0 512 512" fill={!monochrome && (standalone || forceCoral) ? '#FF441F' : 'currentColor'}>
       <path fillRule="evenodd" d={RAPPI_PATH} />
     </svg>
   );
@@ -433,10 +459,19 @@ export function RappiOfficialIcon({
 
 export function MercadoLibreOfficialIcon({
   className = 'w-5 h-5 text-white',
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
+  if (monochrome) {
+    return (
+      <svg className={className} viewBox="0 0 512 512" fill="currentColor">
+        <path fillRule="evenodd" d={MERCADOLIBRE_BLUE_PATH} />
+      </svg>
+    );
+  }
   return (
     <svg className={className} viewBox="0 0 512 512">
       <path fill="#FFE600" fillRule="evenodd" d={MERCADOLIBRE_YELLOW_PATH} />
@@ -447,14 +482,16 @@ export function MercadoLibreOfficialIcon({
 
 export function AmazonOfficialIcon({
   className = 'w-5 h-5 text-white',
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
   return (
-    <svg className={className} viewBox="0 0 512 512">
+    <svg className={className} viewBox="0 0 512 512" fill="currentColor">
       <path fill="currentColor" fillRule="evenodd" d={AMAZON_A_PATH} />
-      <path fill="#FF9900" fillRule="evenodd" d={AMAZON_SMILE_PATH} />
+      <path fill={monochrome ? 'currentColor' : '#FF9900'} fillRule="evenodd" d={AMAZON_SMILE_PATH} />
     </svg>
   );
 }
@@ -462,11 +499,13 @@ export function AmazonOfficialIcon({
 export function ShopifyOfficialIcon({
   className = 'w-5 h-5',
   standalone = true,
+  monochrome = false,
 }: {
   className?: string;
   standalone?: boolean;
+  monochrome?: boolean;
 }) {
-  if (!standalone) {
+  if (monochrome || !standalone) {
     return (
       <svg className={className} viewBox="0 0 24 24" fill="currentColor">
         <path d={SHOPIFY_SILHOUETTE_PATH} />
