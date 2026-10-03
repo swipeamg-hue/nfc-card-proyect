@@ -246,7 +246,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
     }
     if (link.type === 'shopify' || link.iconName === 'shopify') {
       return {
-        icon: <ShopifyOfficialIcon className="w-5 h-5 text-white" />,
+        icon: <ShopifyOfficialIcon className="w-5 h-5 text-white" standalone={false} />,
         bgClass: 'bg-[#95BF47]',
         borderHover: 'hover:border-lime-300',
       };
@@ -348,7 +348,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       else if (link.type === 'rappi' || link.iconName === 'rappi') rawIcon = <RappiOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') rawIcon = <MercadoLibreOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'amazon' || link.iconName === 'amazon') rawIcon = <AmazonOfficialIcon className="w-10 h-10" />;
-      else if (link.type === 'shopify' || link.iconName === 'shopify') rawIcon = <ShopifyOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'shopify' || link.iconName === 'shopify') rawIcon = <ShopifyOfficialIcon className="w-10 h-10" standalone={false} />;
       else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') rawIcon = <GoogleOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-10 h-10" />;
       else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-10 h-10" />;

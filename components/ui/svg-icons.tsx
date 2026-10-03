@@ -8,6 +8,11 @@ import {
   MERCADOLIBRE_YELLOW_PATH,
   MERCADOLIBRE_BLUE_PATH,
   ONLYFANS_PATH,
+  THREADS_PATH,
+  SHOPIFY_BAG_FRONT,
+  SHOPIFY_BAG_SIDE,
+  SHOPIFY_BAG_S,
+  SHOPIFY_SILHOUETTE_PATH,
 } from './brand-paths';
 
 // ==========================================
@@ -135,7 +140,7 @@ export function TelegramOfficialIcon({ className = 'w-5 h-5 text-white' }: { cla
 export function ThreadsOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
   return (
     <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12.186 24C5.466 24 0 18.678 0 12.12 0 5.561 5.466.24 12.186.24c6.643 0 11.964 5.174 12.008 11.666-.044 4.093-2.128 7.37-5.714 8.988-3.328 1.503-7.29 1.139-10.158-.942l1.644-2.148c2.202 1.597 5.253 1.874 7.818.718 2.658-1.198 4.2-3.639 4.23-6.616-.032-4.99-4.135-8.983-9.828-8.983-5.32 0-9.493 3.992-9.493 9.197 0 5.204 4.173 9.196 9.493 9.196 3.197 0 6.096-1.442 7.76-3.864l2.18 1.636C19.78 22.062 16.182 24 12.186 24zm-1.077-7.854c-1.849 0-3.353-1.47-3.353-3.277 0-1.808 1.504-3.277 3.353-3.277 1.849 0 3.353 1.47 3.353 3.277 0 1.807-1.504 3.277-3.353 3.277zm0-2.483c.48 0 .87-.355.87-.794s-.39-.794-.87-.794c-.48 0-.87.355-.87.794s.39.794.87.794z"/>
+      <path d={THREADS_PATH} />
     </svg>
   );
 }
@@ -455,21 +460,24 @@ export function AmazonOfficialIcon({
 }
 
 export function ShopifyOfficialIcon({
-  className = 'w-5 h-5 text-white',
+  className = 'w-5 h-5',
+  standalone = true,
 }: {
   className?: string;
+  standalone?: boolean;
 }) {
+  if (!standalone) {
+    return (
+      <svg className={className} viewBox="0 0 24 24" fill="currentColor">
+        <path d={SHOPIFY_SILHOUETTE_PATH} />
+      </svg>
+    );
+  }
   return (
-    <svg className={className} viewBox="0 0 512 512">
-      <defs>
-        <linearGradient id="shopifyGradIcon" x1="0%" y1="0%" x2="100%" y2="100%">
-          <stop offset="0%" stopColor="#95BF47"/>
-          <stop offset="100%" stopColor="#5E8E3E"/>
-        </linearGradient>
-      </defs>
-      <path fill="url(#shopifyGradIcon)" d="M416 142.4c-.6-5-4.4-8.8-9.4-9.4l-95.6-12.6c-3.4-.4-6.8.8-9.2 3.4l-47.4 51.8c-2.1 2.3-5.1 3.6-8.3 3.6s-6.2-1.3-8.3-3.6l-47.4-51.8c-2.4-2.6-5.8-3.8-9.2-3.4L85.4 133c-5 .6-8.8 4.4-9.4 9.4L42.8 468.9c-.6 5.5 2.3 10.9 7.5 13 1.9.8 3.8 1.3 5.8 1.3 3.8 0 7.3-1.7 9.6-4.5l186.7-222.3c2.3-2.8 5.5-4.3 9.2-4.3s6.8 1.5 9.2 4.3l186.7 222.3c2.3 2.8 5.8 4.5 9.6 4.5 2 0 3.8-.4 5.8-1.3 5.1-2.1 8.1-7.5 7.5-13L416 142.4z"/>
-      <path fill="#FFFFFF" opacity="0.95" d="M256 28.5c-3.6 0-6.8 1.5-9.2 4.3l-41 48.9c-4.5 5.3-3.8 13.2 1.5 17.7 5.3 4.5 13.2 3.8 17.7-1.5l31-36.9 31 36.9c4.5 5.3 12.4 6 17.7 1.5 5.3-4.5 6-12.4 1.5-17.7l-41-48.9c-2.4-2.8-5.6-4.3-9.2-4.3z"/>
-      <path fill="#FFFFFF" d="M285 272c-5.5-2.2-13.8-4.5-21-4.5-15.5 0-25 7.2-25 18 0 29.5 58 20.5 58 59 0 24-18.5 39.5-46 39.5-15 0-26-3.8-32-6.5l4-20c6.5 3.5 16 6.5 25.5 6.5 16 0 24-8 24-18.5 0-31-57.5-22.5-57.5-59 0-23.5 18-38.5 44-38.5 13 0 23.5 3 28.5 5.5l-4.5 18.5z"/>
+    <svg className={className} viewBox="-12.5 306 175 175">
+      <path fill="#95BF47" d={SHOPIFY_BAG_FRONT} />
+      <path fill="#5E8E3E" d={SHOPIFY_BAG_SIDE} />
+      <path fill="#FFFFFF" d={SHOPIFY_BAG_S} />
     </svg>
   );
 }
