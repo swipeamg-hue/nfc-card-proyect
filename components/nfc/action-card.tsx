@@ -377,7 +377,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       } else if (link.type === 'telegram' || link.iconName === 'telegram') {
         standaloneSvg = <TelegramOfficialIcon className="w-10 h-10 text-[#229ED9]" />;
       } else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') {
-        standaloneSvg = <OnlyFansOfficialIcon className="w-10 h-10 text-[#00AFF0]" />;
+        standaloneSvg = <OnlyFansOfficialIcon className="w-10 h-10" standalone />;
       } else if (link.type === 'twitch' || link.iconName === 'twitch') {
         standaloneSvg = <TwitchOfficialIcon className="w-10 h-10 text-[#9146FF]" />;
       } else if (link.type === 'snapchat' || link.iconName === 'snapchat') {

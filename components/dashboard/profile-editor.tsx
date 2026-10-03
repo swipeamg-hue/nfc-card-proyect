@@ -1054,7 +1054,7 @@ export function ProfileEditor({
                     onClick={() => addLink('onlyfans')}
                     className="px-2.5 py-1.5 rounded-xl bg-[#00AFF0]/10 text-[#0092c8] dark:text-[#00AFF0] hover:bg-[#00AFF0]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#00AFF0]/30 active:scale-95 cursor-pointer"
                   >
-                    <OnlyFansOfficialIcon className="w-3.5 h-3.5 text-[#00AFF0]" />
+                    <OnlyFansOfficialIcon className="w-3.5 h-3.5" standalone />
                     <span>+ OnlyFans</span>
                   </button>
 

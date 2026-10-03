@@ -7,6 +7,7 @@ import {
   DIDI_WHITE_PATH,
   MERCADOLIBRE_YELLOW_PATH,
   MERCADOLIBRE_BLUE_PATH,
+  ONLYFANS_PATH,
 } from './brand-paths';
 
 // ==========================================
@@ -139,10 +140,16 @@ export function ThreadsOfficialIcon({ className = 'w-5 h-5 text-white' }: { clas
   );
 }
 
-export function OnlyFansOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function OnlyFansOfficialIcon({
+  className = 'w-5 h-5 text-white',
+  standalone = false,
+}: {
+  className?: string;
+  standalone?: boolean;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.836 12.91a4.91 4.91 0 0 1-4.91 4.91c-2.712 0-4.91-2.198-4.91-4.91 0-2.712 2.198-4.91 4.91-4.91 1.053 0 2.03.332 2.83.896l-1.395 1.764a2.68 2.68 0 0 0-1.435-.417c-1.474 0-2.667 1.193-2.667 2.667 0 1.474 1.193 2.667 2.667 2.667 1.474 0 2.667-1.193 2.667-2.667 0-.256-.036-.503-.105-.738l2.203-.787c.221.48.345 1.014.345 1.579z"/>
+    <svg className={className} viewBox="0 0 24 24" fill={standalone ? '#00AFF0' : 'currentColor'}>
+      <path fillRule="evenodd" d={ONLYFANS_PATH} />
     </svg>
   );
 }
@@ -390,12 +397,14 @@ export function DidiFoodOfficialIcon({
     return (
       <svg className={className} viewBox="0 0 512 512">
         <rect width="512" height="512" rx="110" fill="#FF7537" />
-        <path fill="#FFFFFF" fillRule="evenodd" d={DIDI_WHITE_PATH} />
+        <g transform="translate(81, 79) scale(9.6)">
+          <path fill="#FFFFFF" fillRule="evenodd" d={DIDI_WHITE_PATH} />
+        </g>
       </svg>
     );
   }
   return (
-    <svg className={className} viewBox="0 0 512 512" fill="currentColor">
+    <svg className={className} viewBox="0 5.1 36.39 26.68" fill="currentColor">
       <path fillRule="evenodd" d={DIDI_WHITE_PATH} />
     </svg>
   );
