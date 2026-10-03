@@ -1,4 +1,13 @@
 import React from 'react';
+import {
+  UBER_EATS_PATH,
+  RAPPI_PATH,
+  AMAZON_A_PATH,
+  AMAZON_SMILE_PATH,
+  DIDI_WHITE_PATH,
+  MERCADOLIBRE_YELLOW_PATH,
+  MERCADOLIBRE_BLUE_PATH,
+} from './brand-paths';
 
 // ==========================================
 // REDES SOCIALES OFICIALES (VECTORES OFICIALES)
@@ -352,53 +361,106 @@ export function GoogleOfficialIcon({ className = 'w-5 h-5' }: { className?: stri
 }
 
 // ------------------------------------------
-// DELIVERY & E-COMMERCE OFICIALES
+// DELIVERY & E-COMMERCE OFICIALES (VECTORES OFICIALES)
 // ------------------------------------------
 
-export function UberEatsOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function UberEatsOfficialIcon({
+  className = 'w-5 h-5 text-white',
+}: {
+  className?: string;
+  standalone?: boolean;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 4a1.5 1.5 0 0 1 1.5 1.355V6a8.5 8.5 0 0 1 8.5 8.5H2A8.5 8.5 0 0 1 10.5 6V5.355A1.5 1.5 0 0 1 12 4zm9 12.5a1.5 1.5 0 0 1 0 3H3a1.5 1.5 0 0 1 0-3h18zM12 8.5a6 6 0 0 0-6 6h12a6 6 0 0 0-6-6z" />
+    <svg className={className} viewBox="0 0 512 512" fill="currentColor">
+      <path fillRule="evenodd" d={UBER_EATS_PATH} />
     </svg>
   );
 }
 
-export function DidiFoodOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function DidiFoodOfficialIcon({
+  className = 'w-5 h-5 text-white',
+  standalone = false,
+  showBadge = true,
+}: {
+  className?: string;
+  standalone?: boolean;
+  showBadge?: boolean;
+}) {
+  if (standalone || showBadge) {
+    return (
+      <svg className={className} viewBox="0 0 512 512">
+        <rect width="512" height="512" rx="110" fill="#FF7537" />
+        <path fill="#FFFFFF" fillRule="evenodd" d={DIDI_WHITE_PATH} />
+      </svg>
+    );
+  }
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 3C6.477 3 2 7.477 2 13c0 3.866 2.191 7.22 5.4 8.91.488.257 1.09-.1.97-.64-.45-2.03-.54-3.53-.29-5.11.39-2.48 2.05-4.14 4.53-4.53 3.23-.51 6.13 1.61 6.64 4.84.25 1.58.16 3.08-.29 5.11-.12.54.482.897.97.64C20.129 20.47 22 17.01 22 13c0-5.523-4.477-10-10-10zm-1.5 5.5a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3zm4.5 0a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3z" />
+    <svg className={className} viewBox="0 0 512 512" fill="currentColor">
+      <path fillRule="evenodd" d={DIDI_WHITE_PATH} />
     </svg>
   );
 }
 
-export function RappiOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function RappiOfficialIcon({
+  className = 'w-5 h-5 text-white',
+  standalone = false,
+  forceCoral = false,
+}: {
+  className?: string;
+  standalone?: boolean;
+  forceCoral?: boolean;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M22.8 11.2c-.6-1.8-2.3-3.1-4.3-3.1-2.4 0-4.3 1.8-6.5 4.3-2.2-2.5-4.1-4.3-6.5-4.3-2 0-3.7 1.3-4.3 3.1-.4 1.2-.2 2.5.5 3.5.7 1 1.8 1.6 3 1.6 2.6 0 4.8-2.2 7.3-5.2 2.5 3 4.7 5.2 7.3 5.2 1.2 0 2.3-.6 3-1.6.7-1 .9-2.3.5-3.5z" />
+    <svg className={className} viewBox="0 0 512 512" fill={standalone || forceCoral ? '#FF441F' : 'currentColor'}>
+      <path fillRule="evenodd" d={RAPPI_PATH} />
     </svg>
   );
 }
 
-export function MercadoLibreOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function MercadoLibreOfficialIcon({
+  className = 'w-5 h-5 text-white',
+}: {
+  className?: string;
+  standalone?: boolean;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M21.7 8.3c-.4-.4-1.1-.4-1.5 0l-2.4 2.4-3.5-3.5c-.8-.8-2.1-.8-2.9 0L7.5 11.1l-1.8-1.8c-.8-.8-2.1-.8-2.9 0-.8.8-.8 2.1 0 2.9l3.2 3.2c.8.8 2.1.8 2.9 0l3.9-3.9 3.5 3.5c.8.8 2.1.8 2.9 0l2.5-2.5c.4-.4.4-1.1 0-1.5l-2-2.7zm-8.8 4.2-3.9 3.9c-.2.2-.6.2-.8 0l-3.2-3.2c-.2-.2-.2-.6 0-.8.2-.2.6-.2.8 0l2.5 2.5 4.6-4.6 1.8 1.8c.2.2.4.3.7.3.3 0 .5-.1.7-.3l2.8-2.8 1.5 1.5-2.8 2.8c-.8.8-2.1.8-2.9 0z" />
+    <svg className={className} viewBox="0 0 512 512">
+      <path fill="#FFE600" fillRule="evenodd" d={MERCADOLIBRE_YELLOW_PATH} />
+      <path fill="#2D3277" fillRule="evenodd" d={MERCADOLIBRE_BLUE_PATH} />
     </svg>
   );
 }
 
-export function AmazonOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function AmazonOfficialIcon({
+  className = 'w-5 h-5 text-white',
+}: {
+  className?: string;
+  standalone?: boolean;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M13.62 11.02c-1.38 0-2.5.31-3.36.93-.86.62-1.29 1.5-1.29 2.64 0 .99.35 1.78 1.05 2.37.7.59 1.61.88 2.73.88 1.02 0 1.87-.24 2.56-.71.69-.47 1.16-1.1 1.42-1.88V17h2.3V9.65h-2.3v1.3c-.37-.46-.84-.8-1.42-1.03-.58-.23-1.21-.35-1.89-.35zm1.05 5.22c-.7 0-1.26-.2-1.68-.58-.42-.38-.63-.91-.63-1.59 0-.72.22-1.27.65-1.66.43-.39 1.08-.59 1.94-.59.51 0 .98.07 1.39.21v2.3c-.27.67-.64 1.14-1.1 1.43-.46.29-.98.48-1.57.48zM2.14 18.23c4.76 3.65 11.23 3.65 15.99 0 .42-.32.33-.94-.15-1.15-.42-.18-.94-.03-1.29.24-4.08 3.12-9.63 3.12-13.71 0-.35-.27-.87-.42-1.29-.24-.48.21-.57.83-.15 1.15zm19.33-.42c-.52-.67-3.44-.32-4.75-.15-.4.05-.46.52-.1.74 2.35 1.44 4.35.43 4.9.08.55-.35.47-.67-.05-.67z" />
+    <svg className={className} viewBox="0 0 512 512">
+      <path fill="currentColor" fillRule="evenodd" d={AMAZON_A_PATH} />
+      <path fill="#FF9900" fillRule="evenodd" d={AMAZON_SMILE_PATH} />
     </svg>
   );
 }
 
-export function ShopifyOfficialIcon({ className = 'w-5 h-5 text-white' }: { className?: string }) {
+export function ShopifyOfficialIcon({
+  className = 'w-5 h-5 text-white',
+}: {
+  className?: string;
+}) {
   return (
-    <svg className={className} viewBox="0 0 24 24" fill="currentColor">
-      <path d="M19.64 6.77c-.03-.24-.22-.43-.46-.46l-4.48-.59c-.16-.02-.32.04-.43.16l-2.22 2.43c-.1.11-.24.17-.39.17-.15 0-.29-.06-.39-.17L9.04 5.88c-.11-.12-.27-.18-.43-.16l-4.48.59c-.24.03-.43.22-.46.46L2.01 22.1c-.03.26.11.51.35.61.09.04.18.06.27.06.18 0 .34-.08.45-.21l8.75-10.42c.11-.13.26-.2.43-.2.17 0 .32.07.43.2l8.75 10.42c.11.13.27.21.45.21.09 0 .18-.02.27-.06.24-.1.38-.35.35-.61L19.64 6.77zm-7.46-5.59c.17 0 .32.07.43.2l1.92 2.29c.21.25.18.62-.07.83-.25.21-.62.18-.83-.07l-1.45-1.73-1.45 1.73c-.21.25-.58.28-.83.07-.25-.21-.28-.58-.07-.83l1.92-2.29c.11-.13.26-.2.43-.2z" />
+    <svg className={className} viewBox="0 0 512 512">
+      <defs>
+        <linearGradient id="shopifyGradIcon" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="#95BF47"/>
+          <stop offset="100%" stopColor="#5E8E3E"/>
+        </linearGradient>
+      </defs>
+      <path fill="url(#shopifyGradIcon)" d="M416 142.4c-.6-5-4.4-8.8-9.4-9.4l-95.6-12.6c-3.4-.4-6.8.8-9.2 3.4l-47.4 51.8c-2.1 2.3-5.1 3.6-8.3 3.6s-6.2-1.3-8.3-3.6l-47.4-51.8c-2.4-2.6-5.8-3.8-9.2-3.4L85.4 133c-5 .6-8.8 4.4-9.4 9.4L42.8 468.9c-.6 5.5 2.3 10.9 7.5 13 1.9.8 3.8 1.3 5.8 1.3 3.8 0 7.3-1.7 9.6-4.5l186.7-222.3c2.3-2.8 5.5-4.3 9.2-4.3s6.8 1.5 9.2 4.3l186.7 222.3c2.3 2.8 5.8 4.5 9.6 4.5 2 0 3.8-.4 5.8-1.3 5.1-2.1 8.1-7.5 7.5-13L416 142.4z"/>
+      <path fill="#FFFFFF" opacity="0.95" d="M256 28.5c-3.6 0-6.8 1.5-9.2 4.3l-41 48.9c-4.5 5.3-3.8 13.2 1.5 17.7 5.3 4.5 13.2 3.8 17.7-1.5l31-36.9 31 36.9c4.5 5.3 12.4 6 17.7 1.5 5.3-4.5 6-12.4 1.5-17.7l-41-48.9c-2.4-2.8-5.6-4.3-9.2-4.3z"/>
+      <path fill="#FFFFFF" d="M285 272c-5.5-2.2-13.8-4.5-21-4.5-15.5 0-25 7.2-25 18 0 29.5 58 20.5 58 59 0 24-18.5 39.5-46 39.5-15 0-26-3.8-32-6.5l4-20c6.5 3.5 16 6.5 25.5 6.5 16 0 24-8 24-18.5 0-31-57.5-22.5-57.5-59 0-23.5 18-38.5 44-38.5 13 0 23.5 3 28.5 5.5l-4.5 18.5z"/>
     </svg>
   );
 }

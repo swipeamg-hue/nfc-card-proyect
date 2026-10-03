@@ -385,17 +385,17 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       } else if (link.type === 'wechat' || link.iconName === 'wechat') {
         standaloneSvg = <WeChatOfficialIcon className="w-10 h-10 text-[#07C160]" />;
       } else if (link.type === 'ubereats' || link.iconName === 'ubereats') {
-        standaloneSvg = <UberEatsOfficialIcon className="w-10 h-10 text-[#06C167]" />;
+        standaloneSvg = <UberEatsOfficialIcon className="w-10 h-10 text-slate-900 dark:text-white" standalone />;
       } else if (link.type === 'didifood' || link.iconName === 'didifood') {
-        standaloneSvg = <DidiFoodOfficialIcon className="w-10 h-10 text-[#FF7D41]" />;
+        standaloneSvg = <DidiFoodOfficialIcon className="w-10 h-10" standalone />;
       } else if (link.type === 'rappi' || link.iconName === 'rappi') {
-        standaloneSvg = <RappiOfficialIcon className="w-10 h-10 text-[#FF441F]" />;
+        standaloneSvg = <RappiOfficialIcon className="w-10 h-10" standalone />;
       } else if (link.type === 'mercadolibre' || link.iconName === 'mercadolibre') {
-        standaloneSvg = <MercadoLibreOfficialIcon className="w-10 h-10 text-[#2D3277] dark:text-[#FFE600]" />;
+        standaloneSvg = <MercadoLibreOfficialIcon className="w-10 h-10" standalone />;
       } else if (link.type === 'amazon' || link.iconName === 'amazon') {
-        standaloneSvg = <AmazonOfficialIcon className="w-10 h-10 text-[#FF9900]" />;
+        standaloneSvg = <AmazonOfficialIcon className="w-10 h-10 text-slate-900 dark:text-white" standalone />;
       } else if (link.type === 'shopify' || link.iconName === 'shopify') {
-        standaloneSvg = <ShopifyOfficialIcon className="w-10 h-10 text-[#95BF47]" />;
+        standaloneSvg = <ShopifyOfficialIcon className="w-10 h-10" />;
       } else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
         standaloneSvg = <GoogleOfficialIcon className="w-10 h-10" />;
       } else if (link.type === 'phone' || link.iconName === 'phone') {

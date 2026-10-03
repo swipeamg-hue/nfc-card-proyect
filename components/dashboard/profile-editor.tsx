@@ -1098,18 +1098,18 @@ export function ProfileEditor({
                   <button
                     type="button"
                     onClick={() => addLink('ubereats')}
-                    className="px-2.5 py-1.5 rounded-xl bg-[#06C167]/10 text-[#048848] dark:text-[#06C167] hover:bg-[#06C167]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#06C167]/30 active:scale-95 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-black/10 dark:bg-white/10 text-slate-800 dark:text-zinc-100 hover:bg-black/20 dark:hover:bg-white/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-black/20 dark:border-white/20 active:scale-95 cursor-pointer"
                   >
-                    <UberEatsOfficialIcon className="w-3.5 h-3.5 text-[#06C167]" />
+                    <UberEatsOfficialIcon className="w-3.5 h-3.5 text-black dark:text-white" standalone />
                     <span>+ Uber Eats</span>
                   </button>
 
                   <button
                     type="button"
                     onClick={() => addLink('didifood')}
-                    className="px-2.5 py-1.5 rounded-xl bg-[#FF7D41]/10 text-[#e05616] dark:text-[#FF7D41] hover:bg-[#FF7D41]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF7D41]/30 active:scale-95 cursor-pointer"
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FF7537]/10 text-[#e05616] dark:text-[#FF7537] hover:bg-[#FF7537]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF7537]/30 active:scale-95 cursor-pointer"
                   >
-                    <DidiFoodOfficialIcon className="w-3.5 h-3.5 text-[#FF7D41]" />
+                    <DidiFoodOfficialIcon className="w-3.5 h-3.5" standalone />
                     <span>+ DiDi Food</span>
                   </button>
 
@@ -1118,7 +1118,7 @@ export function ProfileEditor({
                     onClick={() => addLink('rappi')}
                     className="px-2.5 py-1.5 rounded-xl bg-[#FF441F]/10 text-[#d83210] dark:text-[#FF441F] hover:bg-[#FF441F]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF441F]/30 active:scale-95 cursor-pointer"
                   >
-                    <RappiOfficialIcon className="w-3.5 h-3.5 text-[#FF441F]" />
+                    <RappiOfficialIcon className="w-3.5 h-3.5" standalone />
                     <span>+ Rappi</span>
                   </button>
 
@@ -1127,7 +1127,7 @@ export function ProfileEditor({
                     onClick={() => addLink('mercadolibre')}
                     className="px-2.5 py-1.5 rounded-xl bg-[#FFE600]/25 text-[#1e2354] dark:text-[#FFE600] hover:bg-[#FFE600]/40 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FFE600]/40 active:scale-95 cursor-pointer"
                   >
-                    <MercadoLibreOfficialIcon className="w-3.5 h-3.5 text-[#2D3277] dark:text-[#FFE600]" />
+                    <MercadoLibreOfficialIcon className="w-3.5 h-3.5" standalone />
                     <span>+ Mercado Libre</span>
                   </button>
 
@@ -1136,7 +1136,7 @@ export function ProfileEditor({
                     onClick={() => addLink('amazon')}
                     className="px-2.5 py-1.5 rounded-xl bg-[#FF9900]/15 text-[#c47100] dark:text-[#FF9900] hover:bg-[#FF9900]/25 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#FF9900]/30 active:scale-95 cursor-pointer"
                   >
-                    <AmazonOfficialIcon className="w-3.5 h-3.5 text-[#FF9900]" />
+                    <AmazonOfficialIcon className="w-3.5 h-3.5 text-black dark:text-white" standalone />
                     <span>+ Amazon</span>
                   </button>
 
@@ -1145,7 +1145,7 @@ export function ProfileEditor({
                     onClick={() => addLink('shopify')}
                     className="px-2.5 py-1.5 rounded-xl bg-[#95BF47]/15 text-[#5e851d] dark:text-[#95BF47] hover:bg-[#95BF47]/25 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#95BF47]/30 active:scale-95 cursor-pointer"
                   >
-                    <ShopifyOfficialIcon className="w-3.5 h-3.5 text-[#95BF47]" />
+                    <ShopifyOfficialIcon className="w-3.5 h-3.5" />
                     <span>+ Shopify</span>
                   </button>
 
