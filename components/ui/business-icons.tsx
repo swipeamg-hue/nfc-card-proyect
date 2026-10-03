@@ -48,6 +48,11 @@ import {
   XOfficialIcon,
   YouTubeOfficialIcon,
   TelegramOfficialIcon,
+  ThreadsOfficialIcon,
+  OnlyFansOfficialIcon,
+  TwitchOfficialIcon,
+  SnapchatOfficialIcon,
+  WeChatOfficialIcon,
   UtensilsSvg,
   CalendarSvg,
   SparklesBeautySvg,
@@ -135,6 +140,24 @@ export const BUSINESS_ICON_CATEGORIES: { name: string; items: BusinessIconItem[]
     ],
   },
   {
+    name: 'Redes Sociales & Canales Oficiales',
+    items: [
+      { id: 'whatsapp', name: 'WhatsApp', category: 'Redes', icon: WhatsAppOfficialIcon },
+      { id: 'instagram', name: 'Instagram', category: 'Redes', icon: InstagramOfficialIcon },
+      { id: 'tiktok', name: 'TikTok', category: 'Redes', icon: TikTokOfficialIcon },
+      { id: 'facebook', name: 'Facebook', category: 'Redes', icon: FacebookOfficialIcon },
+      { id: 'youtube', name: 'YouTube', category: 'Redes', icon: YouTubeOfficialIcon },
+      { id: 'linkedin', name: 'LinkedIn', category: 'Redes', icon: LinkedinOfficialIcon },
+      { id: 'x', name: 'X (Twitter)', category: 'Redes', icon: XOfficialIcon },
+      { id: 'threads', name: 'Threads', category: 'Redes', icon: ThreadsOfficialIcon },
+      { id: 'telegram', name: 'Telegram', category: 'Redes', icon: TelegramOfficialIcon },
+      { id: 'twitch', name: 'Twitch', category: 'Redes', icon: TwitchOfficialIcon },
+      { id: 'onlyfans', name: 'OnlyFans', category: 'Redes', icon: OnlyFansOfficialIcon },
+      { id: 'snapchat', name: 'Snapchat', category: 'Redes', icon: SnapchatOfficialIcon },
+      { id: 'wechat', name: 'WeChat', category: 'Redes', icon: WeChatOfficialIcon },
+    ],
+  },
+  {
     name: 'Salud, Bienestar & Deportes',
     items: [
       { id: 'activity', name: 'Clínica / Salud', category: 'Salud', icon: Activity },
@@ -175,6 +198,11 @@ export function getBusinessIconComponent(iconId?: string): React.ComponentType<{
   if (iconId === 'youtube') return YouTubeOfficialIcon;
   if (iconId === 'x') return XOfficialIcon;
   if (iconId === 'telegram') return TelegramOfficialIcon;
+  if (iconId === 'threads') return ThreadsOfficialIcon;
+  if (iconId === 'onlyfans') return OnlyFansOfficialIcon;
+  if (iconId === 'twitch') return TwitchOfficialIcon;
+  if (iconId === 'snapchat') return SnapchatOfficialIcon;
+  if (iconId === 'wechat') return WeChatOfficialIcon;
   if (iconId === 'google' || iconId === 'reviews' || iconId === 'google-review') return GoogleOfficialIcon;
 
   const found = ALL_BUSINESS_ICONS.find((item) => item.id === iconId);

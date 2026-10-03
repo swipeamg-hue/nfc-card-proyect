@@ -47,6 +47,14 @@ import {
   FacebookOfficialIcon,
   TikTokOfficialIcon,
   YouTubeOfficialIcon,
+  LinkedinOfficialIcon,
+  XOfficialIcon,
+  ThreadsOfficialIcon,
+  OnlyFansOfficialIcon,
+  TelegramOfficialIcon,
+  TwitchOfficialIcon,
+  SnapchatOfficialIcon,
+  WeChatOfficialIcon,
   GlobeSvg,
   PhoneSvg,
   GoogleOfficialIcon,
@@ -91,6 +99,7 @@ export function ProfileEditor({
   // Link Action feedback
   const [savedLinkId, setSavedLinkId] = useState<string | null>(null);
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
+  const [isAddLinksExpanded, setIsAddLinksExpanded] = useState(false);
 
   // QR Code state for NFC tab
   const [qrPng, setQrPng] = useState<string>('');
@@ -394,6 +403,46 @@ export function ProfileEditor({
       subtitle = 'Califícanos en Google';
       url = 'https://g.page/r/.../review';
       iconName = 'google';
+    } else if (type === 'linkedin') {
+      title = 'LinkedIn';
+      subtitle = 'Conéctate profesionalmente';
+      url = 'https://linkedin.com/in/tunegocio';
+      iconName = 'linkedin';
+    } else if (type === 'x') {
+      title = 'X (Twitter)';
+      subtitle = 'Síguenos en X';
+      url = 'https://x.com/tunegocio';
+      iconName = 'x';
+    } else if (type === 'threads') {
+      title = 'Threads';
+      subtitle = 'Síguenos en Threads';
+      url = 'https://threads.net/@tunegocio';
+      iconName = 'threads';
+    } else if (type === 'onlyfans') {
+      title = 'OnlyFans';
+      subtitle = 'Contenido exclusivo';
+      url = 'https://onlyfans.com/tunegocio';
+      iconName = 'onlyfans';
+    } else if (type === 'telegram') {
+      title = 'Telegram';
+      subtitle = 'Canal o chat oficial';
+      url = 'https://t.me/tunegocio';
+      iconName = 'telegram';
+    } else if (type === 'twitch') {
+      title = 'Twitch';
+      subtitle = 'Transmisiones en vivo';
+      url = 'https://twitch.tv/tunegocio';
+      iconName = 'twitch';
+    } else if (type === 'snapchat') {
+      title = 'Snapchat';
+      subtitle = 'Agréganos en Snapchat';
+      url = 'https://snapchat.com/add/tunegocio';
+      iconName = 'snapchat';
+    } else if (type === 'wechat') {
+      title = 'WeChat';
+      subtitle = 'Contáctanos en WeChat';
+      url = 'https://weixin.qq.com/...';
+      iconName = 'wechat';
     }
 
     const newLink: BusinessLink = {
@@ -809,48 +858,75 @@ export function ProfileEditor({
       {/* TAB 2: Links Manager */}
       {activeTab === 'links' && (
         <div className="space-y-5 animate-in fade-in duration-150">
-          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-slate-700 dark:text-zinc-300">
-                Agregar botón de enlace:
-              </span>
-              <span className="text-[11px] text-slate-500">
-                Selecciona una opción rápida
-              </span>
-            </div>
-            {/* Quick add buttons - Botón Personalizado FIRST */}
-            <div className="flex flex-wrap items-center gap-1.5 pt-1">
+          <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-zinc-800/60 border border-slate-200/80 dark:border-zinc-800 space-y-2.5 transition-all">
+            {/* Header con botón y flecha SVG de despliegue */}
+            <button
+              type="button"
+              onClick={() => setIsAddLinksExpanded(!isAddLinksExpanded)}
+              className="w-full flex items-center justify-between text-left cursor-pointer group select-none"
+            >
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                  Agregar botón de enlace:
+                </span>
+                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                  {isAddLinksExpanded ? '17 opciones' : 'Toca para desplegar'}
+                </span>
+              </div>
+              <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                <span>{isAddLinksExpanded ? 'Plegar' : 'Ver todas las opciones'}</span>
+                {/* Flecha SVG de despliegue interactiva */}
+                <svg
+                  className={`w-4 h-4 text-slate-400 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-transform duration-300 ${
+                    isAddLinksExpanded ? 'rotate-180 text-blue-600 dark:text-blue-400' : ''
+                  }`}
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="6 9 12 15 18 9" />
+                </svg>
+              </div>
+            </button>
+
+            {/* Quick add buttons - Opciones Predeterminadas con Colores e Iconos Oficiales */}
+            <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+              {/* 1. Botón Personalizado siempre destacado al inicio */}
               <button
                 type="button"
                 onClick={() => addLink('custom')}
-                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 ring-2 ring-blue-400/30"
+                className="px-3 py-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 text-white hover:opacity-95 text-xs font-bold transition-all shadow-xs flex items-center gap-1.5 ring-2 ring-blue-400/30 active:scale-95 cursor-pointer"
               >
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>+ Botón Personalizado</span>
               </button>
 
+              {/* 2. Redes de uso más frecuente */}
               <button
                 type="button"
                 onClick={() => addLink('whatsapp')}
-                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95 border border-emerald-500/20 cursor-pointer"
               >
-                <WhatsAppOfficialIcon className="w-3.5 h-3.5" />
+                <WhatsAppOfficialIcon className="w-3.5 h-3.5 text-[#25D366]" />
                 <span>+ WhatsApp</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => addLink('instagram')}
-                className="px-2.5 py-1.5 rounded-xl bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-xl bg-pink-500/10 text-pink-600 dark:text-pink-400 hover:bg-pink-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95 border border-pink-500/20 cursor-pointer"
               >
-                <InstagramOfficialIcon className="w-3.5 h-3.5" />
+                <InstagramOfficialIcon className="w-3.5 h-3.5" withGradient />
                 <span>+ Instagram</span>
               </button>
 
               <button
                 type="button"
                 onClick={() => addLink('tiktok')}
-                className="px-2.5 py-1.5 rounded-xl bg-zinc-800 text-white hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1.5"
+                className="px-2.5 py-1.5 rounded-xl bg-zinc-900 text-white hover:bg-zinc-800 text-xs font-semibold transition-all flex items-center gap-1.5 active:scale-95 border border-zinc-700/60 cursor-pointer"
               >
                 <TikTokOfficialIcon className="w-3.5 h-3.5 text-white" />
                 <span>+ TikTok</span>
@@ -858,48 +934,167 @@ export function ProfileEditor({
 
               <button
                 type="button"
-                onClick={() => addLink('facebook')}
-                className="px-2.5 py-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <FacebookOfficialIcon className="w-3.5 h-3.5" />
-                <span>+ Facebook</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => addLink('youtube')}
-                className="px-2.5 py-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <YouTubeOfficialIcon className="w-3.5 h-3.5" />
-                <span>+ YouTube</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => addLink('phone')}
-                className="px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <PhoneSvg className="w-3.5 h-3.5" />
-                <span>+ Teléfono</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={() => addLink('website')}
-                className="px-2.5 py-1.5 rounded-xl bg-slate-200/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-300/80 text-xs font-semibold transition-colors flex items-center gap-1.5"
-              >
-                <GlobeSvg className="w-3.5 h-3.5" />
-                <span>+ Sitio Web</span>
-              </button>
-
-              <button
-                type="button"
                 onClick={() => addLink('reviews')}
-                className="px-2.5 py-1.5 rounded-xl bg-white/10 dark:bg-zinc-800/90 text-slate-700 dark:text-zinc-200 hover:bg-white/20 dark:hover:bg-zinc-700 text-xs font-semibold transition-colors flex items-center gap-1.5 border border-slate-200/80 dark:border-zinc-700/80 shadow-2xs"
+                className="px-2.5 py-1.5 rounded-xl bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-200 hover:bg-slate-100 dark:hover:bg-zinc-700 text-xs font-semibold transition-all flex items-center gap-1.5 border border-slate-200 dark:border-zinc-700 shadow-2xs active:scale-95 cursor-pointer"
               >
                 <GoogleOfficialIcon className="w-3.5 h-3.5" />
                 <span>+ Reseñas</span>
               </button>
+
+              {/* Botón rápido para desplegar si está plegado */}
+              {!isAddLinksExpanded && (
+                <button
+                  type="button"
+                  onClick={() => setIsAddLinksExpanded(true)}
+                  className="px-3 py-1.5 rounded-xl bg-blue-50 dark:bg-blue-950/50 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 text-xs font-bold transition-all flex items-center gap-1.5 border border-blue-200/80 dark:border-blue-800/80 cursor-pointer shadow-2xs group"
+                >
+                  <span>+ Más redes (LinkedIn, X, Threads, Twitch...)</span>
+                  <svg
+                    className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400 group-hover:translate-y-0.5 transition-transform"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="6 9 12 15 18 9" />
+                  </svg>
+                </button>
+              )}
+
+              {/* Redes y opciones adicionales desplegables */}
+              {isAddLinksExpanded && (
+                <>
+                  <button
+                    type="button"
+                    onClick={() => addLink('linkedin')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#0A66C2]/10 text-[#0A66C2] dark:text-[#3ea4f7] hover:bg-[#0A66C2]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#0A66C2]/25 active:scale-95 cursor-pointer"
+                  >
+                    <LinkedinOfficialIcon className="w-3.5 h-3.5 text-[#0A66C2]" />
+                    <span>+ LinkedIn</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('x')}
+                    className="px-2.5 py-1.5 rounded-xl bg-black dark:bg-zinc-800 text-white hover:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-semibold transition-all flex items-center gap-1.5 border border-zinc-700/60 active:scale-95 cursor-pointer"
+                  >
+                    <XOfficialIcon className="w-3.5 h-3.5 text-white" />
+                    <span>+ X</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('threads')}
+                    className="px-2.5 py-1.5 rounded-xl bg-black dark:bg-zinc-800 text-white hover:bg-zinc-800 dark:hover:bg-zinc-700 text-xs font-semibold transition-all flex items-center gap-1.5 border border-zinc-700/60 active:scale-95 cursor-pointer"
+                  >
+                    <ThreadsOfficialIcon className="w-3.5 h-3.5 text-white" />
+                    <span>+ Threads</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('onlyfans')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#00AFF0]/10 text-[#0092c8] dark:text-[#00AFF0] hover:bg-[#00AFF0]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#00AFF0]/30 active:scale-95 cursor-pointer"
+                  >
+                    <OnlyFansOfficialIcon className="w-3.5 h-3.5 text-[#00AFF0]" />
+                    <span>+ OnlyFans</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('telegram')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#229ED9]/10 text-[#1b86ba] dark:text-[#229ED9] hover:bg-[#229ED9]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#229ED9]/30 active:scale-95 cursor-pointer"
+                  >
+                    <TelegramOfficialIcon className="w-3.5 h-3.5 text-[#229ED9]" />
+                    <span>+ Telegram</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('twitch')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#9146FF]/10 text-[#7c2ff0] dark:text-[#b482ff] hover:bg-[#9146FF]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#9146FF]/30 active:scale-95 cursor-pointer"
+                  >
+                    <TwitchOfficialIcon className="w-3.5 h-3.5 text-[#9146FF]" />
+                    <span>+ Twitch</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('snapchat')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#FFFC00]/25 text-amber-900 dark:text-amber-200 hover:bg-[#FFFC00]/40 text-xs font-semibold transition-all flex items-center gap-1.5 border border-amber-400/40 active:scale-95 cursor-pointer"
+                  >
+                    <SnapchatOfficialIcon className="w-3.5 h-3.5 text-amber-600 dark:text-amber-400" />
+                    <span>+ Snapchat</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('wechat')}
+                    className="px-2.5 py-1.5 rounded-xl bg-[#07C160]/10 text-[#069a4d] dark:text-[#07C160] hover:bg-[#07C160]/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-[#07C160]/30 active:scale-95 cursor-pointer"
+                  >
+                    <WeChatOfficialIcon className="w-3.5 h-3.5 text-[#07C160]" />
+                    <span>+ WeChat</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('facebook')}
+                    className="px-2.5 py-1.5 rounded-xl bg-blue-500/10 text-blue-600 dark:text-blue-400 hover:bg-blue-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-blue-500/20 active:scale-95 cursor-pointer"
+                  >
+                    <FacebookOfficialIcon className="w-3.5 h-3.5 text-[#1877F2]" />
+                    <span>+ Facebook</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('youtube')}
+                    className="px-2.5 py-1.5 rounded-xl bg-red-500/10 text-red-600 dark:text-red-400 hover:bg-red-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-red-500/20 active:scale-95 cursor-pointer"
+                  >
+                    <YouTubeOfficialIcon className="w-3.5 h-3.5 text-[#FF0000]" />
+                    <span>+ YouTube</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('phone')}
+                    className="px-2.5 py-1.5 rounded-xl bg-sky-500/10 text-sky-600 dark:text-sky-400 hover:bg-sky-500/20 text-xs font-semibold transition-all flex items-center gap-1.5 border border-sky-500/20 active:scale-95 cursor-pointer"
+                  >
+                    <PhoneSvg className="w-3.5 h-3.5" />
+                    <span>+ Teléfono</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => addLink('website')}
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-200/80 dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:bg-slate-300/80 text-xs font-semibold transition-all flex items-center gap-1.5 border border-slate-300 dark:border-zinc-700 active:scale-95 cursor-pointer"
+                  >
+                    <GlobeSvg className="w-3.5 h-3.5" />
+                    <span>+ Sitio Web</span>
+                  </button>
+
+                  {/* Botón para volver a plegar */}
+                  <button
+                    type="button"
+                    onClick={() => setIsAddLinksExpanded(false)}
+                    className="px-2.5 py-1.5 rounded-xl bg-slate-200/60 dark:bg-zinc-700/60 text-slate-600 dark:text-zinc-300 hover:bg-slate-200 text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Plegar opciones</span>
+                    <svg
+                      className="w-3.5 h-3.5 rotate-180"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2.5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <polyline points="6 9 12 15 18 9" />
+                    </svg>
+                  </button>
+                </>
+              )}
             </div>
           </div>
 

@@ -15,6 +15,11 @@ export type LinkType =
   | 'menu'
   | 'booking'
   | 'reviews'
+  | 'threads'
+  | 'onlyfans'
+  | 'twitch'
+  | 'snapchat'
+  | 'wechat'
   | 'custom';
 
 export type ButtonShape = 'rounded' | 'pill' | 'square' | 'tile' | 'circle' | 'none';

@@ -12,6 +12,11 @@ import {
   XOfficialIcon,
   YouTubeOfficialIcon,
   TelegramOfficialIcon,
+  ThreadsOfficialIcon,
+  OnlyFansOfficialIcon,
+  TwitchOfficialIcon,
+  SnapchatOfficialIcon,
+  WeChatOfficialIcon,
   FileTextSvg,
   GlobeSvg,
   PhoneSvg,
@@ -87,6 +92,11 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       else if (link.type === 'youtube' || link.iconName === 'youtube') rawIcon = <YouTubeOfficialIcon className="w-5 h-5" />;
       else if (link.type === 'x' || link.iconName === 'x') rawIcon = <XOfficialIcon className="w-5 h-5" />;
       else if (link.type === 'telegram' || link.iconName === 'telegram') rawIcon = <TelegramOfficialIcon className="w-5 h-5" />;
+      else if (link.type === 'threads' || link.iconName === 'threads') rawIcon = <ThreadsOfficialIcon className="w-5 h-5" />;
+      else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') rawIcon = <OnlyFansOfficialIcon className="w-5 h-5" />;
+      else if (link.type === 'twitch' || link.iconName === 'twitch') rawIcon = <TwitchOfficialIcon className="w-5 h-5" />;
+      else if (link.type === 'snapchat' || link.iconName === 'snapchat') rawIcon = <SnapchatOfficialIcon className="w-5 h-5" />;
+      else if (link.type === 'wechat' || link.iconName === 'wechat') rawIcon = <WeChatOfficialIcon className="w-5 h-5" />;
       else if (link.type === 'reviews' || link.iconName === 'google') rawIcon = <GoogleOfficialIcon className="w-5 h-5" />;
       else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-5 h-5" />;
       else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-5 h-5" />;
@@ -151,11 +161,46 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         borderHover: 'hover:border-zinc-400',
       };
     }
+    if (link.type === 'threads' || link.iconName === 'threads') {
+      return {
+        icon: <ThreadsOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-black',
+        borderHover: 'hover:border-zinc-400',
+      };
+    }
     if (link.type === 'telegram' || link.iconName === 'telegram') {
       return {
         icon: <TelegramOfficialIcon className="w-5 h-5 text-white" />,
         bgClass: 'bg-[#229ED9]',
         borderHover: 'hover:border-sky-300',
+      };
+    }
+    if (link.type === 'onlyfans' || link.iconName === 'onlyfans') {
+      return {
+        icon: <OnlyFansOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#00AFF0]',
+        borderHover: 'hover:border-sky-300',
+      };
+    }
+    if (link.type === 'twitch' || link.iconName === 'twitch') {
+      return {
+        icon: <TwitchOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#9146FF]',
+        borderHover: 'hover:border-purple-300',
+      };
+    }
+    if (link.type === 'snapchat' || link.iconName === 'snapchat') {
+      return {
+        icon: <SnapchatOfficialIcon className="w-5 h-5 text-black" />,
+        bgClass: 'bg-[#FFFC00]',
+        borderHover: 'hover:border-amber-300',
+      };
+    }
+    if (link.type === 'wechat' || link.iconName === 'wechat') {
+      return {
+        icon: <WeChatOfficialIcon className="w-5 h-5 text-white" />,
+        bgClass: 'bg-[#07C160]',
+        borderHover: 'hover:border-emerald-300',
       };
     }
     if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
@@ -245,6 +290,11 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       else if (link.type === 'youtube' || link.iconName === 'youtube') rawIcon = <YouTubeOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'x' || link.iconName === 'x') rawIcon = <XOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'telegram' || link.iconName === 'telegram') rawIcon = <TelegramOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'threads' || link.iconName === 'threads') rawIcon = <ThreadsOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') rawIcon = <OnlyFansOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'twitch' || link.iconName === 'twitch') rawIcon = <TwitchOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'snapchat' || link.iconName === 'snapchat') rawIcon = <SnapchatOfficialIcon className="w-10 h-10" />;
+      else if (link.type === 'wechat' || link.iconName === 'wechat') rawIcon = <WeChatOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') rawIcon = <GoogleOfficialIcon className="w-10 h-10" />;
       else if (link.type === 'phone' || link.iconName === 'phone') rawIcon = <PhoneSvg className="w-10 h-10" />;
       else if (link.type === 'maps' || link.iconName === 'map-pin') rawIcon = <MapPinSvg className="w-10 h-10" />;
@@ -268,8 +318,18 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         standaloneSvg = <YouTubeOfficialIcon className="w-10 h-10 text-[#FF0000]" />;
       } else if (link.type === 'x' || link.iconName === 'x') {
         standaloneSvg = <XOfficialIcon className="w-10 h-10 text-slate-900 dark:text-white" />;
+      } else if (link.type === 'threads' || link.iconName === 'threads') {
+        standaloneSvg = <ThreadsOfficialIcon className="w-10 h-10 text-slate-900 dark:text-white" />;
       } else if (link.type === 'telegram' || link.iconName === 'telegram') {
         standaloneSvg = <TelegramOfficialIcon className="w-10 h-10 text-[#229ED9]" />;
+      } else if (link.type === 'onlyfans' || link.iconName === 'onlyfans') {
+        standaloneSvg = <OnlyFansOfficialIcon className="w-10 h-10 text-[#00AFF0]" />;
+      } else if (link.type === 'twitch' || link.iconName === 'twitch') {
+        standaloneSvg = <TwitchOfficialIcon className="w-10 h-10 text-[#9146FF]" />;
+      } else if (link.type === 'snapchat' || link.iconName === 'snapchat') {
+        standaloneSvg = <SnapchatOfficialIcon className="w-10 h-10" standalone />;
+      } else if (link.type === 'wechat' || link.iconName === 'wechat') {
+        standaloneSvg = <WeChatOfficialIcon className="w-10 h-10 text-[#07C160]" />;
       } else if (link.type === 'reviews' || link.iconName === 'google' || link.iconName === 'google-review') {
         standaloneSvg = <GoogleOfficialIcon className="w-10 h-10" />;
       } else if (link.type === 'phone' || link.iconName === 'phone') {
