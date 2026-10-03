@@ -100,6 +100,8 @@ export function ProfileEditor({
   const [savedLinkId, setSavedLinkId] = useState<string | null>(null);
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
   const [isAddLinksExpanded, setIsAddLinksExpanded] = useState(false);
+  const [createdNotice, setCreatedNotice] = useState<string | null>(null);
+  const noticeTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // QR Code state for NFC tab
   const [qrPng, setQrPng] = useState<string>('');
@@ -460,6 +462,13 @@ export function ProfileEditor({
     };
 
     updateField('links', [...business.links, newLink]);
+
+    // Notificación informativa "Botón creado" que aparece y desaparece sola
+    if (noticeTimeoutRef.current) clearTimeout(noticeTimeoutRef.current);
+    setCreatedNotice('Botón creado');
+    noticeTimeoutRef.current = setTimeout(() => {
+      setCreatedNotice(null);
+    }, 2400);
   };
 
   // Add NFC Card to business
@@ -869,9 +878,16 @@ export function ProfileEditor({
                 <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                   Agregar botón de enlace:
                 </span>
-                <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
-                  {isAddLinksExpanded ? '17 opciones' : 'Toca para desplegar'}
-                </span>
+                {createdNotice ? (
+                  <span className="animate-in fade-in zoom-in-95 duration-200 inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-emerald-600 text-white text-[11px] font-bold shadow-xs shadow-emerald-600/30">
+                    <Check className="w-3.5 h-3.5 stroke-[3]" />
+                    <span>{createdNotice}</span>
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-semibold px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400">
+                    {isAddLinksExpanded ? '17 opciones' : 'Toca para desplegar'}
+                  </span>
+                )}
               </div>
               <div className="flex items-center gap-1.5 text-[11px] font-medium text-slate-500 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                 <span>{isAddLinksExpanded ? 'Plegar' : 'Ver todas las opciones'}</span>
@@ -903,6 +919,14 @@ export function ProfileEditor({
                 <Sparkles className="w-3.5 h-3.5 text-amber-300" />
                 <span>+ Botón Personalizado</span>
               </button>
+
+              {/* Botón informativo con micro-animación al crear enlace */}
+              {createdNotice && (
+                <div className="animate-in fade-in zoom-in-95 duration-200 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 text-xs font-bold shadow-xs">
+                  <Check className="w-3.5 h-3.5 stroke-[3]" />
+                  <span>{createdNotice}</span>
+                </div>
+              )}
 
               {/* 2. Redes de uso más frecuente */}
               <button
@@ -2093,6 +2117,18 @@ export function ProfileEditor({
           setCropperImageSrc('');
         }}
       />
+
+      {/* Toast informativo flotante al crear un botón */}
+      {createdNotice && (
+        <div className="fixed bottom-6 right-6 sm:bottom-8 sm:right-8 z-50 animate-in fade-in slide-in-from-bottom-4 duration-200 pointer-events-none">
+          <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-900/95 dark:bg-zinc-800/95 text-white text-xs font-semibold shadow-2xl border border-slate-700/80 backdrop-blur-md">
+            <div className="w-5 h-5 rounded-full bg-emerald-500 text-white flex items-center justify-center flex-shrink-0 shadow-sm shadow-emerald-500/40">
+              <Check className="w-3.5 h-3.5 stroke-[3]" />
+            </div>
+            <span>{createdNotice}</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
