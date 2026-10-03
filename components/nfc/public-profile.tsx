@@ -299,13 +299,17 @@ export function PublicProfile({
             bioColor={business.customization?.bioColor || business.customization?.subtitleColor}
           />
 
-          {/* Action Cards List (Adaptable list vs 2-column grid for tile shape vs floating icon cluster for none) */}
+          {/* Action Cards List (Adaptable: 2-column grid for tile, horizontal grid of 3/4 from left-to-right for none, or list) */}
           <div
             className={`px-4 mt-6 ${
               buttonShape === 'tile'
                 ? 'grid grid-cols-2 gap-3'
                 : buttonShape === 'none'
-                ? 'flex flex-wrap items-center justify-center gap-3 sm:gap-5 py-2'
+                ? `grid ${
+                    activeLinks.length > 12
+                      ? 'grid-cols-4 gap-y-4 gap-x-2'
+                      : 'grid-cols-3 gap-y-4 gap-x-3 sm:gap-x-4'
+                  } justify-items-center items-start py-2`
                 : 'space-y-3'
             }`}
           >

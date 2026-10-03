@@ -347,6 +347,13 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
       }
     }
 
+    // En la opción 'sin contenedor', la función de glasmorfismo regula la transparencia
+    // de los SVG oficiales para darles más o menos translucidez (0 = 100% sólido, 100 = cristal traslúcido)
+    const iconOpacity = (1 - (glassLevel / 100) * 0.75).toFixed(2);
+    const iconFilter = t > 0.05
+      ? `drop-shadow(0 ${2 + Math.round(t * 6)}px ${4 + Math.round(t * 10)}px rgba(0, 0, 0, ${(0.1 + t * 0.25).toFixed(2)}))`
+      : undefined;
+
     return (
       <a
         href={link.url}
@@ -355,9 +362,16 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
         onClick={handleClick}
         title={link.title ? `${link.title}${link.subtitle ? ` - ${link.subtitle}` : ''}` : undefined}
         aria-label={link.title || link.type}
-        className="group relative flex flex-col items-center justify-center p-2 rounded-2xl transition-all duration-300 hover:scale-115 active:scale-95 cursor-pointer"
+        className="group relative flex flex-col items-center justify-start p-1.5 rounded-2xl transition-all duration-300 hover:scale-110 active:scale-95 cursor-pointer w-full text-center"
       >
-        <div className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-transform duration-300 group-hover:scale-110 drop-shadow-md">
+        <div
+          style={{
+            opacity: iconOpacity,
+            filter: iconFilter,
+            transition: 'opacity 0.25s ease, transform 0.3s ease',
+          }}
+          className="w-12 h-12 sm:w-14 sm:h-14 flex items-center justify-center transition-all duration-300 group-hover:scale-110 group-hover:opacity-100"
+        >
           {standaloneSvg}
         </div>
         {link.title && (
@@ -366,7 +380,7 @@ export function ActionCard({ link, globalCustomization, onTrackClick }: ActionCa
               color: customTextColor || undefined,
               fontFamily: activeFont ? `"${activeFont}", sans-serif` : undefined,
             }}
-            className="text-[11px] font-semibold text-center mt-1 max-w-[76px] truncate text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors drop-shadow-xs"
+            className="text-[11px] font-semibold text-center mt-1 w-full max-w-[78px] truncate text-slate-800 dark:text-zinc-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors drop-shadow-xs"
           >
             {link.title}
           </span>

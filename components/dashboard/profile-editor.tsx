@@ -1260,7 +1260,9 @@ export function ProfileEditor({
               </div>
 
               <p className="text-[10px] text-slate-500 dark:text-zinc-400">
-                Ajusta la transparencia, el desenfoque traslúcido y el reflejo de cristal de los contenedores de los botones e iconos sobre tu fondo.
+                {business.customization?.buttonShape === 'none'
+                  ? 'Modo Sin Contenedor: Regula directamente el nivel de transparencia de los SVG oficiales flotantes.'
+                  : 'Ajusta la transparencia, el desenfoque traslúcido y el reflejo de cristal de los contenedores de los botones e iconos sobre tu fondo.'}
               </p>
             </div>
 
