@@ -32,6 +32,8 @@ export interface CardCustomization {
   backgroundMode?: BackgroundStyle; // 'full', 'top-fade', 'banner'
   backgroundOverlay?: BackgroundOverlay; // 'dark', 'light', 'soft-gradient', 'none'
   backgroundOpacity?: number; // 0 a 100
+  backgroundColor?: string; // Color personalizado de fondo / gradiente difuminado (para modo banner y top-fade)
+  gradientColor?: string; // Color complementario para gradiente difuminado
 
   // Estilo global de botones de enlace
   buttonShape?: ButtonShape;

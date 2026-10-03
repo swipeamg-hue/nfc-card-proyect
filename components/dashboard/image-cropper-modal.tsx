@@ -203,9 +203,9 @@ export function ImageCropperModal({
       }
       ctx.fillRect(0, 0, outputWidth, outputHeight);
 
-      // Compute display image size inside container at zoom=1 before rotation
-      const baseScale = Math.min(containerW / img.naturalWidth, containerH / img.naturalHeight) * 0.95;
-      const currentScale = baseScale * zoom;
+      // Compute display image size inside container ensuring it covers the mask without black bars
+      const coverScale = Math.max(maskW / img.naturalWidth, maskH / img.naturalHeight);
+      const currentScale = coverScale * zoom;
 
       // Center of canvas
       ctx.translate(outputWidth / 2, outputHeight / 2);
@@ -340,7 +340,33 @@ export function ImageCropperModal({
               <img
                 src={imageSrc}
                 alt="Para recortar"
-                className="max-w-[280px] sm:max-w-[340px] max-h-[240px] sm:max-h-[280px] object-contain select-none"
+                style={
+                  imageSize.width && imageSize.height
+                    ? {
+                        width: `${Math.round(
+                          imageSize.width *
+                            Math.max(
+                              (activeCropType === 'circle' ? 224 : activeCropType === 'vertical' ? 144 : 340) /
+                                imageSize.width,
+                              (activeCropType === 'circle' ? 224 : activeCropType === 'vertical' ? 256 : 140) /
+                                imageSize.height
+                            )
+                        )}px`,
+                        height: `${Math.round(
+                          imageSize.height *
+                            Math.max(
+                              (activeCropType === 'circle' ? 224 : activeCropType === 'vertical' ? 144 : 340) /
+                                imageSize.width,
+                              (activeCropType === 'circle' ? 224 : activeCropType === 'vertical' ? 256 : 140) /
+                                imageSize.height
+                            )
+                        )}px`,
+                        maxWidth: 'none',
+                        maxHeight: 'none',
+                      }
+                    : undefined
+                }
+                className="select-none pointer-events-none object-cover"
                 draggable={false}
               />
             </div>

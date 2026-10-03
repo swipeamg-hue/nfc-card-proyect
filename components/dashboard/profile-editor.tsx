@@ -1749,11 +1749,11 @@ export function ProfileEditor({
               <label className="text-[11px] font-semibold text-slate-700 dark:text-zinc-300 block">
                 Modo de Presentación:
               </label>
-              <div className="grid grid-cols-2 gap-2">
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
                   onClick={() => updateCustomization('backgroundMode', 'full')}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition-all ${
+                  className={`py-2.5 px-2 rounded-xl border text-xs font-semibold text-center transition-all ${
                     (business.customization?.backgroundMode || 'full') === 'full'
                       ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
                       : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
@@ -1764,7 +1764,7 @@ export function ProfileEditor({
                 <button
                   type="button"
                   onClick={() => updateCustomization('backgroundMode', 'banner')}
-                  className={`py-2.5 px-3 rounded-xl border text-xs font-semibold text-center transition-all ${
+                  className={`py-2.5 px-2 rounded-xl border text-xs font-semibold text-center transition-all ${
                     business.customization?.backgroundMode === 'banner'
                       ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
                       : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
@@ -1772,13 +1772,115 @@ export function ProfileEditor({
                 >
                   Banner Superior
                 </button>
+                <button
+                  type="button"
+                  onClick={() => updateCustomization('backgroundMode', 'top-fade')}
+                  className={`py-2.5 px-2 rounded-xl border text-xs font-semibold text-center transition-all ${
+                    business.customization?.backgroundMode === 'top-fade'
+                      ? 'border-blue-600 bg-blue-50/80 dark:bg-blue-950/50 text-blue-700 dark:text-blue-300 font-bold shadow-xs ring-1 ring-blue-500/30'
+                      : 'border-slate-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-slate-700 dark:text-zinc-300 hover:border-slate-300'
+                  }`}
+                >
+                  Gradiente Difuminado
+                </button>
               </div>
               <p className="text-[11px] text-slate-500 dark:text-zinc-400 pt-0.5">
                 {(business.customization?.backgroundMode || 'full') === 'full'
                   ? '📱 Fondo Completo: la imagen vertical cubrirá toda la pantalla de la tarjeta móvil sin recortes.'
-                  : '🖼️ Banner Superior: se mostrará como encabezado panorámico con avatar superpuesto.'}
+                  : business.customization?.backgroundMode === 'banner'
+                  ? '🖼️ Banner Superior: encabezado panorámico con avatar superpuesto y fondo difuminado personalizable.'
+                  : '✨ Gradiente Difuminado: la foto superior se disuelve suavemente hacia un gradiente atmosférico con el color que elijas.'}
               </p>
             </div>
+
+            {/* Selector de Color para Fondo y Gradiente Difuminado (Banner Superior y Gradiente Difuminado) */}
+            {(business.customization?.backgroundMode === 'banner' ||
+              business.customization?.backgroundMode === 'top-fade') && (
+              <div className="p-3.5 rounded-2xl bg-blue-50/60 dark:bg-blue-950/20 border border-blue-100 dark:border-blue-900/50 space-y-2.5 animate-in fade-in duration-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <span className="text-xs font-bold text-slate-800 dark:text-zinc-200 flex items-center gap-1.5">
+                      <Palette className="w-3.5 h-3.5 text-blue-600 dark:text-blue-400" />
+                      Color de Fondo y Gradiente Difuminado:
+                    </span>
+                    <p className="text-[10px] text-slate-500 dark:text-zinc-400 mt-0.5">
+                      Personaliza la tonalidad atmosférica de la tarjeta bajo el banner o con degradado
+                    </p>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-[10px] font-mono font-bold text-slate-700 dark:text-zinc-300">
+                      {business.customization?.backgroundColor || business.themeColor || '#2563EB'}
+                    </span>
+                    <label
+                      title="Elegir color personalizado libre"
+                      className="w-7 h-7 rounded-xl cursor-pointer border border-slate-300 dark:border-zinc-600 flex items-center justify-center overflow-hidden shadow-xs hover:scale-105 transition-transform"
+                      style={{
+                        backgroundColor:
+                          business.customization?.backgroundColor || business.themeColor || '#2563EB',
+                      }}
+                    >
+                      <input
+                        type="color"
+                        value={
+                          business.customization?.backgroundColor || business.themeColor || '#2563EB'
+                        }
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          updateField('themeColor', val);
+                          updateCustomizations({
+                            backgroundColor: val,
+                            gradientColor: val,
+                          });
+                        }}
+                        className="opacity-0 w-0 h-0 cursor-pointer"
+                      />
+                    </label>
+                  </div>
+                </div>
+
+                {/* Swatches rápidos elegantes */}
+                <div className="flex flex-wrap items-center gap-1.5 pt-0.5">
+                  {[
+                    { label: 'Azul Eléctrico', value: '#2563EB' },
+                    { label: 'Violeta', value: '#6366F1' },
+                    { label: 'Púrpura Neón', value: '#9333EA' },
+                    { label: 'Esmeralda', value: '#059669' },
+                    { label: 'Rosa Magenta', value: '#DB2777' },
+                    { label: 'Ámbar', value: '#D97706' },
+                    { label: 'Carbón', value: '#0F172A' },
+                    { label: 'Negro Noche', value: '#020617' },
+                  ].map((preset) => {
+                    const currentColor =
+                      business.customization?.backgroundColor || business.themeColor || '#2563EB';
+                    const isSelected = currentColor.toLowerCase() === preset.value.toLowerCase();
+                    return (
+                      <button
+                        key={preset.value}
+                        type="button"
+                        onClick={() => {
+                          updateField('themeColor', preset.value);
+                          updateCustomizations({
+                            backgroundColor: preset.value,
+                            gradientColor: preset.value,
+                          });
+                        }}
+                        className={`flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[10px] font-medium transition-all cursor-pointer ${
+                          isSelected
+                            ? 'ring-2 ring-blue-500 bg-white dark:bg-zinc-800 font-bold text-blue-700 dark:text-blue-300 shadow-xs'
+                            : 'bg-white/80 dark:bg-zinc-800/80 text-slate-700 dark:text-zinc-300 hover:bg-white dark:hover:bg-zinc-800'
+                        }`}
+                      >
+                        <span
+                          className="w-3 h-3 rounded-full shrink-0 border border-black/10 dark:border-white/10"
+                          style={{ backgroundColor: preset.value }}
+                        />
+                        <span>{preset.label}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
 
             <div className="flex items-center justify-end text-[11px] text-slate-400 pt-0.5">
               <button
@@ -1840,23 +1942,23 @@ export function ProfileEditor({
             <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4">
               <div
                 onClick={() => logoFileRef.current?.click()}
-                className="relative w-24 h-24 rounded-full border-2 border-dashed border-slate-300 dark:border-zinc-700 hover:border-purple-500 bg-slate-100 dark:bg-zinc-900 overflow-hidden flex flex-col items-center justify-center flex-shrink-0 shadow-md group cursor-pointer transition-all p-2 text-center"
+                className="relative w-24 h-24 rounded-full border-2 border-dashed border-purple-400/80 dark:border-purple-500/70 hover:border-purple-500 bg-slate-100 dark:bg-zinc-900 overflow-hidden flex flex-col items-center justify-center flex-shrink-0 shadow-lg group cursor-pointer transition-all text-center ring-4 ring-purple-500/10"
               >
                 {business.logoUrl ? (
                   <>
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img
                       src={business.logoUrl}
-                      alt="Logo circular preview"
-                      className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-200"
+                      alt="Foto de perfil circular"
+                      className="w-full h-full object-cover rounded-full transition-transform group-hover:scale-105 duration-200"
                     />
-                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1">
-                      <Camera className="w-4 h-4 mb-0.5" />
+                    <div className="absolute inset-0 bg-black/45 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white p-1 rounded-full">
+                      <Camera className="w-5 h-5 mb-0.5" />
                       <span className="text-[8px] font-bold text-center leading-tight">Cambiar foto</span>
                     </div>
                   </>
                 ) : (
-                  <div className="flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400 p-1 text-center">
+                  <div className="flex flex-col items-center justify-center text-slate-500 dark:text-zinc-400 p-2 text-center">
                     <Camera className="w-5 h-5 text-purple-600 dark:text-purple-400 mb-1" />
                     <span className="text-[9px] font-bold leading-tight text-slate-800 dark:text-zinc-200">
                       Subir foto

@@ -197,11 +197,18 @@ export function PublicProfile({
   const brandColor = business.themeColor || '#2563eb';
   const customFont = business.customization?.customFontName || business.customization?.fontFamily;
 
-  // Background Image & Mode (Full bleed vs Banner)
+  // Background Image & Mode (Full bleed vs Banner vs Top-Fade Diffused Gradient)
   const backgroundSrc = business.backgroundUrl || business.bannerUrl;
   const backgroundMode = business.customization?.backgroundMode || 'full';
   const isFullBg = backgroundMode === 'full' && Boolean(backgroundSrc);
+  const isTopFadeBg = backgroundMode === 'top-fade';
+  const isBannerBg = backgroundMode === 'banner';
   const buttonShape = business.customization?.buttonShape || 'rounded';
+  const customBgColor =
+    business.customization?.backgroundColor ||
+    business.customization?.gradientColor ||
+    business.themeColor ||
+    '#2563eb';
 
   return (
     <div
@@ -212,7 +219,7 @@ export function PublicProfile({
       {!isMockup && (
         <div
           className="hidden sm:block absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[700px] rounded-full blur-[140px] opacity-25 dark:opacity-20 pointer-events-none transition-all duration-700"
-          style={{ backgroundColor: brandColor }}
+          style={{ backgroundColor: customBgColor || brandColor }}
         />
       )}
 
@@ -260,6 +267,57 @@ export function PublicProfile({
           </div>
         )}
 
+        {/* Fondo Gradiente Difuminado (Top-Fade) */}
+        {isTopFadeBg && (
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            {backgroundSrc && (
+              <Image
+                src={backgroundSrc}
+                alt=""
+                fill
+                priority
+                unoptimized
+                sizes="(max-width: 768px) 100vw, 450px"
+                className="object-cover object-top opacity-45"
+              />
+            )}
+            {/* Smooth fading gradient into the custom chosen color */}
+            <div
+              className="absolute inset-0"
+              style={{
+                background: `linear-gradient(to bottom, rgba(2, 6, 23, 0.45) 0%, rgba(2, 6, 23, 0.85) 45%, ${customBgColor}40 75%, #020617 100%)`,
+              }}
+            />
+            {/* Ambient diffuse sphere */}
+            <div
+              className="absolute -top-12 left-1/2 -translate-x-1/2 w-[140%] aspect-square rounded-full blur-[100px] opacity-45 dark:opacity-35 transition-all duration-700"
+              style={{
+                background: `radial-gradient(circle, ${customBgColor} 0%, transparent 70%)`,
+              }}
+            />
+          </div>
+        )}
+
+        {/* Banner Superior Ambient Diffused Gradient Layer */}
+        {isBannerBg && (
+          <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+            {/* Ambient diffused light using custom chosen color */}
+            <div
+              className="absolute top-36 left-1/2 -translate-x-1/2 w-[160%] aspect-square rounded-full blur-[110px] opacity-40 dark:opacity-35 transition-all duration-700"
+              style={{
+                background: `radial-gradient(circle, ${customBgColor} 0%, transparent 65%)`,
+              }}
+            />
+            {/* Soft bottom glow */}
+            <div
+              className="absolute bottom-0 right-0 w-[90%] h-[50%] blur-[120px] opacity-25 dark:opacity-20 pointer-events-none"
+              style={{
+                background: `radial-gradient(circle, ${customBgColor} 0%, transparent 65%)`,
+              }}
+            />
+          </div>
+        )}
+
         {/* Mockup Suspended Warning Banner */}
         {business.accountStatus === 'PAUSED' && isMockup && (
           <div className="bg-amber-500 text-slate-950 text-[11px] font-bold py-1.5 px-3 text-center flex items-center justify-center gap-1.5 z-30 shadow-md">
@@ -284,7 +342,7 @@ export function PublicProfile({
             bannerUrl={backgroundSrc}
             logoUrl={business.logoUrl}
             businessName={business.name}
-            isFullBackground={isFullBg}
+            isFullBackground={isFullBg || isTopFadeBg}
           />
 
           {/* Profile Header Details */}
