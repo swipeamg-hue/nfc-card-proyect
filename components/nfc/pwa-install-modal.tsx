@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import Image from 'next/image';
 import { Business } from '@/types/business';
+import { getBasePath } from '@/lib/base-path';
 import {
   X,
   Share,
@@ -12,6 +13,8 @@ import {
   Smartphone,
   CheckCircle2,
   Sparkles,
+  ExternalLink,
+  Eye,
 } from 'lucide-react';
 
 interface PwaInstallModalProps {
@@ -20,6 +23,7 @@ interface PwaInstallModalProps {
   onClose: () => void;
   onNativeInstall?: () => void;
   canNativePrompt?: boolean;
+  isMockup?: boolean;
 }
 
 export function PwaInstallModal({
@@ -28,6 +32,7 @@ export function PwaInstallModal({
   onClose,
   onNativeInstall,
   canNativePrompt = false,
+  isMockup = false,
 }: PwaInstallModalProps) {
   const [activeTab, setActiveTab] = useState<'ios' | 'android'>(() => {
     if (typeof window !== 'undefined') {
@@ -44,13 +49,22 @@ export function PwaInstallModal({
   const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
   const logo = business.logoUrl || '/images/nexo-logo.jpg';
   const isCustomLogo = logo && !logo.startsWith('/images/');
+  const basePath = getBasePath();
+  const publicCardUrl = `${basePath}/${business.slug}/`;
+
+  const handleOpenPublicCard = () => {
+    if (typeof window !== 'undefined') {
+      window.open(publicCardUrl, '_blank');
+      onClose();
+    }
+  };
 
   return (
     <div
       role="dialog"
       aria-modal="true"
       style={fontStyle}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/70 backdrop-blur-md animate-in fade-in duration-200"
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/75 backdrop-blur-md animate-in fade-in duration-200"
       onClick={onClose}
     >
       <div
@@ -80,11 +94,24 @@ export function PwaInstallModal({
           </button>
         </div>
 
+        {/* Dashboard Preview Banner (if triggered from phone simulator) */}
+        {isMockup && (
+          <div className="mt-3 p-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-700 dark:text-amber-300 text-xs flex items-start gap-2">
+            <Eye className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <div>
+              <p className="font-semibold leading-tight">Vista previa para tus clientes</p>
+              <p className="text-[11px] text-amber-600 dark:text-amber-400 mt-0.5 leading-snug">
+                Esta es la experiencia que verán tus visitantes al escanear tu tarjeta física NFC. Se instalará con tu logotipo y nombre exclusivo.
+              </p>
+            </div>
+          </div>
+        )}
+
         {/* Home Screen Preview Badge */}
-        <div className="my-5 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-950/60 dark:to-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 text-center flex flex-col items-center">
+        <div className="my-4 p-4 rounded-2xl bg-gradient-to-br from-slate-50 to-slate-100 dark:from-zinc-950/60 dark:to-zinc-900/80 border border-slate-200/80 dark:border-zinc-800 text-center flex flex-col items-center">
           <span className="text-[10px] font-semibold tracking-wider uppercase text-blue-600 dark:text-blue-400 mb-3 flex items-center gap-1">
             <Sparkles className="w-3 h-3" />
-            Así se verá en la pantalla de tu móvil
+            Así se verá en la pantalla del celular
           </span>
 
           {/* App Icon Squircle */}
@@ -115,26 +142,36 @@ export function PwaInstallModal({
             </div>
           </div>
 
-          <p className="mt-2.5 text-xs font-bold text-slate-800 dark:text-zinc-100 max-w-[180px] truncate">
+          <p className="mt-2.5 text-xs font-bold text-slate-800 dark:text-zinc-100 max-w-[200px] truncate">
             {business.name}
           </p>
           <p className="text-[10px] text-slate-500 dark:text-zinc-400">
-            Acceso directo rápido • Sin descargas de tienda
+            Tarjeta digital de visor • Sin pasar por tiendas
           </p>
         </div>
 
-        {/* Native Android Instant Button (if supported) */}
-        {canNativePrompt && onNativeInstall && (
+        {/* Action Button */}
+        {isMockup ? (
           <button
-            onClick={() => {
-              onNativeInstall();
-              onClose();
-            }}
-            className="w-full mb-4 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+            onClick={handleOpenPublicCard}
+            className="w-full mb-4 py-3 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-xs shadow-lg shadow-blue-500/20 active:scale-98 transition-all flex items-center justify-center gap-2"
           >
-            <Download className="w-4 h-4" />
-            <span>Instalar de Inmediato en este Celular</span>
+            <ExternalLink className="w-4 h-4" />
+            <span>Abrir Tarjeta Pública para Probar en Vivo</span>
           </button>
+        ) : (
+          canNativePrompt && onNativeInstall && (
+            <button
+              onClick={() => {
+                onNativeInstall();
+                onClose();
+              }}
+              className="w-full mb-4 py-3.5 px-4 rounded-xl bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-bold text-sm shadow-lg shadow-blue-500/25 active:scale-98 transition-all flex items-center justify-center gap-2"
+            >
+              <Download className="w-4 h-4" />
+              <span>Instalar de Inmediato en este Celular</span>
+            </button>
+          )
         )}
 
         {/* OS Toggle Tabs */}
@@ -167,9 +204,9 @@ export function PwaInstallModal({
 
         {/* Step-by-Step Instructions */}
         {activeTab === 'ios' ? (
-          <div className="space-y-3 text-xs">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold flex-shrink-0">
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 1
               </div>
               <div className="flex-1">
@@ -177,13 +214,13 @@ export function PwaInstallModal({
                   Toca el botón <span className="text-blue-600 dark:text-blue-400">Compartir</span> en Safari
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1">
-                  Es el icono <Share className="w-3 h-3 inline text-blue-500" /> en la barra inferior de tu pantalla.
+                  Es el icono <Share className="w-3 h-3 inline text-blue-500" /> en la barra de abajo.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold flex-shrink-0">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 2
               </div>
               <div className="flex-1">
@@ -191,13 +228,13 @@ export function PwaInstallModal({
                   Elige <span className="text-blue-600 dark:text-blue-400">&quot;Agregar a inicio&quot;</span>
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1">
-                  Desliza las opciones y pulsa <PlusSquare className="w-3 h-3 inline text-slate-600 dark:text-zinc-300" /> &quot;Agregar a pantalla de inicio&quot;.
+                  Desliza y toca <PlusSquare className="w-3 h-3 inline text-slate-600 dark:text-zinc-300" /> &quot;Agregar a pantalla de inicio&quot;.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 3
               </div>
               <div className="flex-1">
@@ -205,29 +242,29 @@ export function PwaInstallModal({
                   Pulsa <span className="text-emerald-600 dark:text-emerald-400">&quot;Agregar&quot;</span>
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  ¡Listo! Se guardará con el icono y logo oficial en tu menú de apps.
+                  ¡Listo! La app se guardará con el nombre oficial e icono de {business.name}.
                 </p>
               </div>
             </div>
           </div>
         ) : (
-          <div className="space-y-3 text-xs">
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0">
+          <div className="space-y-2.5 text-xs">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 1
               </div>
               <div className="flex-1">
                 <p className="font-semibold text-slate-800 dark:text-zinc-100 leading-snug">
-                  Abre el menú de opciones <span className="text-emerald-600 dark:text-emerald-400">(tres puntos)</span>
+                  Toca el menú <span className="text-emerald-600 dark:text-emerald-400">(tres puntos)</span>
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1">
-                  Toca <MoreVertical className="w-3 h-3 inline text-slate-600 dark:text-zinc-300" /> en la esquina superior derecha del navegador.
+                  En la esquina superior derecha <MoreVertical className="w-3 h-3 inline text-slate-600 dark:text-zinc-300" /> de Chrome.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 2
               </div>
               <div className="flex-1">
@@ -235,13 +272,13 @@ export function PwaInstallModal({
                   Selecciona <span className="text-emerald-600 dark:text-emerald-400">&quot;Instalar aplicación&quot;</span> o <span className="text-emerald-600 dark:text-emerald-400">&quot;Agregar a la pantalla principal&quot;</span>
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5 flex items-center gap-1">
-                  Aparece con el icono de flecha o celular <Download className="w-3 h-3 inline text-emerald-500" />.
+                  Aparece con el icono de celular o descarga <Download className="w-3 h-3 inline text-emerald-500" />.
                 </p>
               </div>
             </div>
 
-            <div className="flex items-start gap-3 p-3 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
-              <div className="w-7 h-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0">
+            <div className="flex items-start gap-3 p-2.5 rounded-xl bg-slate-50 dark:bg-zinc-800/50 border border-slate-100 dark:border-zinc-800">
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center font-bold flex-shrink-0 text-xs">
                 3
               </div>
               <div className="flex-1">
@@ -249,7 +286,7 @@ export function PwaInstallModal({
                   Confirma <span className="text-emerald-600 dark:text-emerald-400">&quot;Instalar&quot;</span>
                 </p>
                 <p className="text-[11px] text-slate-500 dark:text-zinc-400 mt-0.5">
-                  La app quedará instalada de forma nativa e independiente con su logotipo oficial.
+                  La app quedará instalada de forma independiente, abriendo directamente la tarjeta sin barras de navegador.
                 </p>
               </div>
             </div>
@@ -257,10 +294,10 @@ export function PwaInstallModal({
         )}
 
         {/* Benefits Footnote */}
-        <div className="mt-5 pt-4 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
+        <div className="mt-4 pt-3 border-t border-slate-100 dark:border-zinc-800 flex items-center justify-between text-[11px] text-slate-500 dark:text-zinc-400">
           <div className="flex items-center gap-1.5">
             <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
-            <span>Acceso 100% offline & rápido</span>
+            <span>Acceso 100% directo a la tarjeta</span>
           </div>
           <button
             onClick={onClose}

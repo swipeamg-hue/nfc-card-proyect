@@ -92,6 +92,12 @@ export function ProfileViewer({ slug, initialBusiness }: ProfileViewerProps) {
     };
   }, [slug, initialBusiness]);
 
+  useEffect(() => {
+    if (business?.name && typeof document !== 'undefined') {
+      document.title = business.name;
+    }
+  }, [business?.name]);
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center p-4 text-center">

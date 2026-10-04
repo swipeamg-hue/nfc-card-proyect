@@ -1,16 +1,27 @@
 import { Metadata } from 'next';
 import { mockBusinessesDatabase } from '@/lib/mock-data';
 import { ProfileViewer } from '@/components/nfc/profile-viewer';
-import { getBusinessBySlug } from '@/lib/supabase';
+import { supabase, getBusinessBySlug } from '@/lib/supabase';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
 }
 
+const isGithubPages = process.env.GITHUB_ACTIONS === 'true';
+const basePath = isGithubPages ? '/nfc-card-proyect' : '';
+
 export async function generateStaticParams() {
-  return Object.keys(mockBusinessesDatabase).map((slug) => ({
-    slug,
-  }));
+  const mockSlugs = Object.keys(mockBusinessesDatabase);
+  try {
+    const { data, error } = await supabase.from('businesses').select('slug');
+    if (!error && data && data.length > 0) {
+      const allSlugs = new Set([...mockSlugs, ...data.map((b) => b.slug.toLowerCase().trim())]);
+      return Array.from(allSlugs).map((slug) => ({ slug }));
+    }
+  } catch (err) {
+    console.warn('[Page generateStaticParams] Error fetching supabase slugs:', err);
+  }
+  return mockSlugs.map((slug) => ({ slug }));
 }
 
 export async function generateMetadata({
@@ -31,16 +42,20 @@ export async function generateMetadata({
 
   if (!business) {
     return {
-      title: 'Perfil Digital NFC | TapCard',
+      title: 'Tarjeta Digital NFC',
     };
   }
 
-  const logo = business.logoUrl || '/images/nexo-logo.jpg';
+  let logo = business.logoUrl || `${basePath}/images/nexo-logo.jpg`;
+  if (logo.startsWith('/') && !logo.startsWith(basePath) && basePath !== '') {
+    logo = `${basePath}${logo}`;
+  }
 
+  // App Name must strictly be the Client's business or personal profile name
   return {
-    title: `${business.name} | Tarjeta de Contacto Digital NFC`,
+    title: business.name,
     description: business.bio || `${business.name} - ${business.category}`,
-    manifest: `/api/manifest/${cleanSlug}`,
+    manifest: `${basePath}/api/manifest/${cleanSlug}/`,
     appleWebApp: {
       capable: true,
       title: business.name,

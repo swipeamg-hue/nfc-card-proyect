@@ -4,6 +4,7 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Business } from '@/types/business';
 import { PwaInstallModal } from './pwa-install-modal';
+import { getBasePath, resolveAssetUrl } from '@/lib/base-path';
 import { CheckCircle2 } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -77,10 +78,16 @@ export function PwaInstallButton({
     return false;
   });
 
+  const customFont = business.customization?.customFontName || business.customization?.fontFamily;
+  const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
+  const logo = business.logoUrl || '/images/nexo-logo.jpg';
+  const isCustomLogo = Boolean(logo && !logo.startsWith('/images/'));
+  const primaryColor = business.customization?.primaryColor || business.customization?.buttonBgColor || '#2563eb';
+
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
-    // 1. Listen for display-mode changes or app installation
+    // Listen for display-mode standalone changes
     const mediaQuery = window.matchMedia('(display-mode: standalone)');
     const handleMediaChange = (e: MediaQueryListEvent) => {
       setIsInstalled(e.matches);
@@ -93,14 +100,116 @@ export function PwaInstallButton({
     };
     window.addEventListener('appinstalled', handleAppInstalled);
 
-    // 2. Register minimal Service Worker for Chromium PWA criteria
-    if ('serviceWorker' in navigator && !contained) {
+    // CRITICAL: Inside dashboard simulator mockup, DO NOT register service worker or intercept install prompts
+    // This prevents the admin dashboard from being mistakenly installed instead of the viewer's card!
+    if (contained) {
+      return () => {
+        mediaQuery.removeEventListener('change', handleMediaChange);
+        window.removeEventListener('appinstalled', handleAppInstalled);
+      };
+    }
+
+    const basePath = getBasePath();
+    const currentCardPath = window.location.pathname; // e.g. /nfc-card-proyect/sergio-ibanez/
+    const resolvedLogo = resolveAssetUrl(business.logoUrl || '/images/nexo-logo.jpg');
+    const manifestUrl = `${basePath}/api/manifest/${business.slug}/manifest.json`;
+
+    // 1. Ensure the page title is strictly the Client's business or personal name
+    document.title = business.name;
+
+    // 2. Register Service Worker with correct basePath and scope
+    if ('serviceWorker' in navigator) {
+      const swUrl = `${basePath}/sw.js`;
       navigator.serviceWorker
-        .register('/sw.js')
+        .register(swUrl, { scope: `${basePath}/` })
         .catch((e) => console.log('[PWA SW] Info:', e));
     }
 
-    // 3. Capture beforeinstallprompt event (Android / Chromium)
+    // 3. Prepare client-side manifest specifically locked to this business card slug
+    try {
+      const manifestData = {
+        id: currentCardPath,
+        name: business.name,
+        short_name: business.name.length > 20 ? business.name.slice(0, 20) : business.name,
+        description: business.bio || `Tarjeta digital oficial de ${business.name}`,
+        start_url: `${currentCardPath}?src=pwa_viewer`,
+        scope: currentCardPath,
+        display: 'standalone',
+        display_override: ['standalone', 'window-controls-overlay', 'minimal-ui'],
+        background_color: business.customization?.backgroundColor || '#090d16',
+        theme_color: primaryColor,
+        orientation: 'portrait-primary',
+        icons: [
+          {
+            src: resolvedLogo,
+            sizes: '192x192',
+            type: 'image/png',
+            purpose: 'any',
+          },
+          {
+            src: resolvedLogo,
+            sizes: '512x512',
+            type: 'image/png',
+            purpose: 'any maskable',
+          },
+        ],
+      };
+
+      // Store in Cache Storage so Service Worker delivers it directly upon browser fetch
+      if ('caches' in window) {
+        caches.open('tapcard-manifest-cache').then((cache) => {
+          const resp = new Response(JSON.stringify(manifestData), {
+            headers: { 'Content-Type': 'application/manifest+json; charset=utf-8' },
+          });
+          cache.put(manifestUrl, resp).catch(() => {});
+        }).catch(() => {});
+      }
+
+      // Update link[rel=manifest]
+      let manifestLink = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
+      if (!manifestLink) {
+        manifestLink = document.createElement('link');
+        manifestLink.rel = 'manifest';
+        document.head.appendChild(manifestLink);
+      }
+      manifestLink.href = manifestUrl;
+
+      // Update apple-touch-icon for iOS Safari
+      let appleIconLink = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
+      if (!appleIconLink) {
+        appleIconLink = document.createElement('link');
+        appleIconLink.rel = 'apple-touch-icon';
+        document.head.appendChild(appleIconLink);
+      }
+      appleIconLink.href = resolvedLogo;
+
+      // Update favicon
+      const faviconLink = document.querySelector('link[rel="icon"]') as HTMLLinkElement | null;
+      if (faviconLink) {
+        faviconLink.href = resolvedLogo;
+      }
+
+      // Update meta application names
+      let appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
+      if (!appleTitleMeta) {
+        appleTitleMeta = document.createElement('meta');
+        appleTitleMeta.name = 'apple-mobile-web-app-title';
+        document.head.appendChild(appleTitleMeta);
+      }
+      appleTitleMeta.content = business.name;
+
+      let appNameMeta = document.querySelector('meta[name="application-name"]') as HTMLMetaElement | null;
+      if (!appNameMeta) {
+        appNameMeta = document.createElement('meta');
+        appNameMeta.name = 'application-name';
+        document.head.appendChild(appNameMeta);
+      }
+      appNameMeta.content = business.name;
+    } catch (e) {
+      console.warn('[PWA Dynamic Head] error:', e);
+    }
+
+    // 4. Capture beforeinstallprompt for real viewers on the public card
     const handleBeforeInstallPrompt = (e: Event) => {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
@@ -108,51 +217,32 @@ export function PwaInstallButton({
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
-    // 4. Ensure document.head has dynamic manifest and apple-touch-icon pointing to this business
-    if (!contained) {
-      try {
-        let manifestLink = document.querySelector('link[rel="manifest"]') as HTMLLinkElement | null;
-        if (!manifestLink) {
-          manifestLink = document.createElement('link');
-          manifestLink.rel = 'manifest';
-          document.head.appendChild(manifestLink);
-        }
-        manifestLink.href = `/api/manifest/${business.slug}`;
-
-        let appleIconLink = document.querySelector('link[rel="apple-touch-icon"]') as HTMLLinkElement | null;
-        if (!appleIconLink) {
-          appleIconLink = document.createElement('link');
-          appleIconLink.rel = 'apple-touch-icon';
-          document.head.appendChild(appleIconLink);
-        }
-        if (business.logoUrl) {
-          appleIconLink.href = business.logoUrl;
-        }
-
-        let appleTitleMeta = document.querySelector('meta[name="apple-mobile-web-app-title"]') as HTMLMetaElement | null;
-        if (!appleTitleMeta) {
-          appleTitleMeta = document.createElement('meta');
-          appleTitleMeta.name = 'apple-mobile-web-app-title';
-          document.head.appendChild(appleTitleMeta);
-        }
-        appleTitleMeta.content = business.name;
-      } catch (e) {
-        console.warn('[PWA Dynamic Head] error:', e);
-      }
-    }
-
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
       mediaQuery.removeEventListener('change', handleMediaChange);
       window.removeEventListener('appinstalled', handleAppInstalled);
     };
-  }, [business.slug, business.name, business.logoUrl, contained]);
+  }, [
+    business.slug,
+    business.name,
+    business.logoUrl,
+    business.bio,
+    business.customization?.backgroundColor,
+    primaryColor,
+    contained,
+  ]);
 
   const handleInstallClick = async (e?: React.MouseEvent) => {
     e?.stopPropagation();
     onTrackAction?.('pwa_install_click');
 
-    // If native prompt is available (Chromium/Android), trigger it without blocking the UI
+    // If inside simulator mockup, simply open the preview modal
+    if (contained) {
+      setIsModalOpen(true);
+      return;
+    }
+
+    // On actual public card: trigger native prompt if available
     if (deferredPrompt) {
       try {
         deferredPrompt.prompt().catch(() => {});
@@ -170,15 +260,8 @@ export function PwaInstallButton({
       }
     }
 
-    // Always open the visual smart guide modal so user gets clear feedback and instructions
     setIsModalOpen(true);
   };
-
-  const customFont = business.customization?.customFontName || business.customization?.fontFamily;
-  const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
-  const logo = business.logoUrl || '/images/nexo-logo.jpg';
-  const isCustomLogo = Boolean(logo && !logo.startsWith('/images/'));
-  const primaryColor = business.customization?.primaryColor || business.customization?.buttonBgColor || '#2563eb';
 
   return (
     <>
@@ -259,6 +342,7 @@ export function PwaInstallButton({
         onClose={() => setIsModalOpen(false)}
         canNativePrompt={Boolean(deferredPrompt)}
         onNativeInstall={handleInstallClick}
+        isMockup={contained}
       />
     </>
   );

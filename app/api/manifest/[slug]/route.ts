@@ -1,13 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getBusinessBySlug } from '@/lib/supabase';
+import { supabase, getBusinessBySlug } from '@/lib/supabase';
 import { mockBusinessesDatabase } from '@/lib/mock-data';
 
 export const dynamic = 'force-static';
 
+const isGithubPages = process.env.GITHUB_ACTIONS === 'true';
+const basePath = isGithubPages ? '/nfc-card-proyect' : '';
+
 export async function generateStaticParams() {
-  return Object.keys(mockBusinessesDatabase).map((slug) => ({
-    slug,
-  }));
+  const mockSlugs = Object.keys(mockBusinessesDatabase);
+  try {
+    const { data, error } = await supabase.from('businesses').select('slug');
+    if (!error && data && data.length > 0) {
+      const allSlugs = new Set([...mockSlugs, ...data.map((b) => b.slug.toLowerCase().trim())]);
+      return Array.from(allSlugs).map((slug) => ({ slug }));
+    }
+  } catch (err) {
+    console.warn('[Manifest generateStaticParams] Error fetching supabase slugs:', err);
+  }
+  return mockSlugs.map((slug) => ({ slug }));
 }
 
 export async function GET(
@@ -28,10 +39,16 @@ export async function GET(
     business = mockBusinessesDatabase[cleanSlug] || null;
   }
 
-  const name = business?.name || 'Tarjeta NFC Digital';
-  const shortName = business?.name ? (business.name.length > 14 ? business.name.slice(0, 14) : business.name) : 'TapCard';
-  const description = business?.bio || `Tarjeta de contacto e interactiva oficial de ${name}`;
-  const iconUrl = business?.logoUrl || '/images/nexo-logo.jpg';
+  // App Name must strictly be the Client's business or personal profile name
+  const name = business?.name || 'Tarjeta Digital';
+  const shortName = business?.name ? (business.name.length > 20 ? business.name.slice(0, 20) : business.name) : 'Tarjeta NFC';
+  const description = business?.bio || `Tarjeta de contacto digital interactiva de ${name}`;
+  
+  let iconUrl = business?.logoUrl || `${basePath}/images/nexo-logo.jpg`;
+  if (iconUrl.startsWith('/') && !iconUrl.startsWith(basePath) && basePath !== '') {
+    iconUrl = `${basePath}${iconUrl}`;
+  }
+
   const themeColor = business?.customization?.primaryColor || business?.customization?.buttonBgColor || '#2563eb';
   const bgColor = business?.customization?.backgroundColor || '#090d16';
 
@@ -44,13 +61,16 @@ export async function GET(
     iconType = 'image/webp';
   }
 
+  // Viewer PWA: start_url and scope are strictly locked to this business card slug, never the admin panel
+  const cardPath = `${basePath}/${cleanSlug}/`;
+
   const manifest = {
-    id: `/${cleanSlug}`,
+    id: cardPath,
     name: name,
     short_name: shortName,
     description: description,
-    start_url: `/${cleanSlug}?src=pwa_installed`,
-    scope: '/',
+    start_url: `${cardPath}?src=pwa_viewer`,
+    scope: cardPath,
     display: 'standalone',
     display_override: ['standalone', 'window-controls-overlay', 'minimal-ui'],
     background_color: bgColor,
