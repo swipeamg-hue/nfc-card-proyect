@@ -37,6 +37,8 @@ jobs:
         run: npx next build
         env:
           GITHUB_ACTIONS: "true"
+          NEXT_PUBLIC_SUPABASE_URL: "https://cjiesshwfzvyuhjzwoxb.supabase.co"
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: "sb_publishable_c1_shinlEQTWVH1rIj4_6Q__9P__nFQ"
 
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3

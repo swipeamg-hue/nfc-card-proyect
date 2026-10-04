@@ -4,7 +4,8 @@ import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
 import { Business } from '@/types/business';
 import { PwaInstallModal } from './pwa-install-modal';
-import { getBasePath, resolveAssetUrl } from '@/lib/base-path';
+import { getBasePath } from '@/lib/base-path';
+import { getOptimizedAppIconUrl, getAppIconMimeType } from '@/lib/pwa-icons';
 import { CheckCircle2 } from 'lucide-react';
 
 interface BeforeInstallPromptEvent extends Event {
@@ -80,8 +81,8 @@ export function PwaInstallButton({
 
   const customFont = business.customization?.customFontName || business.customization?.fontFamily;
   const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
-  const logo = business.logoUrl || '/images/nexo-logo.jpg';
-  const isCustomLogo = Boolean(logo && !logo.startsWith('/images/'));
+  const logo = getOptimizedAppIconUrl(business.logoUrl);
+  const isCustomLogo = Boolean(logo && !logo.includes('/images/nexo-logo'));
   const primaryColor = business.customization?.primaryColor || business.customization?.buttonBgColor || '#2563eb';
 
   useEffect(() => {
@@ -111,7 +112,8 @@ export function PwaInstallButton({
 
     const basePath = getBasePath();
     const currentCardPath = window.location.pathname; // e.g. /nfc-card-proyect/sergio-ibanez/
-    const resolvedLogo = resolveAssetUrl(business.logoUrl || '/images/nexo-logo.jpg');
+    const resolvedLogo = getOptimizedAppIconUrl(business.logoUrl);
+    const logoMimeType = getAppIconMimeType(resolvedLogo);
     const manifestUrl = `${basePath}/api/manifest/${business.slug}/manifest.json`;
 
     // 1. Ensure the page title is strictly the Client's business or personal name
@@ -143,13 +145,13 @@ export function PwaInstallButton({
           {
             src: resolvedLogo,
             sizes: '192x192',
-            type: 'image/png',
+            type: logoMimeType,
             purpose: 'any',
           },
           {
             src: resolvedLogo,
             sizes: '512x512',
-            type: 'image/png',
+            type: logoMimeType,
             purpose: 'any maskable',
           },
         ],

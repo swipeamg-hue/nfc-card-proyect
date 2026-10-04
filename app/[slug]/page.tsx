@@ -2,6 +2,7 @@ import { Metadata } from 'next';
 import { mockBusinessesDatabase } from '@/lib/mock-data';
 import { ProfileViewer } from '@/components/nfc/profile-viewer';
 import { supabase, getBusinessBySlug } from '@/lib/supabase';
+import { getOptimizedAppIconUrl } from '@/lib/pwa-icons';
 
 interface PageProps {
   params: Promise<{ slug: string }>;
@@ -39,23 +40,19 @@ export async function generateMetadata({
   if (!business) {
     business = mockBusinessesDatabase[cleanSlug] || null;
   }
-
   if (!business) {
     return {
       title: 'Tarjeta Digital NFC',
     };
   }
 
-  let logo = business.logoUrl || `${basePath}/images/nexo-logo.jpg`;
-  if (logo.startsWith('/') && !logo.startsWith(basePath) && basePath !== '') {
-    logo = `${basePath}${logo}`;
-  }
+  const logo = getOptimizedAppIconUrl(business.logoUrl);
 
   // App Name must strictly be the Client's business or personal profile name
   return {
     title: business.name,
     description: business.bio || `${business.name} - ${business.category}`,
-    manifest: `${basePath}/api/manifest/${cleanSlug}/`,
+    manifest: `${basePath}/api/manifest/${cleanSlug}/manifest.json`,
     appleWebApp: {
       capable: true,
       title: business.name,

@@ -4,6 +4,7 @@ import React, { useState } from 'react';
 import Image from 'next/image';
 import { Business } from '@/types/business';
 import { getBasePath } from '@/lib/base-path';
+import { getOptimizedAppIconUrl } from '@/lib/pwa-icons';
 import {
   X,
   Share,
@@ -47,8 +48,8 @@ export function PwaInstallModal({
 
   const customFont = business.customization?.customFontName || business.customization?.fontFamily;
   const fontStyle = customFont ? { fontFamily: `"${customFont}", sans-serif` } : undefined;
-  const logo = business.logoUrl || '/images/nexo-logo.jpg';
-  const isCustomLogo = logo && !logo.startsWith('/images/');
+  const logo = getOptimizedAppIconUrl(business.logoUrl);
+  const isCustomLogo = Boolean(logo && !logo.includes('/images/nexo-logo'));
   const basePath = getBasePath();
   const publicCardUrl = `${basePath}/${business.slug}/`;
 

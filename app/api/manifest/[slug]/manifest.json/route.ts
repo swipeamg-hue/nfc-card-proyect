@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabase, getBusinessBySlug } from '@/lib/supabase';
 import { mockBusinessesDatabase } from '@/lib/mock-data';
+import { getOptimizedAppIconUrl, getAppIconMimeType } from '@/lib/pwa-icons';
 
 export const dynamic = 'force-static';
 
@@ -39,27 +40,17 @@ export async function GET(
     business = mockBusinessesDatabase[cleanSlug] || null;
   }
 
-  // App Name must strictly be the Client's business or personal profile name
+  // App Name strictly matches the Client's business or personal profile title
   const name = business?.name || 'Tarjeta Digital';
   const shortName = business?.name ? (business.name.length > 20 ? business.name.slice(0, 20) : business.name) : 'Tarjeta NFC';
   const description = business?.bio || `Tarjeta de contacto digital interactiva de ${name}`;
   
-  let iconUrl = business?.logoUrl || `${basePath}/images/nexo-logo.jpg`;
-  if (iconUrl.startsWith('/') && !iconUrl.startsWith(basePath) && basePath !== '') {
-    iconUrl = `${basePath}${iconUrl}`;
-  }
+  // High-resolution icon URL (guaranteed >= 192x192 / 512x512)
+  const iconUrl = getOptimizedAppIconUrl(business?.logoUrl);
+  const iconType = getAppIconMimeType(iconUrl);
 
   const themeColor = business?.customization?.primaryColor || business?.customization?.buttonBgColor || '#2563eb';
   const bgColor = business?.customization?.backgroundColor || '#090d16';
-
-  let iconType = 'image/png';
-  if (iconUrl.includes('.svg')) {
-    iconType = 'image/svg+xml';
-  } else if (iconUrl.includes('.jpg') || iconUrl.includes('.jpeg')) {
-    iconType = 'image/jpeg';
-  } else if (iconUrl.includes('.webp')) {
-    iconType = 'image/webp';
-  }
 
   // Viewer PWA: start_url and scope are strictly locked to this business card slug, never the admin panel
   const cardPath = `${basePath}/${cleanSlug}/`;
